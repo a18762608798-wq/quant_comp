@@ -19,8 +19,7 @@ $$
 \begin{aligned}
 \hat o
 &= \frac{1}{M}\sum_{m=1}^{M}
-   \operatorname{tr}\!\left(\hat O \hat \rho^{(m)}\right) \quad where,
-\\[0.8em]
+   \operatorname{tr}\!\left(\hat O \hat \rho^{(m)}\right) \quad where\\
 \hat \rho^{(m)}
 &= \frac{1}{K}\sum_{k=1}^K
    \bigotimes_{n=1}^{N}
@@ -48,95 +47,6 @@ $$
 $$
 
 $\widetilde\rho$ is easy to breaken, the post-processing computational load can be significantly reduced.
-## general solution
-
-^ddf915
-
-The term of the odd order is zero, the term of the even order as follow.
-
-$$
-\mathbb E_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...]= \frac{1}{(2k+1)!!}\sum_{\text{pairing}} \delta_{\mu_{a_1}\mu_{a_2}}\delta_{\mu_{a_3}\mu_{a_4}}...
-$$
-
-For instance, the dim of subspace is 3, there are
-
-$$
-\begin{split}
-\mathbb E_U[P_n(0)\otimes P_n(0)  \otimes P_n(0)] &= \frac{1}{8}\mathbb E_U[(I +  \sigma_n)\otimes(I +  \sigma_n)\otimes (I + \sigma_n)] \\
-&=  \frac{1}{8} \mathbb E_U[III + I\sigma_n\sigma_n + \sigma_n I \sigma_n + \sigma_n\sigma_nI]\\
-&= \frac{1}{8}[III + \frac{1}{3}\sum_{\mu=1}^3 (I\sigma_\mu\sigma_\mu + \sigma_\mu I \sigma_\mu + \sigma_\mu\sigma_\mu I)]
-\end{split}
-$$
-
-the signs of the coefs satisfy,
-
-|                          | 000 | 001 | 010 | 011 |
-| ------------------------ | --- | --- | --- | --- |
-| $I \sigma_\mu\sigma_\mu$ | 1   | -1  | -1  | 1   |
-| $\sigma_\mu I\sigma_\mu$ | 1   | -1  | 1   | -1  |
-| $\sigma_\mu\sigma_\mu I$ | 1   | 1   | -1  | -1  |
-
-Evidently the coefs is $(-1)^q_{s_1,s_2,...} = (-1)^{\sum_{a\in q} s_a}$ , whose exponent equal the sum of the strings that are non-trivially hit by Pauli bases, where q is the set of positions on which the nontrivial Pauli operator acts.
-
-Case: $(-1)^{12}_{s_1s_2s_3} = (-1)^{s_1+s_2}$
-
-**The freedom is enough so we could let $\varepsilon_{ijk,...} = \varepsilon_{\neg i, \neg j, \neg k, ...}$, Viz.,**
-
-$$
-\begin{split}
-&E_{U_n}\bigr[\sum_{s_1, s_2, s_3,...}  f_n(s_1, s_2, s_3, ...)P_1\otimes P_{2}\otimes P_{3}\otimes...]\bigr ] \\
-&= 2\mathbb E_{U_i} \bigr[ \sum_{s_2, s_3, ...}\varepsilon_{0,s_2,s_3,...} P(0)\otimes P_{2}\otimes P_3\otimes...]\bigr]\\
-&=   \frac{1}{2^{N_l-1}}(\sum_{s_2, s_{3}, ...}\varepsilon_{0,s_2,s_3,...})I^{\otimes N_l} + \frac{1}{2^{N_l-1}}[\sum_q \sum_{s_2, s_3, ...}\epsilon_{0, s_2, s_3,...}^q\varepsilon_{0,s_2,s_3,...}\Phi_q ]
-\end{split}
-$$
-
-where(**this direct product form is a concise notation**.)
-
-$$
-\Phi_q = \mathbb E_{\vec n} \bigr[\bigotimes\limits_{a\in q}\sigma_n^{a} \bigr]\otimes I_{q^c} =\sum_{\mu_{a_1}\mu_{a_2}...} \mathbb E_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...](\sigma_{\mu_{a_1}}\otimes\sigma_{\mu_{a_2}}...) \otimes I_{q^c}
-$$
-
-Let $|S|=2k, k\in \mathbb N^+$, where 
-
-$$
-\mathbb E_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...]= \frac{1}{(2k+1)!!}\sum_{\text{pairing}} \delta_{\mu_{a_1}\mu_{a_2}}\delta_{\mu_{a_3}\mu_{a_4}}...
-$$
-
-where pairing  is a set of allocations for the positions in q. Each group consists of two elements, and the groups are identical to each other. For instance, if $k = 2$, the allocations are
-
-$$
-(1,2)(3,4)\quad(1,3)(2,4)\quad(1,4)(2,3)
-$$
-
-therefore
-
-$$
-\Phi_q = \frac{1}{(2k+1)!!}\sum_{\text{pairing}} \sum_{\mu_{a_1}\mu_{a_3}...}(\sigma_{\mu_{a_1}}^{\otimes 2} \otimes\sigma_{\mu_{a_3}}^{\otimes 2}...) \otimes I_{q^c}
-$$
-In conclusion
-
-$$
-\begin{split}
-&E_{U_n}\bigr[\sum_{s_1, s_2, s_3,...}  f_n(s_1, s_2, s_3, ...)P_1\otimes P_{2}\otimes P_{3}\otimes...]\bigr ] \\
-&=   \frac{1}{2^{N_l-1}}(\sum_{s_2, s_{3}, ...}\varepsilon_{0,s_2,s_3,...})I^{\otimes N_l} + \frac{1}{2^{N_l-1}}[\sum_q \sum_{s_2, s_3, ...}\epsilon_{0, s_2, s_3,...}^q\varepsilon_{0,s_2,s_3,...}\Phi_q ]
-\end{split}
-$$
-
-Where
-
-$$
-\begin{cases}
-\varepsilon_{s_1,s_2,s_3,...} = \varepsilon_{\neg s_1, \neg s_2, \neg s_3,...}\\
-\epsilon_{0, s_2, s_3,...}^q = (-1)^{\sum_{a\in q}s_a}\\
-\Phi_q = \frac{1}{(2k+1)!!}\sum_{\text{pairing}} \sum_{\mu_{a_1}\mu_{a_3}...}(\sigma_{\mu_{a_1}}^{\otimes 2} \otimes\sigma_{\mu_{a_3}}^{\otimes 2}...) \otimes I_{q^c}\\
-q = S \subseteq \{1, 2, ..., N_{l}\}, \quad |S|=2k, \quad k\in \mathbb N^+
-\end{cases}
-$$
-
-q is a set of positions on which the nontrivial Pauli operator acts.
-Proof ref to [[classical_shadow#^16f9f8]]
-
-In face, which could be seen as  SWAP operator expectation of $\rho \otimes \rho$, ref to [[Perspective_of_physical_quantities_of_expr_of_rho#^9c6063]]'
 
 #### Based on Hamming Distance
 

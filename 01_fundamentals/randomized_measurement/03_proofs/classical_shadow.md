@@ -39,7 +39,7 @@ Let:
 
 $$
 \widetilde o =
- \operatorname{tr}\bigl(\hat O\widetilde{\hat\rho}(U^m, s^k)\bigr).  
+tr\bigl(\hat O\widetilde{\hat\rho}(U^m, s^k)\bigr).  
 $$
 
 <span style="color:purple">Subsequent omission marker m and k</span>, sufficient and necessary condition is

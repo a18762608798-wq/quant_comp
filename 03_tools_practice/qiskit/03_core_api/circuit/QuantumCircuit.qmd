@@ -1,0 +1,29 @@
+---
+title: "QuantumCircuit"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# QuantumCircuit
+
+```{julia}
+using PythonCall
+```
+
+```{python}
+from qiskit import QuantumCircuit
+circ = QuantumCircuit(1, 1)
+circ.measure([0], [0]) # 0 classical register records 0 qubits.
+circ.draw()
+```
+
+```{python}
+from qiskit import QuantumCircuit
+circ = QuantumCircuit(2, 2)
+circ.measure([0], [0])
+circ.draw()
+```

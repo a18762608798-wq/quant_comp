@@ -1,0 +1,12 @@
+---
+title: "Parameter"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# Parameter
+

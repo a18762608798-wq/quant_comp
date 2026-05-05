@@ -1,0 +1,72 @@
+---
+title: "installization"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# installization
+
+>Do not use the preview function in this installization file.
+
+## qiskit
+
+```{julia}
+using Pkg
+Pkg.activate(".")
+Pkg.add("LanguageServer") # which provides the language server for julia, and it is the dependency of the vscode extension of julia.
+using CondaPkg
+CondaPkg.add(["seaborn", "pylatexenc", "matplotlib", "numpy", "qiskit", "qiskit-aer"]) # NOTE: the installization command and import command are different(qiskit_aer).
+```
+
+## quantum cloud platform
+
+### quark
+
+* install the dependencies
+
+```{julia}
+using CondaPkg
+CondaPkg.add_pip("quarkstudio") # NOTE: quarkstudio does not included in conda, use PYPI.
+```
+
+* Test the environment
+
+```{python}
+from quark import Task
+token = "dYXyLLSQQtMWT7wOoIHo2EmPCmlStsZ`VSfO5NSjzCT/Rg3dUPzZEP45TPzFEOxZUP4dUN7JDd5WnJtJTP1pEPzpEOyBDOz1DOx1jOzBkNjpkJ1GXbjxDN7JDcm[Y[tKDMj13ck6DcqGXctGHemCIR5l{O5BkOzZ{O5FUZjpkJzW3d2Kzf"
+tmgr = Task(token)
+print(tmgr.status()) # express the ranks now.
+```
+
+### IBM
+
+We may not use this platform laterly, but I still record the config way.
+
+* install the dependencies
+
+```{julia}
+using CondaPkg
+CondaPkg.add(["qiskit-ibm-runtime", "qiskit-algorithms"])
+```
+
+* Test the environment
+
+```{python}
+from qiskit_ibm_runtime import QiskitRuntimeService
+IBM_API_TOKEN = 'N7Xu2261xeB3CilWxUt3Khsm6h0ezbYdbfZvVau5N4qD'
+QiskitRuntimeService.save_account(IBM_API_TOKEN, overwrite=True) # renew the token. 
+```
+
+```{python}
+# check the account.
+from qiskit_ibm_runtime import QiskitRuntimeService
+service = QiskitRuntimeService() # 创建服务实例（自动加载已保存的账户）
+print("Active account:", service.active_account()) # 检查活动账户
+print("\nAvailable backends:") # 验证后端列表（确认账户有效）
+for backend in service.backends():
+    print(f"- {backend.name} | Status: {backend.status().operational}")
+```

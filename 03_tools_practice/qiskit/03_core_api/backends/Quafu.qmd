@@ -1,0 +1,61 @@
+---
+title: "Quafu"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# quafu
+
+## check and choose the quantum computer.
+
+```{python}
+from quark import Task
+token = "dYXyLLSQQtMWT7wOoIHo2EmPCmlStsZ`VSfO5NSjzCT/Rg3dUPzZEP45TPzFEOxZUP4dUN7JDd5WnJtJTP1pEPzpEOyBDOz1DOx1jOzBkNjpkJ1GXbjxDN7JDcm[Y[tKDMj13ck6DcqGXctGHemCIR5l{O5BkOzZ{O5FUZjpkJzW3d2Kzf"
+tmgr = Task(token)
+print(tmgr.status()) # express the rows now.
+```
+
+## basics usage
+
+```{python}
+# Create a measure circ
+from qiskit import QuantumCircuit
+from qiskit_aer import Aer
+from qiskit.visualization import plot_histogram
+circ = QuantumCircuit(2, 2)
+circ.x([0])
+circ.measure([0, 1], [0, 1]) 
+circ.draw()
+```
+
+```{python}
+# Transform qiskit circ to qasm2
+from qiskit import qasm2
+qasm2_circ = qasm2.dumps(circ)
+```
+
+```{python}
+# submit the ranks to quatum computer
+task = {
+'chip': 'Baihua', # the quantum computer choice,  
+'name': 'my_job',  
+'circuit':qasm2_circ, 
+'compile': True, # (你要是自信自己写的全是基础门就用False.)
+'options':{
+    'correct': False,
+    'target_qubits': [] # 具体bit而非范围, [] is automatic choice. 
+    }
+}
+tid = tmgr.run(task, repeat=1) # shots = repeat*1024
+```
+
+```{python}
+# Wait utill the result return.
+res = tmgr.result(tid)
+print(res)
+print(res["count"]) # the definition of Hilbert space is normal.
+```

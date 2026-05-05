@@ -1,0 +1,76 @@
+---
+title: "test workflow"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# test workflow 
+
+* setting
+
+```{julia}
+# U
+N = 3
+NU = 50 
+measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
+```
+
+```{julia}
+# state
+site_indices = siteinds("Qubit",N);
+ψ = random_mps(site_indices, linkdims=2); # Quantum state of interest
+```
+
+```{julia}
+# measure and get the data
+NM = 100 # Number of projective measurements per setting 
+measurement_group = MeasurementGroup(ψ , measurement_settings, NM);
+```
+
+```{julia}
+# create shadows
+classical_shadows = get_factorized_shadows( measurement_group);
+```
+
+```{julia}
+# definite the mechanical quantum
+ops = ["I" for _ in 1:N] 
+ops[1] = "Z"
+ops[3] = "X"
+O=MPO(site_indices,ops);
+```
+
+```{julia}
+# calculate the expect value
+estimate_val = get_expect_shadow(O, classical_shadows)
+exact_val = inner(ψ',O,ψ)
+```
+
+```{julia}
+site_indices = siteinds("Qubit",N);
+ops1 = ["I" for _ in 1:N] 
+ops1[1] = "Z"
+ops1[3] = "X"
+O=MPO(site_indices,ops1)
+ops2 = ["I" for _ in 1:N] 
+O2 = MPO(site_indices,ops2)
+apply(O, O2)
+O + O2
+
+```
+
+
+```{julia}
+
+site_indices = siteinds("Qubit",2);
+os = OpSum()
+
+os += (0.7,  "Z", 1, "X", 4)
+os += (-1.2, "Y", 2, "Y", 5)
+
+O = MPO(os, site_indices)
+```

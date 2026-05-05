@@ -1,0 +1,102 @@
+---
+title: "MeasurementGroup_MeasurementData"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# MeasurementGroup MeasurementData
+
+## MeasurementGroup
+
+### cases
+
+```{julia}
+using RandomMeas # MeasurementSettings
+N = 3 
+NU = 2 
+measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
+```
+
+```{julia}
+site_indices = siteinds("Qubit",N)
+ψ = random_mps(site_indices, linkdims=2) # Product Quantum state of interest
+```
+
+```{julia}
+NM = 3 # Number of projective measurements per settings
+measurement_group = MeasurementGroup(ψ , measurement_settings, NM) #NOTE: where have been measured.
+```
+
+### doc
+
+#### fields
+
+```{julia}
+supertype(MeasurementGroup) # Any
+```
+
+```{julia}
+@doc MeasurementGroup
+```
+
+```{julia}
+fieldnames(typeof(measurement_group))
+```
+
+```{julia}
+println(typeof(measurement_group.measurements)) # a vector of MeasurementData
+```
+
+Fields
+
+•  N::Int: Number of sites (qubits).
+•  NU::Int: Number of measurement data
+    objects.
+•  NM::Int: Number of measurements per
+    setting.
+•  measurements::Vector{MeasurementData{T}}: # MeasurementData you should go ask god.
+    A vector of measurement data objects.
+
+#### method
+
+```{julia}
+@which MeasurementGroup(ψ , measurement_settings, NM)
+```
+
+## MeasurementData
+
+### doc
+
+```{julia}
+supertype(MeasurementData) # Any
+```
+
+```{julia}
+@doc MeasurementData
+```
+
+Fields
+
+•  N::Int: Number of sites (qubits).
+•  NM::Int: Number of measurements per setting.
+•  measurement_results::Array{Int, 2}: A 2D array of binary measurement results with dimensions (NM, N).
+•  measurement_setting::T: A measurement setting of type T (subtype of AbstractMeasurementSetting) or nothing.
+
+Type Parameter
+
+•  T: The type of the measurement setting, constrained to Union{Nothing, AbstractMeasurementSetting}.
+
+### cases
+
+```{julia}
+measurement_data = measurement_group.measurements[1]; # a MeasurementData
+println(measurement_data.measurement_results) # the results of measurement.
+```
+
+```{julia}
+println(typeof(measurement_data.measurement_setting)) # a LocalUnitaryMeasurementSetting.
+```

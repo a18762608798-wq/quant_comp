@@ -1,0 +1,70 @@
+---
+title: "related ITensor"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# related ITensor
+
+## Index
+
+```{julia}
+using ITensors
+@doc Index
+```
+
+```{text}
+"""
+dim: the dim of every subspace.
+id: 唯一标识符, to judge whether the index are same.
+"Qubit,Site,n=1": tags of this index, which could be definite by yourself, where
+    Qubit: system of qubit
+    Site: the index would express a qubit site
+    n=1: the first qubit site
+(dim=2|id=451|"Qubit,Site,n=1")': 区分相同的索引对象(to express output or input), because Itensor will multiplication equal index.
+"""
+(dim=2|id=451|"Qubit,Site,n=1")
+```
+
+## ITensor
+
+```{julia}
+@doc ITensor
+```
+
+```{text}
+ITensor 
+ord=2 # the number of order, meaning there are two Index as follow
+Dim 1: (dim=2|id=451|"Qubit,Site,n=1")' # index, Separate rows and columns.
+Dim 2: (dim=2|id=451|"Qubit,Site,n=1")
+NDTensors.Dense{ComplexF64, Vector{ComplexF64}} # sepcifical matrix.
+2×2
+ -0.9171435002629851 + 0.2336989174957588im   …  -0.033305846289088226 - 0.3211282243740626im
+ -0.10173325172253367 - 0.30640326594315254im       -0.9320905355973363 + 0.16423951279518484im
+```
+
+
+## random_maps
+
+```{julia}
+using ITensors
+@doc random_mps
+```
+
+we now use `ψ = random_mps(sites::Vector{<:Index}; linkdims=1)`, which return
+
+```{text}
+julia> ψ = random_mps(site_indices, linkdims=2) # 
+Quantum state of interest
+3-element MPS:
+ ((dim=2|id=984|"Qubit,Site,n=1"), (dim=2|id=489|" # the info of the coeff of MPS, the indexs prepare to multiplication are same.
+Link,l=1"))
+ ((dim=2|id=489|"Link,l=1"), (dim=2|id=666|"Qubit,
+Site,n=2"), (dim=2|id=313|"Link,l=2"))
+ ((dim=2|id=313|"Link,l=2"), (dim=2|id=403|"Qubit,
+Site,n=3"))
+```

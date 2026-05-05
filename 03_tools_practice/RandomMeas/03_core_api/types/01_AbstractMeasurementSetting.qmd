@@ -1,0 +1,54 @@
+---
+title: "installization"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# Measurement_settings
+
+## LocalUnitaryMeasurementSetting
+
+### case
+
+```{julia}
+using RandomMeas
+N = 2 # Number of qubits
+NU = 3 # Number of measurement settings
+measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
+println(measurement_settings[3])
+```
+
+### doc
+
+#### fields
+
+```{julia}
+supertype(LocalUnitaryMeasurementSetting)    
+supertype(LocalMeasurementSetting)
+```
+
+```{julia}
+@doc LocalUnitaryMeasurementSetting # the fields and constrains are at the top, the specified methods at follows.
+```
+
+```{julia}
+fieldnames(LocalUnitaryMeasurementSetting)
+```
+
+Fields:
+
+• N::Int: Number of sites (qubits).
+• basis_transformation::Vector{ITensor}: A vector of N ITensors representing the local unitary basis rotations.
+• site_indices::Vector{Index{Int64}}: A vector of site indices of length N.
+
+#### methods
+
+```{julia}
+@which LocalUnitaryMeasurementSetting(N)
+```
+
+All in all, using `(:N, :basis_transformation, :site_indices)` method to create a instance of LocalUnitaryMeasurementSetting.

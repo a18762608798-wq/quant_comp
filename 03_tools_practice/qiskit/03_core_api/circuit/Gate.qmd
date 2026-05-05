@@ -1,0 +1,22 @@
+---
+title: "Gate"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# Gate
+
+```{python}
+from qiskit import QuantumCircuit
+import numpy as np
+circ = QuantumCircuit(1, 1)
+circ.h([0]) # h gate
+circ.x([0]) # x gate
+circ.ry(np.pi/2, 0) # R_x gate, 0 is the position of this gate. 
+circ.measure([0], [0])
+circ.draw()
+```

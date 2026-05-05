@@ -1,0 +1,12 @@
+[deps]
+qiskit-aer = ""
+qiskit-ibm-runtime = ""
+pylatexenc = ""
+matplotlib = ""
+seaborn = ""
+numpy = ""
+qiskit-algorithms = ""
+qiskit = ""
+
+[pip.deps]
+quarkstudio = ""

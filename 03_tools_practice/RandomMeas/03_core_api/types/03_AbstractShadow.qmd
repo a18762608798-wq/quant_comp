@@ -1,0 +1,78 @@
+---
+title: "ClassicalShadow"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# AbstractShadow
+
+## FactorizedShadow
+
+### cases
+
+```{julia}
+using RandomMeas # MeasurementSettings
+N = 3 
+NU = 2 
+measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
+site_indices = siteinds("Qubit",N);
+ψ = random_mps(site_indices, linkdims=2); # Product Quantum state of interest
+NM = 3 # Number of projective measurements per settings
+measurement_group = MeasurementGroup(ψ , measurement_settings, NM);
+```
+
+```{julia}
+classical_shadows = get_factorized_shadows(measurement_group); # Matrix{FactorizedShadow}  
+println(classical_shadows[1, 1])
+```
+
+### docs
+
+```{julia}
+supertype(FactorizedShadow)
+```
+
+```{julia}
+@doc FactorizedShadow
+```
+
+Fields
+
+• shadow_data::Vector{ITensor}: A vector of ITensors (each 2×2) representing the shadow for each qubit/site.
+• N::Int: Number of qubits/sites.
+• site_indices::Vector{Index{Int64}}: A vector of site indices (length N).
+
+## DenseShadow
+
+### cases
+
+```{julia}
+using RandomMeas 
+N = 3 
+NU = 2 
+measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
+site_indices = siteinds("Qubit",N);
+ψ = random_mps(site_indices, linkdims=2); 
+NM = 3 
+measurement_group = MeasurementGroup(ψ , measurement_settings, NM);
+```
+
+```{julia}
+reduced_group = reduce_to_subsystem(measurement_group, [1, 3]) # Type: MeasurementGroup
+dense_shadows = get_dense_shadows(reduced_group) # Vector{DenseShadow}
+```
+
+### doc
+
+```{julia}
+typeof(dense_shadows[1])
+```
+
+```{julia}
+supertype(DenseShadow)
+```
+

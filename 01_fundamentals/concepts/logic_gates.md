@@ -113,7 +113,7 @@ $$
 SWAP = \sum_R R \otimes R = \Pi^\dagger [\bigotimes\limits_{n=1}^N R_{\mu_n}\otimes R_{\mu_n}]\Pi
 $$
 
-the proof is ref to [[Hamming_core_estimation]]
+the proof is ref to [[Hamming_Core_Estimation]]
 
 $\Pi$ is use to reorder Hilbert space, which change the room ordering $(1, ..., N, 1', ..., N')$ to $(1, 1', ..., N, N')$ (basic perspective)
 

@@ -16,29 +16,16 @@ The advantage of random measurements lies not in the measurement of specific mec
 
 $$
 \left\{
-\begin{aligned}
-\hat o
-&= \frac{1}{M}\sum_{m=1}^{M}
-   \operatorname{tr}\!\left(\hat O \hat \rho^{(m)}\right) \quad where\\
-\hat \rho^{(m)}
-&= \frac{1}{K}\sum_{k=1}^K
-   \bigotimes_{n=1}^{N}
-   \left(
-   3\left(
-   U_n^{(m)}
-   |s_n^{(m,k)}\rangle
-   \langle s_n^{(m,k)}|
-   U_n^{(m)\dagger}
-   - \hat I
-   \right)
-   \right).
-\end{aligned}
+\begin{split}
+&o = \frac{1}{M} \sum_{m=1}^M tr\bigr(O\rho^{(m)}\bigr)\\
+&\rho^{(m)} = \frac{1}{K} \bigotimes_{n=1}^N\bigr[3(U_n^{(m)}|s_n^{(m,k)}\rangle\langle s_n^{(m,k)}| U_n^{(m\dagger)} - I) \bigr]
+\end{split}
 \right.
 $$
 
 If the targeted operator is easy to breaken, the post-processing computational load can be significantly reduced.
 
-Proof ref to [[classical_shadow#^1624d1]]
+Proof ref to [[Classical_Shadow#^1624d1]]
 
 ##### Classical Shadow Extend to Polynomials of the Density Matrix
 
@@ -46,7 +33,9 @@ $$
 \hat P_2 = \frac{1}{M(M-1)}\sum\limits_{m\neq m'} tr(\hat \rho^{(m)}\hat \rho^{(m')})
 $$
 
-$\widetilde\rho$ is easy to breaken, the post-processing computational load can be significantly reduced.
+Since $\widetilde\rho$ is easy to breaken, the post-processing computational load can be significantly reduced.
+
+Proof ref to [[Classical_Shadow#^16f9f8]]
 
 #### Based on Hamming Distance
 
@@ -56,19 +45,19 @@ $$
 \hat P_2 = \frac{2^N}{MK(K-1)} \sum\limits_{m=1}^M\sum\limits_{k,k'=1;k\neq k'}^K (-2)^{-D[s^{(m, k)}, s^{(m, k')}]}
 $$
 
-Proof ref to [[Hamming_core_estimation]]. 
+Proof ref to [[Hamming_Core_Estimation]]
 
-<span style="color:red">I think the Hamming core come from the local global gate in N_l qubits system or its equivalent</span>. ref to [[Perspective_of_physical_quantities_of_expr_of_rho]]
-
-Which could extend to any operators which satisfy limitations, ref to [[Hamming_core_estimation#^f7a70a]]
+此方法天生带有局限性，从某种意义上一般无法达到不记录 U setting 的功能, ref to [[HCE_Limit_of_Hamming_Core]]
 
 ### Extended Unbiased Estimation Methods
 
-#### Local U Gate of N_l Qubits
+#### Random U(2) of Multiple Qubits
 
-The reflection channel is restricted by the form of the operator. Ref to [[classical_shadow#^6dc453]] and [[Hamming_core_estimation#^b54c3a]]. I think they are not useful.
+2 比特系统可用于构建两两交换算符已知，ref to [[HCE_Limit_of_Hamming_Core]]
 
-### error bounds 
+对于 2 比特以上系统的整体的 U(2) 随机变换, the reflection channel is restricted by the form of the operator. Ref to [[Classical_Shadow#^6dc453]] and [[Hamming_Core_Estimation#^b54c3a]]. I think they are not useful.
+
+### Error Bounds 
 
 The special case of Pauli expectation values, an improved scaling of M  
 
@@ -88,9 +77,9 @@ Where L is the quantity of operation, $\omega$ is the scale of sub-system, $\eps
 
 Some possible relevant evidence [[classical error]]
 
-### cases
+### Cases
 
-#### basic solution of S^2 operation
+#### Basic solution of S^2 Operation
 
 The system only requires local Z-rotations, while the ions were rotated along the X-axis via a global beam.
 
@@ -109,11 +98,11 @@ $$
 \end{cases}
 $$
 
-The proof ref to [[overall_gates_operation]]
+The proof ref to [[S_2_Operation]]
 
-The proof could extend to more general angle of $R_X$, ref to [[ogo_the_expend_of_R_delta]]
+The proof could extend to more general angle of $R_X$, ref to [[S2O_the_Expend_of_R_Delta]]
 
-####  reflection invariant
+####  Reflection Invariant
 
 ^12e242
 
@@ -124,12 +113,12 @@ where \quad Z_R = tr(R_I\rho),
 \end{split}
 $$
 
-* Classical shadow, which is a mechanical quantity and easy to use [[classical_shadow]]; If we deliberately forming the space order, the numerical calculation is easy to simplify [[reflection_invariant#^2b4427]].
-* Based on Hamming Distance, **whose U transform is not independent between those qubits**. ref to [[reflection_invariant#^45a4ea]].
+* Classical shadow, which is a mechanical quantity and easy to use [[Classical_Shadow]]; If we deliberately forming the space order, the numerical calculation is easy to simplify [[Reflection_Invariant#^2b4427]].
+* Based on Hamming Distance, **whose U transform is not independent between those qubits**. ref to [[Reflection_Invariant#^45a4ea]].
 
-**In conclusion $R_I$ is a SWAP operation of $\rho$**, ref to [[Perspective_of_physical_quantities_of_expr_of_rho#^d0f2c8]].
+**In conclusion $R_I$ is a SWAP operation of $\rho$**, ref to [[HCE_Limit_of_Hamming_Core#^d0f2c8]].
 
-#### time reversal symmetry
+#### Time Reversal Symmetry
 
 $$
 \begin{cases}
@@ -138,4 +127,4 @@ where \quad Z_T = tr(\rho u_T\rho^{T_1}u_T^\dagger)
 \end{cases},
 $$
 
-* Classical shadow, Base on $T_1$ is a kind of linear mapping, the classical shadow is still vaild, ref to [[time_reversal]].
+* Classical shadow, Base on $T_1$ is a kind of linear mapping, the classical shadow is still vaild, ref to [[Time_Reversal]].

@@ -91,7 +91,7 @@ $$
 Where(**this direct product form is a concise notation**).
 
 $$
-\Phi_q = \mathbb E_{\vec n} \bigr[\bigotimes\limits_{a\in q}\sigma_n^{a} \bigr]\otimes I_{q^c} =\sum_{\mu_{a_1}\mu_{a_2}...} \mathbb E_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...](\sigma_{\mu_{a_1}}\otimes\sigma_{\mu_{a_2}}...) \otimes I_{q^c}
+\Phi_q = \mathbb {E}_{\vec n} \bigl[\bigotimes\limits_{a\in q}\sigma_n^{a} \bigl]\otimes I_{q^c} =\sum_{\mu_{a_1}\mu_{a_2}...} \mathbb {E}_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...](\sigma_{\mu_{a_1}}\otimes\sigma_{\mu_{a_2}}...) \otimes I_{q^c}
 $$
 
 Let $|S|=2k, k\in \mathbb N^+$, where 
@@ -116,7 +116,7 @@ In conclusion
 
 $$
 \begin{split}
-&E_{U_n}\bigr[\sum_{s_1, s_2, s_3,...}  f_n(s_1, s_2, s_3, ...)P_1\otimes P_{2}\otimes P_{3}\otimes...]\bigr ] \\
+&E_{U_n}\bigl[\sum_{s_1, s_2, s_3,...}  f_n(s_1, s_2, s_3, ...)P_1\otimes P_{2}\otimes P_{3}\otimes...]\bigl ] \\
 &=   \frac{1}{2^{N_l-1}}(\sum_{s_2, s_{3}, ...}\varepsilon_{0,s_2,s_3,...})I^{\otimes N_l} + \frac{1}{2^{N_l-1}}[\sum_q \sum_{s_2, s_3, ...}\epsilon_{0, s_2, s_3,...}^q\varepsilon_{0,s_2,s_3,...}\Phi_q ]
 \end{split}
 $$

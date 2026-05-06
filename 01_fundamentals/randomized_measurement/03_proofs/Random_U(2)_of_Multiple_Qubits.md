@@ -60,7 +60,13 @@ $$
 
 Ref to the sample average in [[01_2023_Elben_Zoller_randomized_measurement_review#^12e242]], let $K = 1$, renew hamming core. 
 
-let $M = \mathscr M N$, where $2N$ is the number of qubits, and $\mathscr M$ is the number of settings groups of all pair. in one settings groups $\mathscr m$, the U gate of a pair(with oreder n) is $U^{(\mathscr m n)} = U^m$ , therefore the form of sample average of operator is
+let $M = \mathscr M N$, where $2N$ is the number of qubits, and $\mathscr M$ is the number of settings groups of all pair. in one settings groups $\mathscr m$, the U gate of a pair(with oreder n) is
+
+$$
+U^{(\mathscr m n)} = U^m
+$$
+
+Therefore the form of sample average of operator is
 
 $$
 o = \frac{1}{\mathscr M} \sum\limits_{\mathscr m=1}^{\mathscr M}  \prod\limits_{n=1}^N \varepsilon_{s_{\mathscr m n}s_{\mathscr m n}'}

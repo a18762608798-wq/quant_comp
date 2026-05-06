@@ -90,13 +90,11 @@ $$
 
 Where(**this direct product form is a concise notation**).
 
-
 $$
 \begin{split}
 \Phi_q = \mathbb{E}_{\vec n} \bigl[\bigotimes\limits_{a\in q}\sigma_n^{a} \bigl]\otimes I_{q^c} =\sum_{\mu_{a_1}\mu_{a_2}\cdots} \mathbb{E}_{\vec n} \bigl[n_{\mu_{a_1}}n_{\mu_{a_2}}\ldots\bigl](\sigma_{\mu_{a_1}}\otimes\sigma_{\mu_{a_2}}\ldots) \otimes I_{q^c}
 \end{split}
 $$
-
 
 Let $|S|=2k, k\in \mathbb N^+$, where 
 

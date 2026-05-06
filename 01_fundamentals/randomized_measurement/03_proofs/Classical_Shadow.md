@@ -9,12 +9,10 @@
 <span style="color:red">key point: There is no need to mark m for the actual state ρ because what remains constant in your perspective is the state, and what changes is the measurement direction / measurement settings.</span>
 
 $$
-\left\{
 \begin{split}
-&o = \frac{1}{M} \sum_{m=1}^M tr\bigr(O\rho^{(m)}\bigr)\\
-&\rho^{(m)} = \frac{1}{K} \bigotimes_{n=1}^N\bigr[3(U_n^{(m)}|s_n^{(m,k)}\rangle\langle s_n^{(m,k)}| U_n^{(m\dagger)} - I) \bigr]
+&o = \frac{1}{M} \sum_{m=1}^M tr\bigr(O\rho^{(m)}\bigr)\quad where,\\
+&\rho^{(m)} = \frac{1}{K} \bigotimes_{n=1}^N\bigr[3(U_n^{(m)}|s_n^{(m,k)}\rangle\langle s_n^{(m,k)}| U_n^{(m\dagger)} - I) \bigr].
 \end{split}
-\right.
 $$
 
 $$
@@ -42,7 +40,7 @@ $$
 \widetilde{\hat \rho}:= 3U_n^{\dagger}|s_n^{(U,s),z}\rangle\langle s_n^{(U,s),z}|U_n - \hat I.  
 $$
 
- Let the single-qubit state $\hat\rho$ have Bloch vector $\vec r$ **(which could be a mixed state and $|\vec r| \le 1$)**, and let the measurement direction be $\vec n$ (randomized). Then
+ Let the single-qubit state $\hat\rho$ have Bloch vector $\vec r$ **(which could be a mixed state and $|\vec r| \le 1$ )**, and let the measurement direction be $\vec n$ (randomized). Then
 
 $$
 \begin{cases}  
@@ -72,6 +70,7 @@ Target
 $$
 \mathbb E_{U, s}[\widetilde{\rho}(U, s)] = \rho.
 $$
+
 Definite
 
 $$

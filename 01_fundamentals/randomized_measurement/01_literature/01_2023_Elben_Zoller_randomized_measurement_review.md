@@ -15,12 +15,10 @@ The advantage of random measurements lies not in the measurement of specific mec
 ##### Classical Shadow and Observation Quantify Estimator
 
 $$
-\left\{
 \begin{split}
-&o = \frac{1}{M} \sum_{m=1}^M tr\bigr(O\rho^{(m)}\bigr)\\
-&\rho^{(m)} = \frac{1}{K} \bigotimes_{n=1}^N\bigr[3(U_n^{(m)}|s_n^{(m,k)}\rangle\langle s_n^{(m,k)}| U_n^{(m\dagger)} - I) \bigr]
+&o = \frac{1}{M} \sum_{m=1}^M tr\bigr(O\rho^{(m)}\bigr)\quad where,\\
+&\rho^{(m)} = \frac{1}{K} \bigotimes_{n=1}^N\bigr[3(U_n^{(m)}|s_n^{(m,k)}\rangle\langle s_n^{(m,k)}| U_n^{(m\dagger)} - I) \bigr].
 \end{split}
-\right.
 $$
 
 If the targeted operator is easy to breaken, the post-processing computational load can be significantly reduced.

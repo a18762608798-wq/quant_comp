@@ -113,7 +113,7 @@ $$
 \tau(\sigma_i\sigma_j\sigma_k\sigma_l...) = \mathbb E_{n} [n_in_jn_kn_l... A_{1234...}(n)]
 $$
 
-考虑到$n_i, n_j, n_k,...$ 顺序随便换，所以左边也随便换
+考虑到 $n_i, n_j, n_k,...$ 顺序随便换，所以左边也随便换
 
 所以
 

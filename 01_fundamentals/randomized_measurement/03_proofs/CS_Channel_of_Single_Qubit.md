@@ -57,7 +57,7 @@ Viz.,
 $$
 \mathbb E_{\vec n}\left[  
 \sum_{\pm}  
-\operatorname{tr}\bigl(\hat P_{\pm}\hat \rho(\pm) \bigr)\widetilde\rho
+tr\bigl(\hat P_{\pm}\hat \rho(\pm) \bigr)\widetilde\rho
 \right]
 =  \frac{1}{2} I + \frac{1}{2} \vec r\cdot \vec\sigma = \rho
 .  

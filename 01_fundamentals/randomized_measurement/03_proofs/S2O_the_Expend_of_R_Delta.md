@@ -84,9 +84,9 @@ $$
 \end{cases}
 $$
 
-For instance, just choose two parallels of latitude, let $z_1 = 1$
+For instance, just choose two parallels of latitude, let $z_1 = 1$ .
 
-there are
+There are
 
 $$
 \begin{cases}
@@ -95,6 +95,7 @@ p_1 z_1 + p_2z_2 = 0\\
 p_1z_1^2 + p_2 z_2^2 = \frac{1}{3}
 \end{cases}
 $$
+
 so
 
 $$

@@ -9,8 +9,8 @@ Where
 $$
 \begin{cases}
 A_{same} = \mathbb E_{U_n}[P_n(0)\otimes P_n(0)]\\
-A_{diff} = \mathbb E_{U_n}[P_n(0)\otimes P_n(1)],
-\end{cases}
+A_{diff} = \mathbb E_{U_n}[P_n(0)\otimes P_n(1)]\\
+\end{cases},
 $$
 
 since 
@@ -31,7 +31,7 @@ $$
 also
 
 $$
-E_{U_n}\bigr[(n_i[\sigma_i]^\alpha_\beta n_j[\sigma_j]^c_d)\bigr] = E_{U_n} [n_in_j] [\sigma_i\otimes\sigma_j]^{(\alpha, c)}_{\beta, d} = \frac{1}{3}\delta_{ij}[\sigma_i\otimes\sigma_j]^{(\alpha, c)}_{\beta, d}
+E_{U_n}\bigr[(n_i[\sigma_i]^\alpha_\beta n_j[\sigma_j]^c_d)\bigr] = E_{U_n} [n_in_j] [\sigma_i\otimes\sigma_j]^{(\alpha, c)}_{\beta, d} = \frac{1}{3}\delta_{ij}[\sigma_i\otimes\sigma_j]^{(\alpha, c)}_{\beta, d}.
 $$
 
 Viz.,
@@ -42,7 +42,7 @@ $$
 &= 2[\frac{1}{4}(I \otimes I + \frac{1}{3}\sum_{\mu=1}^3 \sigma_\mu \otimes \sigma_\mu)] - [\frac{1}{4}(I \otimes I - \frac{1}{3}\sum_{\mu=1}^3 \sigma_\mu \otimes \sigma_\mu)]\\
 &= \frac{1}{4} [I\otimes I + \sum_{\mu=1}^3 \sigma_\mu \otimes \sigma_\mu]\\
 &= \frac{1}{2}\sum_{R_\mu} R_\mu \otimes R_\mu
-\end{aligned}
+\end{aligned}.
 $$
 
 ## General Solution
@@ -62,7 +62,7 @@ $$
 \mathbb E_U[P_n(0)\otimes P_n(0)  \otimes P_n(0)] &= \frac{1}{8}\mathbb E_U[(I +  \sigma_n)\otimes(I +  \sigma_n)\otimes (I + \sigma_n)] \\
 &=  \frac{1}{8} \mathbb E_U[III + I\sigma_n\sigma_n + \sigma_n I \sigma_n + \sigma_n\sigma_nI]\\
 &= \frac{1}{8}[III + \frac{1}{3}\sum_{\mu=1}^3 (I\sigma_\mu\sigma_\mu + \sigma_\mu I \sigma_\mu + \sigma_\mu\sigma_\mu I)]
-\end{split}
+\end{split},
 $$
 
 the signs of the coefs satisfy,
@@ -88,7 +88,7 @@ $$
 \end{split}
 $$
 
-where(**this direct product form is a concise notation**.)
+Where(**this direct product form is a concise notation**).
 
 $$
 \Phi_q = \mathbb E_{\vec n} \bigr[\bigotimes\limits_{a\in q}\sigma_n^{a} \bigr]\otimes I_{q^c} =\sum_{\mu_{a_1}\mu_{a_2}...} \mathbb E_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...](\sigma_{\mu_{a_1}}\otimes\sigma_{\mu_{a_2}}...) \otimes I_{q^c}
@@ -97,19 +97,19 @@ $$
 Let $|S|=2k, k\in \mathbb N^+$, where 
 
 $$
-\mathbb E_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...]= \frac{1}{(2k+1)!!}\sum_{\text{pairing}} \delta_{\mu_{a_1}\mu_{a_2}}\delta_{\mu_{a_3}\mu_{a_4}}...
+\mathbb E_{\vec n} [n_{\mu_{a_1}}n_{\mu_{a_2}}...]= \frac{1}{(2k+1)!!}\sum_{\text{pairings}} \delta_{\mu_{a_1}\mu_{a_2}}\delta_{\mu_{a_3}\mu_{a_4}}...
 $$
 
-where pairing  is a set of allocations for the positions in q. Each group consists of two elements, and the groups are identical to each other. For instance, if $k = 2$, the allocations are
+Where pairing  is a set of allocations for the positions in q. Each group consists of two elements, and the groups are identical to each other. For instance, if $k = 2$, the allocations are
 
 $$
 (1,2)(3,4)\quad(1,3)(2,4)\quad(1,4)(2,3)
 $$
 
-therefore
+Therefore
 
 $$
-\Phi_q = \frac{1}{(2k+1)!!}\sum_{\text{pairing}} \sum_{\mu_{a_1}\mu_{a_3}...}(\sigma_{\mu_{a_1}}^{\otimes 2} \otimes\sigma_{\mu_{a_3}}^{\otimes 2}...) \otimes I_{q^c}
+\Phi_q = \frac{1}{(2k+1)!!}\sum_{\text{pairings}} \sum_{\mu_{a_1}\mu_{a_3}...}(\sigma_{\mu_{a_1}}^{\otimes 2} \otimes\sigma_{\mu_{a_3}}^{\otimes 2}...) \otimes I_{q^c}
 $$
 
 In conclusion
@@ -127,7 +127,7 @@ $$
 \begin{cases}
 \varepsilon_{s_1,s_2,s_3,...} = \varepsilon_{\neg s_1, \neg s_2, \neg s_3,...}\\
 \epsilon_{0, s_2, s_3,...}^q = (-1)^{\sum_{a\in q}s_a}\\
-\Phi_q = \frac{1}{(2k+1)!!}\sum_{\text{pairing}} \sum_{\mu_{a_1}\mu_{a_3}...}(\sigma_{\mu_{a_1}}^{\otimes 2} \otimes\sigma_{\mu_{a_3}}^{\otimes 2}...) \otimes I_{q^c}\\
+\Phi_q = \frac{1}{(2k+1)!!}\sum_{\text{pairings}} \sum_{\mu_{a_1}\mu_{a_3}...}(\sigma_{\mu_{a_1}}^{\otimes 2} \otimes\sigma_{\mu_{a_3}}^{\otimes 2}...) \otimes I_{q^c}\\
 q = S \subseteq \{1, 2, ..., N_{l}\}, \quad |S|=2k, \quad k\in \mathbb N^+
 \end{cases}
 $$

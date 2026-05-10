@@ -1,0 +1,51 @@
+---
+title: "ITensor"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# ITensor
+
+## doc
+
+```{julia}
+@doc ITensor
+```
+
+```{text}
+ITensor 
+ord=2 # the number of order, meaning there are two Index as follow
+Dim 1: (dim=2|id=451|"Qubit,Site,n=1")' # index, Separate rows and columns.
+Dim 2: (dim=2|id=451|"Qubit,Site,n=1")
+NDTensors.Dense{ComplexF64, Vector{ComplexF64}} # sepcifical matrix.
+2×2
+ -0.9171435002629851 + 0.2336989174957588im   …  -0.033305846289088226 - 0.3211282243740626im
+ -0.10173325172253367 - 0.30640326594315254im       -0.9320905355973363 + 0.16423951279518484im
+```
+
+## usage
+
+```{julia}
+# define a operator
+using RandomMeas # MeasurementSettings
+N = 7 # NOTE: Warning if N ≥ 7
+site_indices = siteinds("Qubit",N);
+O = op("I", site_indices[1]);
+for i = 2:N
+    O *= op("I", site_indices[i]);
+end
+```
+
+```{julia}
+# turn to mpo
+O_mpo = MPO(O, site_indices; cutoff=1e-15); # NOTE: if you do not cut the linkdims it will be full.
+linkdims(O_mpo)
+```
+
+## performance
+
+It not useful to constuct local operator production. And the consumption of cut linkdims is big.

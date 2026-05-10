@@ -1,0 +1,132 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# get expect shadow
+
+## preprocessing
+
+```{julia}
+using RandomMeas
+# get classical shadows
+N = 4
+NU = 100
+measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
+site_indices = siteinds("Qubit",N);
+ψ = random_mps(site_indices, linkdims=4);
+NM = 100
+measurement_group = MeasurementGroup(ψ , measurement_settings, NM);
+factorized_shadows = get_factorized_shadows(measurement_group);
+```
+
+```{julia}
+# swap function
+function create_local_swap_op(bitsnum::Int64, localsites::Vector{Int64}, siteindices::Vector{Index{Int64}})
+    ops = MPO[]
+    site1 = localsites[1]
+    site2 = localsites[2]
+    opstrbases = ["I", "X", "Y", "Z"]
+    for basesindex = 1:4
+        opstrbase = opstrbases[basesindex]
+        opstrs = ["I" for _ in 1:bitsnum]
+        opstrs[site1], opstrs[site2] = opstrbase, opstrbase
+        op = MPO(ComplexF64, siteindices, opstrs)
+        push!(ops, op)
+    end
+    return local_swap_op = sum(ops) / 2
+end
+```
+
+```{julia}
+# create factorized operator type
+struct FactorizedOperator
+    localoperators::Vector{MPO}
+    sites::Vector{Vector{Int64}}
+    function FactorizedOperator(localoperators, sites)
+        @assert length(localoperators) == length(sites) "The length of localoperators must equal the length of sites" # constrain.
+        new(localoperators, sites)
+    end
+end
+
+function create_factorized_reflect_op(bitsnum::Int64, siteindices::Vector{Index{Int64}})
+    @assert iszero(bitsnum % 2) "bitsnum must be 2k, k ∈ ℕ" # constrain
+    pairsnum = bitsnum ÷ 2
+    factorized_reflect_op = Vector{MPO}()
+    factorized_reflect_sites = Vector{Vector{Int64}}()
+    for pairsite = 1:pairsnum
+        site1 = pairsite
+        site2 = bitsnum - site1 + 1
+        pairsites = [site1, site2]
+        indices = [siteindices[i] for i in pairsites]
+        localoperator = create_local_swap_op(2, [1, 2], indices)
+        push!(factorized_reflect_op, localoperator)
+        push!(factorized_reflect_sites, pairsites)
+    end
+    return factorized_reflect_op, factorized_reflect_sites
+end
+```
+
+```{julia}
+factorized_reflect_op, factorized_reflect_sites = create_factorized_reflect_op(N, site_indices)
+factorized_op = FactorizedOperator(factorized_reflect_op, factorized_reflect_sites)
+```
+
+## get expect shadow
+
+### main context
+
+```{julia}
+function get_producted_expect_shadow(O::FactorizedOperator, measurement_group::MeasurementGroup{LocalUnitaryMeasurementSetting})
+    localops = O.localoperators
+    sites = O.sites
+    factorizednum = length(localops)
+    expect_val = ComplexF64(1)
+    for factorizedindex = 1:factorizednum
+        localop = localops[factorizedindex]
+        localsite = sites[factorizedindex]
+        # take the reduced info
+        reduced_group = reduce_to_subsystem(measurement_group, localsite)
+        dense_shadows = get_dense_shadows(reduced_group)
+        local_val = get_expect_shadow(localop, dense_shadows)
+        expect_val *= ComplexF64(local_val)
+    end
+    return expect_val
+end
+```
+
+```{julia}
+get_producted_expect_shadow(factorized_op, measurement_group)
+```
+
+### comparative verification
+
+```{julia}
+function create_overall_swap_op(bitsnum::Int64, siteindices::Vector{Index{Int64}})
+    @assert iszero(bitsnum % 2) "bitsnum must be 2k, k ∈ ℕ" # constrain
+    pairsnum = bitsnum ÷ 2
+    opstrs = ["I" for _ in 1:bitsnum]
+    op = MPO(ComplexF64, siteindices, opstrs)
+    for pairsite = 1:pairsnum
+        site1 = pairsite
+        site2 = bitsnum - site1 + 1
+        sites = [site1, site2]
+        local_swap_op = create_local_swap_op(bitsnum, sites, siteindices)
+        op = apply(local_swap_op, op)
+    end
+    return op
+end
+```
+
+```{julia}
+overall_reflect_op = create_overall_swap_op(N, site_indices)
+```
+
+```{julia}
+estimate_val = get_expect_shadow(overall_reflect_op, factorized_shadows)
+exact_val = inner(ψ', overall_reflect_op, ψ)
+```

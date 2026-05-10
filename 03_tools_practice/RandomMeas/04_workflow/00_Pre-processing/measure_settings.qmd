@@ -14,7 +14,7 @@ julia:
 using RandomMeas
 # U
 N = 3
-NU = 50
+NU = 300
 measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
 ```
 
@@ -26,20 +26,20 @@ site_indices = siteinds("Qubit",N);
 
 ```{julia}
 # measure and get the data
-NM = 100 # Number of shots per setting 
+NM = 10 # Number of shots per setting 
 measurement_group = MeasurementGroup(ψ , measurement_settings, NM);
 ```
 
 ```{julia}
 # create shadows
-classical_shadows = get_factorized_shadows( measurement_group);
+classical_shadows = get_factorized_shadows(measurement_group);
+size(classical_shadows)
 ```
 
 ```{julia}
 # definite the mechanical quantum
 ops = ["I" for _ in 1:N] 
 ops[1] = "Z"
-ops[3] = "X"
 O=MPO(site_indices,ops);
 ```
 
@@ -49,3 +49,12 @@ estimate_val = get_expect_shadow(O, classical_shadows)
 exact_val = inner(ψ',O,ψ)
 ```
 
+```{julia}
+reduced_group = reduce_to_subsystem(measurement_group, [1, 3]) 
+dense_shadows = get_dense_shadows(reduced_group) 
+estimate_val = get_expect_shadow(reduce_to_subsystem(O,[1,3]), dense_shadows)
+```
+
+```{julia}
+estimate_val = get_expect_shadow(reduce_to_subsystem(O,[1,3]), classical_shadows) # error
+```

@@ -1,0 +1,55 @@
+---
+title: "ITensor"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# purity
+
+## classical shadows
+
+### cases
+
+```{julia}
+using RandomMeas
+# U
+N = 4
+NU = 200
+measurement_settings = [LocalUnitaryMeasurementSetting(N) for _ in 1: NU];
+```
+
+```{julia}
+# state
+site_indices = siteinds("Qubit",N);
+ψ = random_mps(site_indices, linkdims=2); # Quantum state of interest
+```
+
+```{julia}
+# measure and get the data
+NM = 10 # Number of shots per setting 
+measurement_group = MeasurementGroup(ψ , measurement_settings, NM);
+```
+
+```{julia}
+# create shadows
+factorized_shadows = get_factorized_shadows(measurement_group);
+dense_shadows = get_dense_shadows(measurement_group);
+```
+
+```{julia}
+@elapsed get_trace_moment(dense_shadows, 2) # 4.676559065
+```
+
+```{julia}
+@elapsed get_trace_moment(factorized_shadows, 2) # 137.674895947
+```
+
+### Performance analysis
+
+* dense_shadows: The time complexity is $O(NU^2)$ . However, it has high space requirements, so it is suitable for small systems.
+
+* factorized_shadows: The time complexity is $O(NU^2NM^2)$ . However, it has lower space requirements, so it is suitable for biger systems; The structure is suitable to parallel computing **but which could not use @Threads out of get_trace_moment because cross term, you must write a new method**.

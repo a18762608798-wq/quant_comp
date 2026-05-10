@@ -32,6 +32,8 @@ id: 唯一标识符, to judge whether the index are same.
 
 ## ITensor
 
+Compared to MPO, which is a completely quantitative tensor.
+
 ```{julia}
 @doc ITensor
 ```
@@ -48,23 +50,19 @@ NDTensors.Dense{ComplexF64, Vector{ComplexF64}} # sepcifical matrix.
 ```
 
 
-## random_maps
+## MPO
 
 ```{julia}
-using ITensors
-@doc random_mps
+@doc MPO
+````
+
+```{julia}
+os = OpSum()
+os += "Sz", 1, "Sz", 2
+os += "Sz", 2, "Sz", 3
+os += "Sz", 3, "Sz", 4
+sites = siteinds("S=1/2", 4)
+H = MPO(os, sites)
 ```
-
-we now use `ψ = random_mps(sites::Vector{<:Index}; linkdims=1)`, which return
-
-```{text}
-julia> ψ = random_mps(site_indices, linkdims=2) # 
-Quantum state of interest
-3-element MPS:
- ((dim=2|id=984|"Qubit,Site,n=1"), (dim=2|id=489|" # the info of the coeff of MPS, the indexs prepare to multiplication are same.
-Link,l=1"))
- ((dim=2|id=489|"Link,l=1"), (dim=2|id=666|"Qubit,
-Site,n=2"), (dim=2|id=313|"Link,l=2"))
- ((dim=2|id=313|"Link,l=2"), (dim=2|id=403|"Qubit,
-Site,n=3"))
+```
 ```

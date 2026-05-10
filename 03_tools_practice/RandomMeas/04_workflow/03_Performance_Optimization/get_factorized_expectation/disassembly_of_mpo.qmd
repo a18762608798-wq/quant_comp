@@ -10,7 +10,7 @@ julia:
 
 # disassembly of mpo
 
-## basic test
+## preprocessing
 
 Give a case of SWAP operator.
 
@@ -37,9 +37,12 @@ function create_local_swap_op(bitsnum::Int64, localsites::Vector{Int64}, siteind
     end
     return local_swap_op = sum(ops) / 2
 end
-local_swap_op = create_local_swap_op(N, [1, 3], site_indices);
+local_swap_op = create_local_swap_op(N, [1, N], site_indices);
 linkdims(local_swap_op)
 ```
+
+
+## comparing different swaps
 
 ```{julia}
 # overall swap op 
@@ -58,7 +61,7 @@ function create_overall_swap_op(bitsnum::Int64, siteindices::Vector{Index{Int64}
     return op
 end
 overall_op = create_overall_swap_op(N, site_indices); 
-linkdims(overall_op) # NOTE: the result is not fixed...
+linkdims(overall_op)
 ```
 
 
@@ -86,7 +89,7 @@ linkdims(factorized_op)
 
 
 ```{julia}
-# overall swap op 
+# overall swap op but adjacent 
 function create_overall_swap_op2(bitsnum::Int64, siteindices::Vector{Index{Int64}})
     @assert iszero(bitsnum % 2) "bitsnum must be 2k, k ∈ ℕ" # contrain
     pairsnum = bitsnum ÷ 2
@@ -109,3 +112,4 @@ linkdims(overall_op)
 
 * General situation: 对于需要重排希尔伯特空间order的优化ITensors还是需要手动排序. 
 * Classical shadow: Or calculate the expectation of local operator then product(Only could be used in Classical shadow).
+

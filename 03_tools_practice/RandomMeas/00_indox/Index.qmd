@@ -1,0 +1,29 @@
+---
+title: "related ITensor"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+## Index
+
+```{julia}
+using ITensors
+@doc Index
+```
+
+```{text}
+"""
+dim: the dim of every subspace.
+id: 唯一标识符, to judge whether the index are same.
+"Qubit,Site,n=1": tags of this index, which could be definite by yourself, where
+    Qubit: system of qubit
+    Site: the index would express a qubit site
+    n=1: the first qubit site
+(dim=2|id=451|"Qubit,Site,n=1")': 区分相同的索引对象(to express output or input), because Itensor will multiplication equal index.
+"""
+(dim=2|id=451|"Qubit,Site,n=1")
+```

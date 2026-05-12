@@ -1,0 +1,25 @@
+---
+title: "ITensor"
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# MPO
+
+```{julia}
+using RandomMeas
+@doc MPO
+````
+
+```{julia}
+os = OpSum()
+os += "Sz", 1, "Sz", 2
+os += "Sz", 2, "Sz", 3
+os += "Sz", 3, "Sz", 4
+sites = siteinds("S=1/2", 4)
+H = MPO(os, sites)
+```

@@ -1,0 +1,138 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# MeasurementData and MeasurementGroup
+
+## MeasurementData
+
+```{julia}
+using RandomMeas
+@doc MeasurementData
+```
+
+  Settings(Could be nothing) and results of measurements for one NU.
+
+### fields
+
+```{julia}
+fieldnames(MeasurementData)
+```
+
+>(:N, :NM, :measurement_results(NM, N), :measurement_setting(T <: Union{Nothing, AbstractMeasurementSetting))
+
+### method
+
+---
+MeasurementData(measurement_results::Array{Int, 2}; measurement_setting::Union{T, Nothing} = nothing) where T <: Union{Nothing, AbstractMeasurementSetting}
+
+>Creates a MeasurementData object by the measurement results and the provided setting.
+>The nothing choice is because the ways related to hamming core is not necessary to provide the settings.
+
+```{julia}
+# With measurement setting
+setting = LocalUnitaryMeasurementSetting(4, ensemble=Haar)
+results = rand(1:2, 10, 4)
+data_with_setting = MeasurementData(results; measurement_setting=setting)
+# Without measurement setting
+data_without_setting = MeasurementData(results)
+```
+
+---
+MeasurementData(probability::MeasurementProbability{T}, NM::Int) where T <: Union{Nothing, AbstractMeasurementSetting}
+
+>Returns a MeasurementData object by measurement probability and provided setting.
+
+---
+MeasurementData(ψ::Union{MPO, MPS}, NM::Int, measurement_setting::Union{LocalUnitaryMeasurementSet
+ting, ComputationalBasisMeasurementSetting, ShallowUnitaryMeasurementSetting}; mode::SimulationMode = TensorNetwork(Dense or TensorNetwork))
+
+>Returns a MeasurementData object by sampling NM projective measurements from the quantum state ψ and neasurement_setting.
+
+## MeasurementProbability
+
+```{julia}
+using RandomMeas
+@doc MeasurementProbability
+```
+
+  A container for measurement probabilities and settings.
+
+### fields
+
+```{julia}
+fieldnames(MeasurementProbability)
+```
+
+>(:N, :measurement_probability, :measurement_setting, :site_indices)
+>measurement_probability::ITensor: An ITensor representing Born probability. Order is N and dimensions of every order is 2. Measurement_probability[s1, s2, ..., sN] = P(s1, s2, ..., sN)
+
+## MeasurementGroup
+
+```{julia}
+using RandomMeas
+@doc MeasurementGroup
+```
+
+  A container for a group of measurement data(settings and results).
+
+### fields
+
+```{julia}
+fieldnames(MeasurementGroup)
+```
+
+>(:N, :NU, :NM, :measurements::Vector{MeasurementData})
+
+### methods
+
+---
+MeasurementGroup(measurements::Vector{MeasurementData{T}}) where {T <: Union{Nothing, AbstractMeasurementSetting}}
+
+>Construct a MeasurementGroup object by a vector of MeasurementData.
+
+```{julia}
+siteindices = siteinds("Qubit",4);
+setting1 = LocalUnitaryMeasurementSetting(4, site_indices=siteindices);
+results1 = rand(1:2, 10, 4);
+data1 = MeasurementData(results1; measurement_setting=setting1);
+setting2 = LocalUnitaryMeasurementSetting(4, site_indices=siteindices);
+results2 = rand(1:2, 10, 4);
+data2 = MeasurementData(results2; measurement_setting=setting2);
+group = MeasurementGroup([data1, data2]);
+```
+
+---
+MeasurementGroup(measurements::Array{Int,3}, basis_transformation::Array{ComplexF64,4},site_indices::Union{Vector{Index{Int64}}, Nothing}=nothing)
+
+>Construct a MeasurementGroup from raw measurement outcomes and local unitary basis transformations.
+>measurements: (Nu, NM, N)
+>basis_transformation: (NU, N, 2, 2)
+
+---
+MeasurementGroup(ψ::Union{MPO, MPS}, measurement_settings::Vector{AbstractMeasurementSetting}, NM::Int; mode::String = “MPS/MPO”, progress_bar::Bool=false)
+
+>Construct a MeasurementGroup from a quantum state ψ by generating NU **local** measurement settings and simulating NM projective measurements per setting.
+>mode: Simulation mode.
+
+---
+MeasurementGroup(ψ::Union{MPO, MPS}, NU::Int, NM::Int; setting_type::Type=LocalUnitaryMeasurementSetting, depth::Union{Int, Nothing}=nothing, mode::SimulationMode=TensorNetwork, progress_bar::Bool=false)
+
+>Construct a MeasurementGroup from a quantum state ψ by generating NU measurement settings and simulating NM projective measurements per setting.
+>setting_type::Type{<:AbstractMeasurementSetting}
+>depth::Union{Int, Nothing}(optional): Circuit depth for shallow settings. Required when setting_type=ShallowUnitaryMeasurementSetting.
+
+```{julia}
+using RandomMeas
+N = 6
+NU = 400
+site_indices = siteinds("Qubit",N);
+ψ = MPS(ComplexF64, site_indices, ["0", "0", "1", "1", "0", "0"]);
+group1 = MeasurementGroup(ψ, 10, 100);
+group3 = MeasurementGroup(ψ, 10, 100; setting_type=ComputationalBasisMeasurementSetting);
+```

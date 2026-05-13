@@ -1,0 +1,121 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# Data acquisition
+
+## get_rotation
+
+```{julia}
+@doc get_rotation
+```
+
+>Generate a single-qubit unitary sampled from a ensemble and on a index.
+
+```{julia}
+using RandomMeas
+N = 2;
+site_indices = siteinds("Qubit",N);
+U = get_rotation(site_indices[1])
+```
+
+## reduce_to_subsystem
+
+```{julia}
+@doc reduce_to_subsystem
+```
+
+---
+reduce_to_subsystem(settings, subsystem::Vector{Int})
+
+>Reduce a LocalMeasurementSetting object to a specified subsystem.
+
+```{julia}
+full_setting = LocalUnitaryMeasurementSetting(3);
+reduced_setting = reduce_to_subsystem(full_setting, [1, 2]);
+```
+
+---
+reduce_to_subsystem(data::MeasurementData{T}, subsystem::Vector{Int}) where T <: Union{Nothing, LocalMeasurementSetting}
+
+>Reduce a MeasurementData object to a specified subsystem, preserving the measurement setting type if available.
+
+```{julia}
+setting = LocalUnitaryMeasurementSetting(2, ensemble=Haar);
+results = rand(1:2, 10, 2);
+data = MeasurementData(results; measurement_setting=setting);
+reduced_data = reduce_to_subsystem(data, [1])
+```
+
+---
+reduce_to_subsystem(group::MeasurementGroup{T},subsystem::Vector{Int}
+
+Reduce a MeasurementGroup object (T <: LocalMeasurementSetting) to a specified subsystem.
+
+```{julia}
+setting = LocalUnitaryMeasurementSetting(2, ensemble=Haar);
+results = rand(1:2, 10, 2);
+data = MeasurementData(results; measurement_setting=setting);
+group = MeasurementGroup([data, data]);
+reduced_data = reduce_to_subsystem(group, [1])
+```
+
+---
+reduce_to_subsystem(ρ::MPO, subsystem::Vector{Int64}, renormalize=false)
+
+>Compute the reduced density matrix (as an MPO) for a specified subsystem.
+>renormalize (optional): Whether to renormalize the result (default: false).
+
+```{julia}
+os = OpSum()
+os += "Sz", 1, "Sz", 2
+os += "Sz", 2, "Sz", 3
+os += "Sz", 3, "Sz", 4
+sites = siteinds("S=1/2", 4)
+H = MPO(os, sites)
+H_reduced = reduce_to_subsystem(H, [1])
+```
+---
+reduce_to_subsystem(ψ::MPS, subsystem::Vector{Int64})
+
+>Compute the reduced a pure state (as an MPS) for a specified subsystem.
+
+```{julia}
+site_indices = siteinds("Qubit",2);
+ρ = MPS(ComplexF64, site_indices, ["0", "0"])
+ρ_reduced = reduce_to_subsystem(ρ, [1])
+```
+
+## align_site_indices
+
+```{julia}
+@doc align_site_indices
+```
+
+---
+align_site_indices(measurements::Vector{MeasurementData{T}}; site_indices=nothing) where T<:AbstractMeasurementSetting
+
+>Return a new vector of MeasurementData where all measurement settings use the same site indices(if site_indices=nothing, use the first indices).
+
+```{julia}
+setting1 = LocalUnitaryMeasurementSetting(2);
+setting2 = LocalUnitaryMeasurementSetting(2);
+results = rand(1:2, 10, 2);
+data1 = MeasurementData(results; measurement_setting=setting1);
+data2 = MeasurementData(results; measurement_setting=setting2);
+@show data1.measurement_setting.site_indices
+@show data2.measurement_setting.site_indices # which is not equal
+datas = align_site_indices([data1, data2]);
+@show datas[1].measurement_setting.site_indices
+@show datas[2].measurement_setting.site_indices # which is equal
+```
+
+---
+align_site_indices(group::MeasurementGroup{T}; site_indices=nothing) where T< AbstractMeasurementSetting
+
+>Return a new MeasurementGroup with all measurement settings aligned to common site indices.

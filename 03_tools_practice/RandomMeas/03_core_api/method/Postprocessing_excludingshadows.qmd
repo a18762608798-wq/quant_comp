@@ -1,0 +1,66 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# postprocessing excluding shadows
+
+## overlap
+
+Which to estimate the overlap such as
+
+$$
+tr(ρ_1 ρ_2),
+$$
+
+```{julia}
+@doc get_overlap
+```
+
+---
+get_overlap(
+    group_1::MeasurementGroup,
+    group_2::MeasurementGroup,
+    subsystem::Vector{Int} = collect(1:group_1.N);
+    apply_bias_correction::Bool = false
+)
+
+>Compute the overlap of two quantum states from measurement data by averaging the overlap of measurement results.
+
+---
+get_overlap(
+    data_1::MeasurementData,
+    data_2::MeasurementData;
+    apply_bias_correction::Bool = false
+)
+
+>Compute the overlap between two quantum states for a single measurement setting.
+
+---
+get_overlap(prob1::MeasurementProbability, prob2::MeasurementProbability) -> Float64
+
+>Compute the weighted overlap 2^N sum_s (-2)^{-D[s,s']}P(s)P(s') by sequentially applying the Hamming tensor to each qubit index and contracting with the second probability tensor.
+
+## purity
+
+```{julia}
+@doc get_purity
+```
+
+get_purity(group::MeasurementGroup, subsystem::Vector{Int} = collect(1:group.N))
+
+>Compute the purity though hamming core method.
+
+```{julia}
+results = rand(1:2, 10, 4);
+data = MeasurementData(results);
+group = MeasurementGroup([data, data]);
+get_purity(group)
+get_overlap(group, group, apply_bias_correction=true)
+```
+
+

@@ -1,0 +1,73 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# Postprocessing Shadows
+
+## get_expect_shadow 
+
+```{julia}
+@doc get_expect_shadow
+```
+
+>Compute the average expectation value of an MPO operator O using an array of shadow objects.
+
+---
+get_expect_shadow(O::MPO, shadows::AbstractArray{<:AbstractShadow}; compute_sem::Bool = false)
+
+>compute_sem::Bool (optional): If true, also compute the standard error of the mean (SEM) for
+statistical error analysis. Default is false.
+
+```{julia}
+ops = ["I" for _ = 1:2]
+site_indices = siteinds("Qubit", 2);
+O = MPO(ComplexF64, site_indices, ops)
+shadowtensor = random_itensor(site_indices[1]', site_indices[2]', site_indices[1], site_indices[2]);
+shadow = DenseShadow(shadowtensor, 2, site_indices);
+mean_val, sem_val = get_expect_shadow(O, [shadow, shadow], compute_sem=true)
+```
+
+---
+get_expect_shadow(O::MPO, shadow::AbstractShadow)
+
+```{julia}
+@show get_expect_shadow(O, shadow)
+```
+
+## get_trace_moment 
+
+```{julia}
+@doc get_trace_moment
+```
+
+---
+get_trace_moment(shadows::Array{<:AbstractShadow, 2 or 1}, kth_moment::Int; O::Union{Nothing, MPO}=nothing, compute_sem::Bool = false, compute_renyi::Bool = false)
+
+>compute_renyi::Bool (optional): If true, returns the Rényi-k entropy Sk = (1/(1-k)) * log₂(pk) instead of the raw trace moment (default:false).
+>bias(Returns): The bias correction from jackknife resampling
+>sem(Returns): The standard error of the mean.
+
+```{julia}
+estimate, bias, sem = get_trace_moment([shadow shadow; shadow shadow;], 2; compute_sem=true)
+renyi_entropy = get_trace_moment([shadow shadow; shadow shadow;], 2; compute_renyi=true) # if compute_renyi=true, returns the Rényi-k entropy Sk instead of the raw trace moment
+```
+
+---
+get_trace_moment(ψ::Union{MPS, MPO}, k::Int, subsystem::Vector{Int}=collect(1:length(ψ)))
+
+```{julia}
+site_indices = siteinds("Qubit",5);
+ψ = random_mps(ComplexF64, site_indices, linkdims=5)
+moment = get_trace_moment(ψ, 1, [1, 5])
+moment = get_trace_moment(ψ, 2, [1, 5])
+```
+
+---
+get_trace_moment(spec::ITensor, k::Int)
+
+用到再说，spec is a ITensor to storage 纯态 eigenvalue.

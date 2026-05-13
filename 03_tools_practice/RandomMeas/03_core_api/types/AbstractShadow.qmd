@@ -1,0 +1,103 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# AbstractShadow
+
+```{julia}
+using RandomMeas
+subtypes(RandomMeas.AbstractShadow)
+```
+
+>DenseShadow
+>FactorizedShadow
+>ShallowShadow
+
+## DenseShadow
+
+```{julia}
+@doc DenseShadow
+```
+
+>A struct representing a dense classical shadow (2^N x 2^N matrix), stored as a single ITensor with 2N indices.
+
+### fields
+
+```{julia}
+fieldnames(DenseShadow)
+```
+
+>(:shadow_data, :N, :site_indices(N))
+
+### Methods
+
+---
+>DenseShadow(shadow_data::ITensor, N::Int, site_indices::Vector{Index{Int64}})
+
+```{julia}
+site_indices = siteinds("Qubit", 2);
+shadowtensor = random_itensor(site_indices[1]', site_indices[2]', site_indices[1], site_indices[2]);
+@show DenseShadow(shadowtensor, 2, site_indices);
+```
+
+---
+DenseShadow(measurement_data::MeasurementData{LocalUnitaryMeasurementSetting}; G::Vector{Float64} = fill(1.0, measurement_data.N))
+
+>Construct a DenseShadow object from a MeasurementData object.
+>G::Vector{Float64} (optional): Vector of G values to account for measurement errors and noise. Each element corresponds to a qubit/site. Default is 1.0 for all sites (no error mitigation). **You must conduct a separate experiment to calculate G = get_calibration_vector(ψ0, calibration_group)**
+
+```{julia}
+setting = LocalUnitaryMeasurementSetting(1, ensemble=Haar);
+results = rand(1:2, 10, 1);
+data = MeasurementData(results; measurement_setting=setting);
+@show DenseShadow(data);
+```
+
+---
+DenseShadow(Probability::MeasurementProbability; G::Vector{Float64} = fill(1.0,measurement_probability.N))
+
+>Construct a DenseShadow object from a precomputed measurement probability tensor.
+
+## FactorizedShadow
+
+```{julia}
+@doc FactorizedShadow
+```
+
+> $ρ^{(m, k)}$ , A struct representing a factorized classical shadow which can be represented as a tensor product of single qubit shadows.
+
+### fields
+
+```{julia}
+fieldnames(FactorizedShadow)
+```
+
+>(:shadow_data::Vector{ITensor}, :N, :site_indices::Vector{Index{Int64}})
+
+### methods
+
+---
+FactorizedShadow(shadow_data::Vector{ITensor}, N::Int, site_indices::Vector{Index{Int64}})
+
+```{julia}
+site_indices = siteinds("Qubit", 2);
+tensor1 = random_itensor(site_indices[1]', site_indices[1]);
+tensor2 = random_itensor(site_indices[2]', site_indices[2]);
+@show FactorizedShadow([tensor1, tensor2], 2, site_indices);
+```
+
+---
+FactorizedShadow(measurement_results::Vector{Int}, basis_transformation::Vector{ITensor}; G::Vector{Float64} = fill(1.0, length(basis_transformation)))
+
+>measurement_results::Vector{Int}: length = N, vector of binary measurement results for each qubit/site.
+>basis_transformation::Vector{ITensor}: Vector of local unitary transformations applied during the measurement.
+
+```{julia}
+measurement_results = rand(1:2, 2);
+@show FactorizedShadow(measurement_results, [tensor1, tensor2]);
+```

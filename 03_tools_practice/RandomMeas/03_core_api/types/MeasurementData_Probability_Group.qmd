@@ -16,7 +16,7 @@ using RandomMeas
 @doc MeasurementData
 ```
 
-  Settings(Could be nothing) and results of measurements for one NU.
+>Settings(Could be nothing) and results of measurements for one NU.
 
 ### fields
 
@@ -53,6 +53,24 @@ MeasurementData(ψ::Union{MPO, MPS}, NM::Int, measurement_setting::Union{LocalUn
 ting, ComputationalBasisMeasurementSetting, ShallowUnitaryMeasurementSetting}; mode::SimulationMode = TensorNetwork(Dense or TensorNetwork))
 
 >Returns a MeasurementData object by sampling NM projective measurements from the quantum state ψ and neasurement_setting.
+
+### I/O
+
+#### Output
+
+```{julia}
+@doc export_MeasurementData
+```
+
+export_MeasurementData(data::MeasurementData{T}, filepath::String)
+
+#### Input
+
+```{julia}
+@doc import_MeasurementData
+```
+
+import_MeasurementData(filepath::String; predefined_setting=nothing, site_indices=nothing)
 
 ## MeasurementProbability
 
@@ -111,7 +129,7 @@ group = MeasurementGroup([data1, data2]);
 MeasurementGroup(measurements::Array{Int,3}, basis_transformation::Array{ComplexF64,4},site_indices::Union{Vector{Index{Int64}}, Nothing}=nothing)
 
 >Construct a MeasurementGroup from raw measurement outcomes and local unitary basis transformations.
->measurements: (Nu, NM, N)
+>measurements: (NU, NM, N)
 >basis_transformation: (NU, N, 2, 2)
 
 ---
@@ -136,3 +154,43 @@ site_indices = siteinds("Qubit",N);
 group1 = MeasurementGroup(ψ, 10, 100);
 group3 = MeasurementGroup(ψ, 10, 100; setting_type=ComputationalBasisMeasurementSetting);
 ```
+
+### I/O
+
+#### Output
+
+```{julia}
+@doc export_MeasurementGroup
+```
+
+export_MeasurementGroup(group::MeasurementGroup{T}, filepath::String)
+
+```{julia}
+siteindices = siteinds("Qubit",4);
+setting = LocalUnitaryMeasurementSetting(4, site_indices=siteindices);
+results = rand(1:2, 10, 4);
+data = MeasurementData(results; measurement_setting=setting);
+group = MeasurementGroup([data, data]);
+export_MeasurementGroup(group, "./03_tools_practice/RandomMeas/03_core_api/types/group.npz")
+```
+
+#### Input
+
+```{julia}
+@doc import_MeasurementGroup
+```
+
+import_MeasurementGroup(filepath::String; predefined_settings=nothing,site_indices=nothing) -> MeasurementGroup
+
+>Import a MeasurementGroup object from an NPZ file.
+>predefined_setting (optional): A predefined MeasurementSetting object. If provided, this will be used instead of the file's setting.
+
+```{julia}
+siteindices = siteinds("Qubit",4);
+setting = LocalUnitaryMeasurementSetting(4, site_indices=siteindices);
+results = rand(1:2, 10, 4);
+data = MeasurementData(results; measurement_setting=setting);
+group = MeasurementGroup([data, data]);
+import_MeasurementGroup("./03_tools_practice/RandomMeas/03_core_api/types/group.npz", site_indices=siteindices)
+```
+

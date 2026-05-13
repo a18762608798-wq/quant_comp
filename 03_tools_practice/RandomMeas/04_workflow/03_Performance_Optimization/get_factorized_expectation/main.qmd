@@ -9,7 +9,9 @@ julia:
 
 # get expect expectation of factorized operators
 
-**对于需要重排希尔伯特空间order的优化还是需要手动排序 to shadows**. 
+**对于需要重排希尔伯特空间order的优化还是需要手动排序 to shadows**.  
+MPO is Matrix naturally, so the union indices(s_1, s_2, ...) to sum must be same.
+其实用更基本的Itensor来做运算，本身不同的空间顺序自然会造成合并成的MPO的linkdims不同。所以其实和一开始就换空间顺序没有区别
 
 ## normal way
 

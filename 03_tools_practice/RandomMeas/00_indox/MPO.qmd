@@ -15,11 +15,64 @@ using RandomMeas
 @doc MPO
 ````
 
+## definition
+
+### basic operators
+
+#### Way 1 (recommended)
+
 ```{julia}
-os = OpSum()
-os += "Sz", 1, "Sz", 2
-os += "Sz", 2, "Sz", 3
-os += "Sz", 3, "Sz", 4
-sites = siteinds("S=1/2", 4)
+sites = siteinds("Qubit", 4)
+os = OpSum() # 不用显式写那些 I
+os += "X", 1, "H", 2
+os += "Proj0", 2, "Sz", 3
+os += "S+", 3, "Sz", 4
 H = MPO(os, sites)
+Rx90  = op("Rx", sites[1]; θ = π/2) 
+H = apply(Rx90, H; cutoff=1e-12)
+```
+
+> the supported operators are as follow.
+"I"       # identity
+"X"       # Pauli X
+"Y"       # Pauli Y
+"iY"      # i * Pauli Y
+"Z"       # Pauli Z
+
+"H"       # Hadamard
+"Phase"   # phase gate, alias: "P", "S"
+"π/8"     # T gate, alias: "T"
+
+"Proj0"   # |0><0|
+"Proj1"   # |1><1|
+
+"Sz"      # S^z = 1/2 σz
+"Sx"      # S^x = 1/2 σx
+"Sy"      # S^y = 1/2 σy
+"iSy"     # i S^y
+"S+"      # raising
+"S-"      # lowering
+"S2"      # S^2
+
+#### Way 2
+
+```{julia}
+sites = siteinds("Qubit",4)
+ops = ["I" for _ in 1:4] 
+ops[1] = "Z" 
+ops[4] = "X" 
+O=MPO(sites,ops)
+```
+
+### multiple qubits gate
+
+```{julia}
+psi = random_mps(sites; linkdims=2)
+gates = [
+    op("H", sites[1]),
+    op("CNOT", sites[1], sites[2]),
+    op("Rx", sites[3]; θ = π/2),
+    op("CZ", sites[2], sites[4]),
+]
+psi = apply(gates, psi; cutoff=1e-12)
 ```

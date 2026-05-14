@@ -66,7 +66,7 @@ s1           s2           s3
 
 ### Operation
 
-#### Matrix Multiplication
+#### MPO Multiplication
 
 * concept
 
@@ -112,4 +112,45 @@ B[1] --(l1, l1')-- B[2] --(l2, l2')-- B[3]
 s1''              s2''                s3''
 ```
 
-有暴露的物理指标说明依然是个Tensor, 如果没有说明是个标量。
+#### MPO Sum
+
+* concept
+
+本质上是直和。但是实际上为了节省空间一般经常先求trace之类的标量最后再相加。
+
+$$
+\rho_1 + \rho_2
+$$
+
+$$
+\begin{aligned}
+&[\rho_1]_{s_1s_2s_3,...}^{s_1's_2's_3',...} = [A_1]_{s_1l_1}^{s_1'}[A_2]_{s_2l_2}^{s_2'l_1}...[A_N]_{s_N}^{s_N'l_{N-1}}\\
+&[\rho_2]_{t_1t_2t_3,...}^{t_1't_2't_3',...} = [B_1]_{t_1o_1}^{t_1'}[B_2]_{t_2o_2}^{t_2'o_1}...[B_N]_{t_N}^{t_N'o_{N-1}}
+\end{aligned}
+$$
+
+Therefore
+
+$$
+\begin{aligned}
+&[\rho_1]_{s_1s_2s_3,...}^{s_1's_2's_3',...} + [\rho_2]_{t_1t_2t_3,...}^{t_1't_2't_3',...}\\
+&=[C_1]^{s_1's_1l_1}_{p_1}[C_2]^{s_2's_2l_1l_2 p_1}_{p_2} ... [C_N]^{s_N's_Nl_{N-1}p_{N-1}}
+\end{aligned}
+$$
+
+where the dim of $p_i$ is 2, and
+
+$$
+\begin{cases}
+[C_1]_{p_1=0} = A_1 \\
+[C_2]_{p_2=1} = B_1\\
+[C_N]_{p_{N-1}=0} = A_N\\
+[C_N]_{p_{N-1}=1} = B_N\\
+\end{cases}
+$$
+
+When $i \neq 1, N-1$ , there are
+
+$$
+[C]_i = \delta_{p_{i-1}0}\delta_{p_i0}A + \delta_{p_{i-1}1}\delta_{p_i1}B + O
+$$

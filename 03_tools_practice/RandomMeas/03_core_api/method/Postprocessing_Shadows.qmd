@@ -24,6 +24,7 @@ get_expect_shadow(O::MPO, shadows::AbstractArray{<:AbstractShadow}; compute_sem:
 statistical error analysis. Default is false.
 
 ```{julia}
+using RandomMeas
 ops = ["I" for _ = 1:2]
 site_indices = siteinds("Qubit", 2);
 O = MPO(ComplexF64, site_indices, ops)

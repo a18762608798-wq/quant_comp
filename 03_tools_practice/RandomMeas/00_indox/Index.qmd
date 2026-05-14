@@ -27,3 +27,11 @@ id: 唯一标识符, to judge whether the index are same.
 """
 (dim=2|id=451|"Qubit,Site,n=1")
 ```
+
+### Definition
+
+```{julia}
+@show i = Index(2, "i");
+@show i'; # distinguish the same index, which is important for multiplication of ITensor.
+@show site_indices = siteinds("Qubit",2); # a special index in RandomMeas.jl, which is defined as [Index(2, "Qubit,Site,n=$i") for i in 1:2]
+```

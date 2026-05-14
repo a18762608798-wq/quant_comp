@@ -22,30 +22,86 @@ ord=2 # the number of order, meaning there are two Index as follow
 Dim 1: (dim=2|id=451|"Qubit,Site,n=1")' # index, Separate rows and columns.
 Dim 2: (dim=2|id=451|"Qubit,Site,n=1")
 NDTensors.Dense{ComplexF64, Vector{ComplexF64}} # sepcifical matrix.
-2×2
- -0.9171435002629851 + 0.2336989174957588im   …  -0.033305846289088226 - 0.3211282243740626im
+2×2 -0.9171435002629851 + 0.2336989174957588im   …  -0.033305846289088226 - 0.3211282243740626im
  -0.10173325172253367 - 0.30640326594315254im       -0.9320905355973363 + 0.16423951279518484im
 ```
 
-## usage
+## Create
+
+
+### const ITensor
+
+```{julia}
+i = Index(2, "i")
+j = Index(3, "j")
+ITensor(undef, i, j)
+ITensor(0, i, j)
+```
+
+### define from AbstractArray
+
+```{julia}
+ITensor(randn(2, 3), i, j)
+```
+
+### special ITensor
+
+```{julia}
+onehot(i=>2, j=>3) # only the element (2, 3) is 1, and the rest are 0
+diag_itensor([1.0, 2.0], i, j) # D[i=>1, j=>1] == 1.0 D[i=>2, j=>2] == 2.0 D[i=>1, j=>2] == 0.0 D[i=>2, j=>1] == 0.0
+delta(i, j) # diag_itensor([1.0, 1.0], i, j)
+```
+### using op char
 
 ```{julia}
 # define a operator
 using RandomMeas # MeasurementSettings
-N = 7 # NOTE: Warning if N ≥ 7
+N = 3
 site_indices = siteinds("Qubit",N);
 O = op("I", site_indices[1]);
-for i = 2:N
-    O *= op("I", site_indices[i]);
-end
 ```
+
+## method
+
+## operation
+
+### math
+
+```{julia}
+using RandomMeas
+N = 3
+site_indices = siteinds("Qubit",N);
+O = Vector{ITensor}(undef, N);
+O[1] = op("I", site_indices[1]);
+O[2] = op("X", site_indices[2]);
+
+# multiplication
+@show O[1] * O[2]
+@show 2O[1]
+@show O[1] .* 2 # only dense ITensor can do elementwise multiplication.
+
+# addition
+@show O[1] + O[1] # same index 
+
+# trace
+@show trO = O[1] * delta(site_indices[1], site_indices[1]') # trace of O[1]
+trO[1]
+```
+
+### format
+
+```{julia}
+inds(O[1]) # check the index of an ITensor
+hasinds(O[1], site_indices[1]) # check whether an ITensor has a specific index.
+commoninds(O[1], O[1] * O[2]) # return the common indices.
+```
+
+## transfor
+
+### MPO
 
 ```{julia}
 # turn to mpo
-O_mpo = MPO(O, site_indices; cutoff=1e-15); # NOTE: if you do not cut the linkdims it will be full.
+O_mpo = MPO(O, site_indices; cutoff=1e-15); # NOTE: if you do not cut the linkdims it will be full, even is the read singular values are zero.
 linkdims(O_mpo)
 ```
-
-## performance
-
-It not useful to constuct local operator production. And the consumption of cut linkdims is big.

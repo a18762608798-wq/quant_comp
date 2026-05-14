@@ -67,12 +67,15 @@ O=MPO(sites,ops)
 ### multiple qubits gate
 
 ```{julia}
+using RandomMeas
+sites = siteinds("Qubit",4)
 psi = random_mps(sites; linkdims=2)
 gates = [
     op("H", sites[1]),
     op("CNOT", sites[1], sites[2]),
     op("Rx", sites[3]; θ = π/2),
-    op("CZ", sites[2], sites[4]),
+    op("CZ", sites[2], sites[1]),
+    op("SWAP", sites[3], sites[4]),
 ]
 psi = apply(gates, psi; cutoff=1e-12)
 ```

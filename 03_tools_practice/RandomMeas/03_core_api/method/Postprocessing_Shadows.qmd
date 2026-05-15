@@ -9,6 +9,10 @@ julia:
 
 # Postprocessing Shadows
 
+## get_factorized_shadows
+
+## get_dense_shadows
+
 ## get_expect_shadow 
 
 ```{julia}

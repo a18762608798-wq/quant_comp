@@ -187,10 +187,6 @@ import_MeasurementGroup(filepath::String; predefined_settings=nothing,site_indic
 
 ```{julia}
 siteindices = siteinds("Qubit",4);
-setting = LocalUnitaryMeasurementSetting(4, site_indices=siteindices);
-results = rand(1:2, 10, 4);
-data = MeasurementData(results; measurement_setting=setting);
-group = MeasurementGroup([data, data]);
 import_MeasurementGroup("./03_tools_practice/RandomMeas/03_core_api/types/group.npz", site_indices=siteindices)
 ```
 

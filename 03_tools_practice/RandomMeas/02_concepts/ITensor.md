@@ -10,16 +10,28 @@ $$
 F(e_{1s_1}\otimes e_{2s_2}...) = F^{s_1's_2'...}_{s_1s_2...}e_{1s_1'}'\otimes e_{2s_2'}'...
 $$
 
+对应 dirac 符号
+
+$$
+|e_{1s_1}\otimes e_{2s_2}...\rangle = \sum_{s_1's_2'...} F^{s_1's_2'...}_{s_1s_2...}|e_{1s_1'}'\otimes e_{2s_2'}'...\rangle
+$$
+
 或者写成
 
 $$
 F = F_{s_1s_2...}^{s_1's_2'...}(e_{1s_1'}'\otimes e_{2s_2'}'...)\otimes(e_1^{s_1}\otimes e_2^{s_2}...)
 $$
 
+对应 dirac 符号
+
+$$
+F = \sum_{s_1's_2'...;s_1,s_2} F_{s_1s_2...}^{s_1's_2'...} |e_{1s_1'}'\otimes e_{2s_2'}'...\rangle\langle e_{1s_1}\otimes e_{2s_2}...|
+$$
+
 但是有两点：
 
 * 这里的空间 bases 不一定非要是同一组。
-* 这里F的指标的排布也不一定非要是这种自然的和空间顺序对应的“槽位”。可以随便更换指标槽位但是对应的数值也需要交换。
+* 这里F的指标的排布也不一定非要是这种自然的输入输出向对应的“槽位"，这只是一个标记，没有特殊属性，只是一般我们会取同一个比特的下标为 $s_i$ 和 $s_i'$
 
 对于量子态，有
 
@@ -34,14 +46,14 @@ $$
 显然上述指标对应每个比特的指标
 
 $$
-s_i', s_i 
+s_i', s_i
 $$
 
 也代表了空间顺序按照比特直积分排列, 默认的正常的槽位也是如此。
 
 #### cases
 
-For instance,
+For instance, 对于坐标视角
 
 $$
 tr(\rho R_I) = \langle \psi|SWAP|\psi\rangle = \psi_{s_1's_2'...}S^{s_1's_2'...}_{s_1s_2....}\psi^{s_1s_2...}
@@ -59,4 +71,10 @@ $$
 expr = \psi_{s_1's_2'...}\psi^{s_{2N}'s_{2N-1}'...}
 $$
 
-注意空间的bases顺序从未改变。一般依然是默认的(1, 2, 3,..., 2N)
+**这里交换算符的张量元素写成连乘事实上和空间顺序无关, prod 张量算符本身就有相同的交换效果。
+
+对于 bases 视角
+
+$$
+\langle \psi |S|\psi\rangle = \langle \psi| S|ab\rangle \langle ab|\psi\rangle = \langle \psi|ba\rangle \langle ab|\psi\rangle = \langle \psi|ab\rangle\langle ba|\psi\rangle
+$$

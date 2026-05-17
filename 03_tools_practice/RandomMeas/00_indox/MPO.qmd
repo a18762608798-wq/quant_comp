@@ -22,6 +22,7 @@ using RandomMeas
 #### Way 1 (recommended)
 
 ```{julia}
+using RandomMeas
 sites = siteinds("Qubit", 4)
 os = OpSum() # 不用显式写那些 I
 os += "X", 1, "H", 2
@@ -61,7 +62,7 @@ sites = siteinds("Qubit",4)
 ops = ["I" for _ in 1:4] 
 ops[1] = "Z" 
 ops[4] = "X" 
-O=MPO(sites,ops)
+O = MPO(sites,ops)
 ```
 
 ### multiple qubits gate
@@ -74,7 +75,7 @@ gates = [
     op("H", sites[1]),
     op("CNOT", sites[1], sites[2]),
     op("Rx", sites[3]; θ = π/2),
-    op("CZ", sites[2], sites[1]),
+    op("CZ", sites[2], sites[0]),
     op("SWAP", sites[3], sites[4]),
 ]
 psi = apply(gates, psi; cutoff=1e-12)

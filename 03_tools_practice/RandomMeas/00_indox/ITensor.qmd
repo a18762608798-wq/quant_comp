@@ -74,6 +74,7 @@ site_indices = siteinds("Qubit",N);
 O = Vector{ITensor}(undef, N);
 O[1] = op("I", site_indices[1]);
 O[2] = op("X", site_indices[2]);
+op("SWAP", sites[3], sites[4]),
 
 # multiplication
 @show O[1] * O[2]

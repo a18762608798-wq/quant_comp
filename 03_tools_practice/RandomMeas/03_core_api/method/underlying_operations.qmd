@@ -1,0 +1,30 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# underlying operation
+
+
+## get_trace
+
+```{julia}
+@doc get_trace
+```
+
+>get_trace(ρ::MPO)
+
+## apply_map
+
+```{julia}
+@doc apply_map
+```
+
+apply_map(map::Vector{ITensor},state::MPO,s::Vector{Index{Int64}},ξ::Vector{Index{Int64}})
+
+>revise the indices of MPO from (s', s) to (ξ', ξ), then merging with the map.
+>I think which is the source code of get_expect_shadow(Vector{AbstractShadow})

@@ -9,11 +9,49 @@ julia:
 
 # Postprocessing Shadows
 
-## get_factorized_shadows
+## shadows production
 
-## get_dense_shadows
+### get_factorized_shadows
 
-## get_expect_shadow 
+```{julia}
+@doc get_factorized_shadows
+```
+
+---
+get_factorized_shadows(measurement_data::MeasurementData{LocalUnitaryMeasurementSetting};G::Vector{Float64} = fill(1.0, measurement_data.N))
+Returns: A Vector{FactorizedShadow} of length NM containing one factorized shadow for each measurement shot.
+
+>G::Vector{Float64} (optional): Vector of G values for measurement error correction (default: 1.0 for all sites).
+>fill() means to create a vector, all the elements are same.
+
+---
+get_factorized_shadows(measurement_group::MeasurementGroup{LocalUnitaryMeasurementSetting};G::Vector{Float64} = fill(1.0, measurement_group.N))
+
+>An Array{FactorizedShadow, 2} of size (NU, NM) containing factorized shadows for each random unitary and measurement shot.
+
+### get_dense_shadows
+
+```{julia}
+@doc get_dense_shadows
+```
+
+get_dense_shadows(measurement_group::MeasurementGroup{LocalUnitaryMeasurementSetting}; G::Vector{Float64} = fill(1.0, measurement_group.N), number_of_ru_batches::Int = measurement_group.NU)
+
+>number_of_ru_batches::Int(optional): Number of random unitary batches to create. Default is measurement_group.NU. Viz., the number of dense shadows to product. Generally we need not to set it.
+
+### convert_to_dense_shadow 
+
+```{julia}
+@doc convert_to_dense_shadow 
+```
+
+---
+convert_to_dense_shadow(factorized_shadow::FactorizedShadow)
+
+
+## the physical quantity based on shadows
+
+### get_expect_shadow 
 
 ```{julia}
 @doc get_expect_shadow
@@ -44,7 +82,7 @@ get_expect_shadow(O::MPO, shadow::AbstractShadow)
 @show get_expect_shadow(O, shadow)
 ```
 
-## get_trace_moment 
+### get_trace_moment 
 
 ```{julia}
 @doc get_trace_moment
@@ -76,3 +114,57 @@ moment = get_trace_moment(ψ, 2, [1, 5])
 get_trace_moment(spec::ITensor, k::Int)
 
 用到再说，spec is a ITensor to storage 纯态 eigenvalue.
+
+### multiply
+
+```{julia}
+using RandomMeas
+@doc multiply
+```
+
+>Multiply two shadow objects of the same concrete type, returning a same type shadow.
+
+multiply(shadow1::AbstractShadow, shadow2::AbstractShadow)
+
+```{julia}
+using RandomMeas
+ops = ["I" for _ = 1:2]
+site_indices = siteinds("Qubit", 2);
+shadowtensor = random_itensor(site_indices[1]', site_indices[2]', site_indices[1], site_indices[2]);
+shadow = DenseShadow(shadowtensor, 2, site_indices);
+multiplied_shadow = multiply(shadow, shadow)
+```
+
+### partial_trace
+
+```{julia}
+@doc partial_trace
+```
+
+---
+partial_trace(shadow::AbstractShadow, subsystem::Vector{Int}; assume_unit_trace::Bool=false)
+partial_trace(shadows::AbstractArray{<:AbstractShadow}, subsystem::Vector{Int}; assume_unit_trace::Bool=false)
+
+>assume_unit_trace::Bool (optional): 是否假设子系统的补集是tr(\rho)=1(default: false) 
+
+### partial_transpose
+
+```{julia}
+@doc partial_transpose
+```
+
+---
+partial_transpose(shadow::AbstractShadow, subsystem::Vector{Int})
+partial_transpose(shadows::AbstractArray{<:AbstractShadow}, subsystem::Vector{Int})
+partial_transpose(ρ::MPO, subsystem::Vector{Int})
+
+### trace
+
+```{julia}
+@doc trace
+```
+
+---
+trace(shadow::AbstractShadow)
+trace(shadows::AbstractArray{<:AbstractShadow})
+

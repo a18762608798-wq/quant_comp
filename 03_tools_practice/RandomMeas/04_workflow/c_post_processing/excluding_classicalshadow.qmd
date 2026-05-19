@@ -1,0 +1,21 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# excluding_classicalshadow
+
+## purity
+
+```{julia}
+using RandomMeas
+# product group
+siteindices = siteinds("Qubit",4);
+measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+# calculate purity
+get_purity(measurement_group)
+```

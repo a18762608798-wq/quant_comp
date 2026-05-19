@@ -1,5 +1,4 @@
 ---
-title: "Gate"
 format: html
 engine: julia
 execute:
@@ -32,6 +31,8 @@ Where
 
 ## aer_simulator
 
+### create
+
 ```{python}
 # creat the circ
 from qiskit import QuantumCircuit
@@ -54,15 +55,35 @@ print("the depth of the transpiled circuit is:", transpiled_circ.depth())
 transpiled_circ.draw()
 ```
 
+### get the results
+
 ```{python}
 # use backend to calculate and statistics.
 from qiskit.visualization import plot_histogram
-job = backend.run(transpiled_circ, shots=1024) 
-result = job.result() 
+job = backend.run(transpiled_circ, shots=1024, memory=True) # save memory to show the real progress.
+result = job.result()
 counts = result.get_counts()
+counts_int = counts.int_outcomes() # but to decimal
+probs = {k: v / counts.shots() for k, v in counts.items()} # probs
+memory = result.get_memory()
 fig = plot_histogram(counts)
 fig.show()
 ```
+
+### parallel
+
+>Aer spport to submit multiple circs
+
+```{python}
+circs = [circ, circ]
+backend = Aer.get_backend('aer_simulator') 
+transpiled_circs = transpile(circs, backend) 
+job = backend.run(transpiled_circs, shots=1024, memory=True) # save memory to show the real progress.
+results = job.result()
+counts = result.get_counts(0) # which is the result of first circ
+
+```
+
 
 ## aer_simulartor_statevector
 

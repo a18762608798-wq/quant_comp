@@ -1,5 +1,4 @@
 ---
-title: "Parameter"
 format: html
 engine: julia
 execute:
@@ -10,3 +9,53 @@ julia:
 
 # Parameter
 
+## single params
+
+```{python}
+from qiskit.circuit import QuantumCircuit, Parameter
+theta = Parameter("θ") # define a param var.
+ 
+param_circ = QuantumCircuit(3)
+param_circ.rx(theta, 0)
+param_circ.cx(0, 1)
+param_circ.x(2)
+ 
+param_circ.draw()
+```
+
+```{python}
+import numpy as np
+circ = param_circ.assign_parameters({theta: np.pi/2}) # assign a value to the parameter
+circ.draw()
+```
+
+## params vector
+
+```{python}
+from qiskit.circuit import QuantumCircuit, ParameterVector
+import numpy as np
+
+theta = ParameterVector("θ", 3)
+
+qc = QuantumCircuit(3)
+
+qc.rx(theta[0], 0)
+qc.ry(theta[1], 1)
+qc.rz(theta[2], 2)
+
+qc.cx(0, 1)
+qc.cx(1, 2)
+
+qc.draw()
+```
+
+```{python}
+values = {
+    theta[0]: np.pi / 2,
+    theta[1]: np.pi / 4,
+    theta[2]: np.pi,
+}
+
+bound_qc = qc.assign_parameters(values)
+bound_qc.draw()
+```

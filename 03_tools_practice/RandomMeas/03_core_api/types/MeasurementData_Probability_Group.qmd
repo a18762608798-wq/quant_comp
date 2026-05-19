@@ -79,7 +79,7 @@ using RandomMeas
 @doc MeasurementProbability
 ```
 
-  A container for measurement probabilities and settings.
+A container for measurement probabilities and settings.
 
 ### fields
 
@@ -184,6 +184,12 @@ import_MeasurementGroup(filepath::String; predefined_settings=nothing,site_indic
 
 >Import a MeasurementGroup object from an NPZ file.
 >predefined_setting (optional): A predefined MeasurementSetting object. If provided, this will be used instead of the file's setting.
+>the tags of arrs must be fixed, for instance:
+    np.savez(
+        "group.npz",
+        measurement_results=measured_res,
+        measurement_settings=local_unitary_settings,
+    )
 
 ```{julia}
 siteindices = siteinds("Qubit",4);

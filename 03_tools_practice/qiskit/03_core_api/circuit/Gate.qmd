@@ -10,6 +10,8 @@ julia:
 
 # Gate
 
+## bases
+
 ```{python}
 from qiskit import QuantumCircuit
 import numpy as np
@@ -19,4 +21,25 @@ circ.x([0]) # x gate
 circ.ry(np.pi/2, 0) # R_x gate, 0 is the position of this gate. 
 circ.measure([0], [0])
 circ.draw()
+```
+
+## extension
+
+### random U
+
+```{python}
+from qiskit import QuantumCircuit
+from qiskit.circuit.library import UnitaryGate
+from qiskit.quantum_info import random_unitary
+
+qc = QuantumCircuit(1)
+
+U = random_unitary(2, seed=123)   # 2 表示单比特 Hilbert space 维度
+print(type(U.data))
+gate = UnitaryGate(U.data, label="U_rand")
+
+qc.append(gate, [0])
+
+qc.draw()
+qc.decompose(reps=1).draw()
 ```

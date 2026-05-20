@@ -41,21 +41,45 @@ siteindices = siteinds("Qubit", N);
 
 ```{julia}
 # get the calibration vector
+using NPZ
 classical_measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/classical_group.npz", site_indices=siteindices);
 calibration_vec = get_calibration_vector(ψ0, classical_measurement_group)
+npzwrite(
+    "./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/calibration.npz",
+    Dict(
+        "calibration" => calibration_vec
+    ),
+)
 ```
 
 ```{julia}
-# produnct shadows
+# calibrated shadows 
+calibration_data = npzread("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/calibration.npz")
+calibration_vec = calibration_data["calibration"]
 measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
 dense_shadows = get_dense_shadows(measurement_group, G=calibration_vec);
 ```
 
+## reduced shadows
+
 ```{julia}
-# test
-@show estimate = get_trace_moment(dense_shadows, 1);
+# calibration 
+using NPZ
+calibration_data = npzread("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/calibration.npz")
+calibration_vec = calibration_data["calibration"]
 ```
 
 ```{julia}
-@show estimate = get_trace_moment(dense_shadows, 2);
+# product shadows of subsystem.
+using RandomMeas
+N = 4
+siteindices = siteinds("Qubit", N);
+measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+subrange = [1, 2];
+subgroup = reduce_to_subsystem(measurement_group, subrange);
+sub_dense_shadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
+```
+
+```{julia}
+get_trace_moment(sub_dense_shadows, 2)
 ```

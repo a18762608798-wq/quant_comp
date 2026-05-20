@@ -1,0 +1,46 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# momentum estimate
+
+* get shadows of subsystem
+
+```{julia}
+# calibration 
+using NPZ
+calibration_data = npzread("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/calibration.npz")
+calibration_vec = calibration_data["calibration"]
+```
+
+```{julia}
+# product shadows of subsystem.
+using RandomMeas
+N = 4
+siteindices = siteinds("Qubit", N);
+measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+subrange = [1, 2];
+subgroup = reduce_to_subsystem(measurement_group, subrange);
+sub_dense_shadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
+```
+
+## get estimate of op
+
+```{julia}
+using RandomMeas
+sites = siteinds("Qubit", 10)
+os = OpSum() 
+os += "I", 1
+my_op = MPO(os, sites)
+gates = [
+    op("SWAP", sites[1], sites[10]),
+    op("SWAP", sites[2], sites[9]),
+]
+H = apply(gates, my_op; cutoff=1e-4)
+linkdims(H)
+```

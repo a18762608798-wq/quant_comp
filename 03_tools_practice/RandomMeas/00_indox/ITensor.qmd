@@ -32,6 +32,7 @@ NDTensors.Dense{ComplexF64, Vector{ComplexF64}} # sepcifical matrix.
 ### const ITensor
 
 ```{julia}
+using RandomMeas
 i = Index(2, "i")
 j = Index(3, "j")
 ITensor(undef, i, j)
@@ -51,6 +52,7 @@ onehot(i=>2, j=>3) # only the element (2, 3) is 1, and the rest are 0
 diag_itensor([1.0, 2.0], i, j) # D[i=>1, j=>1] == 1.0 D[i=>2, j=>2] == 2.0 D[i=>1, j=>2] == 0.0 D[i=>2, j=>1] == 0.0
 delta(i, j) # diag_itensor([1.0, 1.0], i, j)
 ```
+
 ### using op char
 
 ```{julia}
@@ -74,11 +76,11 @@ site_indices = siteinds("Qubit",N);
 O = Vector{ITensor}(undef, N);
 O[1] = op("I", site_indices[1]);
 O[2] = op("X", site_indices[2]);
-op("SWAP", sites[3], sites[4]),
+op("SWAP", sites[3], sites[4]);
 
 # multiplication
 @show O[1] * O[2]
-@show 2O[1]
+@show O[1]
 @show O[1] .* 2 # only dense ITensor can do elementwise multiplication.
 
 # addition

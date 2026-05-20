@@ -1,0 +1,49 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# exculding momentum
+
+* get shadows of subsystem
+
+```{julia}
+# calibration 
+using NPZ
+calibration_data = npzread("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/calibration.npz")
+calibration_vec = calibration_data["calibration"]
+```
+
+```{julia}
+# product shadows of subsystem.
+using RandomMeas
+N = 4
+siteindices = siteinds("Qubit", N);
+measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+subrange = [1, 2];
+subgroup = reduce_to_subsystem(measurement_group, subrange);
+sub_dense_shadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
+```
+
+## trace
+
+```{julia}
+# tr(ρ)
+#@show estimate, bias, sem = get_trace_moment(dense_shadows, 1, compute_sem = true); # Cross-validation, but it consumes a lot of memory.
+@show estimate = get_trace_moment(sub_dense_shadows, 1);
+```
+
+```{julia}
+# tr(ρ^2)
+#@show estimate, bias, sem = get_trace_moment(dense_shadows, 2, compute_sem = true);
+@show estimate = get_trace_moment(sub_dense_shadows, 2);
+```
+
+```{julia}
+# multiply
+multiply(sub_dense_shadows[1], sub_dense_shadows[1]);
+```

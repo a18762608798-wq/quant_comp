@@ -19,7 +19,7 @@ using RandomMeas
 
 ### basic operators
 
-#### Way 1 (recommended)
+#### Way 1
 
 ```{julia}
 using RandomMeas
@@ -30,7 +30,7 @@ os += "Proj0", 2, "Sz", 3
 os += "S+", 3, "Sz", 4
 H = MPO(os, sites)
 Rx90  = op("Rx", sites[1]; θ = π/2) 
-H = apply(Rx90, H; cutoff=1e-12)
+H = apply(Rx90, H; cutoff=1e-12) # NOTE: apply只在和子区域缩进的link维度压缩，但是区域内部指标不管, ref to way2。
 ```
 
 > the supported operators are as follow.
@@ -55,7 +55,21 @@ H = apply(Rx90, H; cutoff=1e-12)
 "S-"      # lowering
 "S2"      # S^2
 
-#### Way 2
+#### way2
+
+```{julia}
+using RandomMeas
+sites = siteinds("Qubit", 10)
+identity_op = MPO(sites, "Id") # NOTE: Which is useful, let the linkdims = 1.
+gates = [
+    op("SWAP", sites[1], sites[10]),
+    op("SWAP", sites[2], sites[9]),
+]
+H = apply(gates, identity_op; cutoff=1e-4)
+linkdims(H)
+```
+
+#### Way 3
 
 ```{julia}
 sites = siteinds("Qubit",4)
@@ -64,19 +78,4 @@ ops[1] = "Z"
 ops[4] = "X" 
 O = MPO(sites,ops)
 ```
-
-### multiple qubits gate
-
-```{julia}
-using RandomMeas
-sites = siteinds("Qubit",4)
-psi = random_mps(sites; linkdims=2)
-gates = [
-    op("H", sites[1]),
-    op("CNOT", sites[1], sites[2]),
-    op("Rx", sites[3]; θ = π/2),
-    op("CZ", sites[2], sites[0]),
-    op("SWAP", sites[3], sites[4]),
-]
-psi = apply(gates, psi; cutoff=1e-12)
 ```

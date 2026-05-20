@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 from qiskit_aer import Aer
 from qiskit import transpile
+from tqdm.auto import tqdm
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
@@ -12,22 +13,29 @@ from a_pre_processing.create_circs import creat_measured_circs
 
 def measure_circs(circs, backend="aer_simulator", shots=2**9):
     settings_num = len(circs)
-    qubits_num = circs[0].num_clbits
+    qubits_num = circs[0].num_qubits
     measured_res = np.empty((settings_num, shots, qubits_num), dtype=np.uint8)
     if backend == "aer_simulator":
         backend = Aer.get_backend(backend)
-        transpiled_circs = transpile(circs, backend)
-        job = backend.run(transpiled_circs, shots=shots, memory=True)
-        results = job.result()
-        for setting_index in range(settings_num):
-            measured_re = np.empty((shots, qubits_num), dtype=np.uint8)
-            memory = results.get_memory(setting_index)
-            # transform the bitstr to bitarr
-            for shot in range(shots):
-                bitstr = memory[shot]
-                bitarr = np.array([int(b) for b in bitstr], dtype=np.uint8)
-                measured_re[shot, :] = bitarr
-            measured_res[setting_index, :, :] = measured_re
+        # Process in batches to show progress.
+        batch_num = min(10, settings_num)
+        batch_size = np.int32(np.ceil(settings_num / batch_num))
+        for batch_index in tqdm(range(0, batch_num), desc="Aer batches process"):
+            start = batch_size * batch_index
+            end = min(start + batch_size, settings_num)
+            batch_circs = circs[start:end]
+            transpiled_batch_circs = transpile(batch_circs, backend)
+            job = backend.run(transpiled_batch_circs, shots=shots, memory=True)
+            results = job.result()
+            for local_index, setting_index in enumerate(range(start, end)):
+                measured_re = np.empty((shots, qubits_num), dtype=np.uint8)
+                memory = results.get_memory(local_index)
+                # transform the bitstr to bitarr
+                for shot in range(shots):
+                    bitstr = memory[shot]
+                    bitarr = np.array([int(b) for b in bitstr], dtype=np.uint8)
+                    measured_re[shot, :] = bitarr
+                measured_res[setting_index, :, :] = measured_re
         measured_res = measured_res[:, :, ::-1]
     return measured_res
 

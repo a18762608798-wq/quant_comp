@@ -94,15 +94,16 @@ from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.synthesis import SuzukiTrotter
 
 H_initial = SparsePauliOp.from_list([
-    ("XIII", -1.0),
-    ("IXII", -1.0),
-    ("IIXI", -1.0),
-    ("IIIX", -1.0),
+    ("IXXI", 1.0), 
+    ("IZZI", 1.0),
 ])
 
-H_problem = SparsePauliOp.from_list(
-    [("IIZZ", 1), ("IZIZ", 1), ("IZZI", 1), ("ZIIZ", 1), ("ZZII", 1)]
-)
+H_problem = SparsePauliOp.from_list([
+    ("XXII", 1.0),
+    ("ZZII", 1.0),
+    ("IIXX", 1.0),
+    ("IIZZ", 1.0),
+])
 
 n = H_problem.num_qubits
 steps = 2
@@ -111,8 +112,11 @@ dt = total_time / steps
 
 qc = QuantumCircuit(n)
 
-# 制备 |++++>
-qc.h(range(n))
+# 制备initial state.
+qc.x(1)
+qc.h(2)
+qc.cx(2, 1)
+qc.z(2)
 
 for k in range(steps):
     s = (k + 0.5) / steps

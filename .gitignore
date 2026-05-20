@@ -1,4 +1,5 @@
 .obsidian/
 .CondaPkg/
 *.tmp
+*.npz
 undergraduate_courses/

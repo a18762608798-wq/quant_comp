@@ -1,6 +1,7 @@
 [deps]
 qiskit-aer = ""
 qiskit-ibm-runtime = ""
+tqdm = ""
 pylatexenc = ""
 matplotlib = ""
 seaborn = ""

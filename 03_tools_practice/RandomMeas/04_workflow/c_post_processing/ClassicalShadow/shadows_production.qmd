@@ -1,0 +1,61 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# product shadows
+
+## basic production
+
+### dense shadows
+
+```{julia}
+using RandomMeas
+siteindices = siteinds("Qubit", 4);
+measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+dense_shadows = get_dense_shadows(measurement_group);
+```
+
+### factorized shadows
+
+```{julia}
+using RandomMeas
+siteindices = siteinds("Qubit", 4);
+measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+factorized_shadows = get_factorized_shadows(measurement_group);
+```
+
+## error correction
+
+```{julia}
+# Prepare classical state
+using RandomMeas
+N = 4
+siteindices = siteinds("Qubit", N);
+ψ0 = MPS(siteindices, fill("1", N))
+```
+
+```{julia}
+# get the calibration vector
+classical_measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/classical_group.npz", site_indices=siteindices);
+calibration_vec = get_calibration_vector(ψ0, classical_measurement_group)
+```
+
+```{julia}
+# produnct shadows
+measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+dense_shadows = get_dense_shadows(measurement_group, G=calibration_vec);
+```
+
+```{julia}
+# test
+@show estimate = get_trace_moment(dense_shadows, 1);
+```
+
+```{julia}
+@show estimate = get_trace_moment(dense_shadows, 2);
+```

@@ -8,7 +8,8 @@ from tqdm.auto import tqdm
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from a_pre_processing.create_circs import creat_measured_circs
+from a_pre_processing.create_circs import create_measured_circs
+from a_pre_processing.create_circs import create_pre_measured_circ
 
 
 def measure_circs(circs, backend="aer_simulator", shots=2**9):
@@ -41,10 +42,16 @@ def measure_circs(circs, backend="aer_simulator", shots=2**9):
 
 
 if __name__ == "__main__":
-    circs, local_unitary_settings = creat_measured_circs(2**10)
-    measured_res = measure_circs(circs)
+    # get measured_res
+    settings_num = 2**7
+    shots = 2**7
+    circs, local_unitary_settings = create_measured_circs(
+        create_pre_measured_circ,
+        settings_num,
+    )
+    measured_res = measure_circs(circs, shots=shots)
     print(np.shape(measured_res), np.shape(local_unitary_settings))
-    # NOTE: the demand of RandomMeas.jl, the tags of arrs are fixed.
+    # NOTE: The demand of RandomMeas.jl, the tags of arrs are fixed.
     np.savez(
         "./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz",
         measurement_results=measured_res,

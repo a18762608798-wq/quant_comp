@@ -48,6 +48,16 @@ get_dense_shadows(measurement_group::MeasurementGroup{LocalUnitaryMeasurementSet
 ---
 convert_to_dense_shadow(factorized_shadow::FactorizedShadow)
 
+### error correction
+
+```{julia}
+using RandomMeas
+@doc get_calibration_vector
+```
+
+get_calibration_vector(ψ0::MPS, measurement_group::MeasurementGroup)
+
+>Return a calibration vector G for evaluating process shadows based on the calibration initial state ψ0=0000 Reference Vitale et al, PRXQ 2025.
 
 ## the physical quantity based on shadows
 
@@ -92,7 +102,7 @@ get_expect_shadow(O::MPO, shadow::AbstractShadow)
 get_trace_moment(shadows::Array{<:AbstractShadow, 2 or 1}, kth_moment::Int; O::Union{Nothing, MPO}=nothing, compute_sem::Bool = false, compute_renyi::Bool = false)
 
 >compute_renyi::Bool (optional): If true, returns the Rényi-k entropy Sk = (1/(1-k)) * log₂(pk) instead of the raw trace moment (default:false).
->bias(Returns): The bias correction from jackknife resampling
+>bias(Returns): The bias correction from jackknife resampling(每次删掉一部分数据，重新算估计值，看估计值对删数据有多敏感)
 >sem(Returns): The standard error of the mean.
 
 ```{julia}

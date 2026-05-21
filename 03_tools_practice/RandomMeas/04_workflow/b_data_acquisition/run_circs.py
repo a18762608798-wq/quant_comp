@@ -43,8 +43,8 @@ def measure_circs(circs, backend="aer_simulator", shots=2**9):
 
 if __name__ == "__main__":
     # get measured_res
-    settings_num = 2**7
-    shots = 2**7
+    settings_num = 2**9
+    shots = 2**9
     circs, local_unitary_settings = create_measured_circs(
         create_pre_measured_circ,
         settings_num,

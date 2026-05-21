@@ -24,23 +24,21 @@ using RandomMeas
 N = 4
 siteindices = siteinds("Qubit", N);
 measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
-subrange = [1, 2];
+subrange = [1, 2, 3, 4];
 subgroup = reduce_to_subsystem(measurement_group, subrange);
-sub_dense_shadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
+subshadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
 ```
 
 ## get estimate of op
 
+### reflect op
+
 ```{julia}
-using RandomMeas
-sites = siteinds("Qubit", 10)
-os = OpSum() 
-os += "I", 1
-my_op = MPO(os, sites)
-gates = [
-    op("SWAP", sites[1], sites[10]),
-    op("SWAP", sites[2], sites[9]),
-]
-H = apply(gates, my_op; cutoff=1e-4)
-linkdims(H)
+# permute the order of op and calculate op 
+include("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/ops_estimate/aux_fun.jl")
+include("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/ops_estimate/create_ops.jl")
+permuted_order = [1, 4, 2, 3]
+permuted_siteindices = permute_siteindices(siteindices, permuted_order)
+adjacent_swap_op = create_adjacent_swap_op(permuted_siteindices);
+@show estimate_val = get_expect_shadow(adjacent_swap_op, subshadows);
 ```

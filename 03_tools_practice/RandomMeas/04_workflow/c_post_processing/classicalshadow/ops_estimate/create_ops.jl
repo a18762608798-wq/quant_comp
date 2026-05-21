@@ -1,7 +1,8 @@
 using RandomMeas
 
 # reflect op 
-function create_reflect_op(bitsnum::Int64, siteindices::Vector{Index{Int64}})
+function create_reflect_op(siteindices::Vector{Index{Int64}})
+    bitsnum = length(siteindices)
     @assert iseven(bitsnum) "bitsnum must be even" # constrain
     pairsnum = bitsnum ÷ 2
     identity_op = MPO(siteindices, "Id")
@@ -13,7 +14,8 @@ function create_reflect_op(bitsnum::Int64, siteindices::Vector{Index{Int64}})
 end
 
 # adjacent swap 
-function create_adjacent_swap_op(bitsnum::Int64, siteindices::Vector{Index{Int64}})
+function create_adjacent_swap_op(siteindices::Vector{Index{Int64}})
+    bitsnum = length(siteindices)
     @assert iseven(bitsnum) "bitsnum must be even" # constrain
     pairsnum = bitsnum ÷ 2
     identity_op = MPO(siteindices, "Id")
@@ -30,9 +32,9 @@ if abspath(PROGRAM_FILE) == @__FILE__
     N = 8
     site_indices = siteinds("Qubit", N)
     # reflect op
-    reflect_op = create_reflect_op(N, site_indices)
+    reflect_op = create_reflect_op(site_indices)
     @show linkdims(reflect_op)
     # swap op but adjacent
-    adjacent_swap_op = create_adjacent_swap_op(N, site_indices)
+    adjacent_swap_op = create_adjacent_swap_op(site_indices)
     @show linkdims(adjacent_swap_op)
 end

@@ -14,7 +14,7 @@ julia:
 ```{julia}
 # product shadows.
 using RandomMeas
-N = 4
+N = 16
 siteindices = siteinds("Qubit", N);
 group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
 shadows = get_factorized_shadows(group);

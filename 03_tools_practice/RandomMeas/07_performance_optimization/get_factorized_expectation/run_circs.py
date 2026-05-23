@@ -1,15 +1,11 @@
-import sys
-from pathlib import Path
-
 import numpy as np
 from qiskit_aer import Aer
 from qiskit import transpile
 from tqdm.auto import tqdm
+from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parents[1]))
-
-from a_pre_processing.create_circs import create_measured_circs
-from a_pre_processing.create_circs import create_pre_measured_circ
+from create_circs import create_measured_circs
+from create_circs import create_pre_measured_circ
 
 
 def measure_circs(circs, backend="aer_simulator", shots=2**9):
@@ -41,11 +37,10 @@ def measure_circs(circs, backend="aer_simulator", shots=2**9):
     return measured_res
 
 
-def savez_reflect_data(N, settings_num, shots):
+def savez_reflect_data(settings_num, shots):
     circs, local_unitary_settings = create_measured_circs(
         create_pre_measured_circ,
         settings_num,
-        N,
     )
     measured_res = measure_circs(circs, shots=shots)
     print(np.shape(measured_res), np.shape(local_unitary_settings))
@@ -61,7 +56,6 @@ def savez_reflect_data(N, settings_num, shots):
 
 if __name__ == "__main__":
     # get measured_res
-    N = 4
     settings_num = 2**9
     shots = 2**9
-    savez_reflect_data(N, settings_num, shots)
+    savez_reflect_data(settings_num, shots)

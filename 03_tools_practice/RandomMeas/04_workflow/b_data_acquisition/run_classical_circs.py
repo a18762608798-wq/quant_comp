@@ -9,18 +9,28 @@ from a_pre_processing.create_circs import create_measured_circs
 from a_pre_processing.create_circs import create_classical_circ
 from run_circs import measure_circs
 
-if __name__ == "__main__":
-    # get classical measured_res
-    classical_settings_num = 2**10
-    shots = 2**9
-    clcircs, classical_local_unitary_settings = create_measured_circs(
-        create_classical_circ,
-        classical_settings_num,
+
+def savez_reflect_data(N, settings_num, shots):
+    circs, local_unitary_settings = create_measured_circs(
+        create_pre_measured_circ,
+        settings_num,
+        N,
     )
-    classical_measured_res = measure_circs(clcircs, shots=shots)
-    print(np.shape(classical_measured_res), np.shape(classical_local_unitary_settings))
+    measured_res = measure_circs(circs, shots=shots)
+    print(np.shape(measured_res), np.shape(local_unitary_settings))
+    # NOTE: The demand of RandomMeas.jl, the tags of arrs are fixed.
+    HERE = Path(__file__).resolve().parent
+    out_path = HERE / "group.npz"
     np.savez(
-        "./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/classical_group.npz",
+        out_path,
         measurement_results=classical_measured_res,
         measurement_settings=classical_local_unitary_settings,
     )
+
+
+if __name__ == "__main__":
+    # get measured_res
+    N = 4
+    settings_num = 2**9
+    shots = 2**9
+    savez_reflect_data(N, settings_num, shots)

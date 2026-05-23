@@ -41,11 +41,10 @@ def measure_circs(circs, backend="aer_simulator", shots=2**9):
     return measured_res
 
 
-def savez_reflect_data(N, settings_num, shots):
+def savez_reflect_data(settings_num, shots):
     circs, local_unitary_settings = create_measured_circs(
         create_pre_measured_circ,
         settings_num,
-        N,
     )
     measured_res = measure_circs(circs, shots=shots)
     print(np.shape(measured_res), np.shape(local_unitary_settings))
@@ -64,4 +63,4 @@ if __name__ == "__main__":
     N = 4
     settings_num = 2**9
     shots = 2**9
-    savez_reflect_data(N, settings_num, shots)
+    savez_reflect_data(settings_num, shots)

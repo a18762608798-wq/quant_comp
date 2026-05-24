@@ -22,12 +22,12 @@ def run_diff_settings(N, settings_num_ls, shots_ls):
 
 if __name__ == "__main__":
     # run diff size
-    N_ls = range(4, 21)
-    settings_num = 2**10
-    shots = 2**10
+    N_ls = [2 * i for i in range(2, 10)]
+    settings_num = 2**7
+    shots = 2**7
     run_diff_size(N_ls, settings_num, shots)
     # run diff settings
-    N = 12
-    settings_num_ls = [2**i for i in range(8, 15)]
-    shots_ls = [2**i for i in range(8, 14)]
+    N = 8
+    settings_num_ls = [2**i for i in range(6, 11)]
+    shots_ls = [2**i for i in range(6, 11)]
     run_diff_settings(N, settings_num_ls, shots_ls)

@@ -15,7 +15,7 @@ def measure_circs(circs, backend="aer_simulator", shots=2**9):
     if backend == "aer_simulator":
         backend = Aer.get_backend(backend)
         # Process in batches to show progress.
-        batch_num = min(10, settings_num)
+        batch_num = 1  # set 1 to prevent interference with Qiskit parallelization
         batch_size = np.int32(np.ceil(settings_num / batch_num))
         for batch_index in tqdm(range(0, batch_num), desc="Aer batches process"):
             start = batch_size * batch_index

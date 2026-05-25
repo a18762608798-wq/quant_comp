@@ -72,7 +72,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
         ),
     )
     # compare diff settings
-    N = 8
+    N = 4
     settings_num_ls = [2^i for i = 6:10]
     shots_ls = [2^i for i = 6:10]
     expect_val_matrix, sem_matrix = compare_diff_settings(N, settings_num_ls, shots_ls)

@@ -27,7 +27,7 @@ if __name__ == "__main__":
     shots = 2**7
     run_diff_size(N_ls, settings_num, shots)
     # run diff settings
-    N = 8
+    N = 4
     settings_num_ls = [2**i for i in range(6, 11)]
     shots_ls = [2**i for i in range(6, 11)]
     run_diff_settings(N, settings_num_ls, shots_ls)

@@ -18,13 +18,13 @@ def plot_sems_of_diff_size():
     df1 = pd.DataFrame(
         {
             "N": N_ls,
-            "expect": expect_val_vec,
+            "expect": np.real(expect_val_vec),
         }
     )
     df2 = pd.DataFrame(
         {
             "N": N_ls,
-            "sem": sem_vec,
+            r"$\log_2{sem}$": np.log2(sem_vec),
         }
     )
     # figure
@@ -33,7 +33,7 @@ def plot_sems_of_diff_size():
     ax[0] = fig.add_subplot(1, 2, 1)
     ax[1] = fig.add_subplot(1, 2, 2)
     sns.lineplot(data=df1, x="N", y="expect", ax=ax[0])
-    sns.lineplot(data=df2, x="N", y="sem", ax=ax[1])
+    sns.lineplot(data=df2, x="N", y=r"$\log_2{sem}$", ax=ax[1])
     # titles
     ax[0].set_title("expect")
     ax[1].set_title("sem")
@@ -58,20 +58,20 @@ def plot_sems_of_diff_settings():
     ax[0] = fig.add_subplot(1, 2, 1)
     ax[1] = fig.add_subplot(1, 2, 2)
     sns.heatmap(np.abs(np.real(expect_val_matrix) - 1), cmap="coolwarm", ax=ax[0])
-    sns.heatmap(np.sqrt(np.real(sem_matrix)), cmap="coolwarm", ax=ax[1])
+    sns.heatmap(np.log2(np.real(sem_matrix)), cmap="coolwarm", ax=ax[1])
     # titles
-    ax[0].set_title(r"|expect - 1|")
-    ax[1].set_title(r"$\sqrt{sem}$")
+    ax[0].set_title("the relationship between |expect - 1| and (NU, NM)")
+    ax[1].set_title(r"the relationship between $\log_2^{sem}$ and (NU, NM)")
     # labels
-    ax[0].set_xlabel("NU")
-    ax[1].set_xlabel("NU")
-    ax[0].set_ylabel("NM")
-    ax[1].set_ylabel("NM")
+    ax[0].set_ylabel("NU")
+    ax[1].set_ylabel("NU")
+    ax[0].set_xlabel("NM")
+    ax[1].set_xlabel("NM")
     # ticks
-    ax[0].set_xticklabels([str(i) for i in settings_num_ls])
-    ax[1].set_xticklabels([str(i) for i in settings_num_ls])
-    ax[0].set_yticklabels([str(i) for i in shots_ls])
-    ax[1].set_yticklabels([str(i) for i in shots_ls])
+    ax[0].set_yticklabels([str(i) for i in settings_num_ls])
+    ax[1].set_yticklabels([str(i) for i in settings_num_ls])
+    ax[0].set_xticklabels([str(i) for i in shots_ls])
+    ax[1].set_xticklabels([str(i) for i in shots_ls])
     # output
     output_path = HERE / "sems_of_diff_settings.jpg"
     plt.savefig(output_path)

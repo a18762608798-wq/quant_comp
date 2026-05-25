@@ -2,4 +2,5 @@
 .CondaPkg/
 *.tmp
 *.npz
+*.ipynb
 undergraduate_courses/

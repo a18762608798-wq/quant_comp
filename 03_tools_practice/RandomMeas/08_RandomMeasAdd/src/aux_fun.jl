@@ -1,6 +1,4 @@
-using RandomMeas
-using NPZ
-
+# This method has the function to reduce.
 function import_permuted_group(filepath::String, site_indices, permuted_order)
     permuted_indices = site_indices[permuted_order]
     group_data = npzread(filepath)
@@ -10,12 +8,4 @@ function import_permuted_group(filepath::String, site_indices, permuted_order)
     permuted_settings = settings[:, permuted_order, :, :]
     permuted_group = MeasurementGroup(permuted_meas_res, permuted_settings, permuted_indices)
     return permuted_group, permuted_indices
-end
-
-if abspath(PROGRAM_FILE) == @__FILE__
-    N = 4
-    siteindices = siteinds("Qubit", N);
-    permuted_order = [x for pair = 1:N÷2 for x in (pair, N - pair + 1)];
-    group_path = joinpath(@__DIR__, "../../../b_data_acquisition/group.npz")
-    permuted_group, permuted_indices = import_permuted_group(group_path, siteindices, permuted_order)
 end

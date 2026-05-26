@@ -5,9 +5,9 @@ from qiskit.quantum_info import random_unitary
 
 
 def create_pre_measured_circ():
-    circ = QuantumCircuit(4, 4)
+    circ = QuantumCircuit(6, 6)
     circ.x([0])
-    circ.x([3])
+    circ.x([5])
     return circ
 
 

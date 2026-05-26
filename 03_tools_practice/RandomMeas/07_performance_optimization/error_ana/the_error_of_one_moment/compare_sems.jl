@@ -1,8 +1,7 @@
-include("./create_ops.jl")
-include("./aux_fun.jl")
-include("./corrected_fun.jl")
-
-using Base.Threads
+using ProgressMeter
+using RandomMeas
+include("../../../08_RandomMeasAdd/src/RandomMeasAdd.jl")
+using .RandomMeasAdd
 
 # calculate sems
 function calculate_sems(group_name, N)
@@ -13,7 +12,7 @@ function calculate_sems(group_name, N)
     permuted_shadows = get_factorized_shadows(permuted_group);
     # calculate op 
     adjacent_swap_op = create_adjacent_swap_op(permuted_indices);
-    expect_val, sem = corrected_get_expect_shadow(adjacent_swap_op, permuted_shadows; compute_sem=true);
+    expect_val, sem = modified_get_expect_shadow(adjacent_swap_op, permuted_shadows; compute_sem=true, show_progress=false);
     return expect_val, sem
 end
 
@@ -23,10 +22,9 @@ function compare_diff_size(N_ls)
     N_num = length(N_ls)
     expect_val_vec = Vector{ComplexF64}(undef, N_num) 
     sem_vec = Vector{ComplexF64}(undef, N_num)
-    @threads for N_index = 1:N_num
+    @showprogress desc="Compare diff size..." for N_index = 1:N_num
         N = N_ls[N_index]
         N_str = string(N)
-        println("N = $N_str")
         group_name = "./data/group_diff_size(N = $N_str).npz"
         expect_val, sem = calculate_sems(group_name, N)
         expect_val_vec[N_index] = expect_val
@@ -42,10 +40,9 @@ function compare_diff_settings(N, settings_num_ls, shots_ls)
     shots_ls_length = length(shots_ls)
     expect_val_matrix = Matrix{ComplexF64}(undef, settings_ls_length, shots_ls_length) 
     sem_matrix = Matrix{ComplexF64}(undef, settings_ls_length, shots_ls_length)
-    @threads for settings_index = 1:settings_ls_length
+    @showprogress desc="Compare diff settings..." for settings_index = 1:settings_ls_length
         settings_num = settings_num_ls[settings_index]
         settings_num_str = string(settings_num)
-        println("settings_num = $(settings_num_str)")
         for shots_index = 1:shots_ls_length
             shots = shots_ls[shots_index]
             shots_str = string(shots)

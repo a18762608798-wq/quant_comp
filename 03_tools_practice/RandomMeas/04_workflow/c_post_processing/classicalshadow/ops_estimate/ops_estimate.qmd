@@ -14,10 +14,12 @@ julia:
 ```{julia}
 # product shadows.
 using RandomMeas
+include("./03_tools_practice/RandomMeas/08_RandomMeasAdd/src/RandomMeasAdd.jl")
+using .RandomMeasAdd
 N = 4
 siteindices = siteinds("Qubit", N);
 group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
-shadows = get_factorized_shadows(group);
+# shadows = get_factorized_shadows(group);
 ```
 
 ## get estimate of op
@@ -26,16 +28,15 @@ shadows = get_factorized_shadows(group);
 
 ```{julia}
 # permute the order of group and create permuted_shadows
-include("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/ops_estimate/aux_fun.jl")
 permuted_order = [x for pair = 1:N÷2 for x in (pair, N - pair + 1)];
+# NOTE: This method has the function to reduce.
 permuted_group, permuted_indices = import_permuted_group("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", siteindices, permuted_order);
 permuted_shadows = get_factorized_shadows(permuted_group);
 ```
 
 ```{julia}
 # calculate op 
-include("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/ops_estimate/create_ops.jl")
 adjacent_swap_op = create_adjacent_swap_op(permuted_indices);
 @show linkdims(adjacent_swap_op)
-@time get_expect_shadow(adjacent_swap_op, permuted_shadows)
+@time modified_get_expect_shadow(adjacent_swap_op, permuted_shadows)
 ```

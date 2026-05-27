@@ -16,7 +16,7 @@ also
 $$
 U^\dagger \exp(I \otimes A) U = \exp [U^\dagger (I \otimes A) U],
 $$
-^\dagger
+
 so we only shout to proof 
 
 $$
@@ -35,7 +35,7 @@ $$
 Therefore
 
 $$
-CX(I \otimes Z)CX^\dagger |ab\rangle = CX(I\otimes Z) |a(a\otimes b)\rangle = (-1)^{a\oplus b} |a(a\oplus (a\oplus b))\rangle = (-1)^{a+b} |ab\rangle = ZZ|ab\rangle
+CX(I \otimes Z)CX^\dagger |ab\rangle = CX(I\otimes Z) |a(a\oplus b)\rangle = (-1)^{a\oplus b} |a(a\oplus (a\oplus b))\rangle = (-1)^{a+b} |ab\rangle = ZZ|ab\rangle
 $$
 
 QED.

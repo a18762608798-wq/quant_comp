@@ -28,7 +28,6 @@ NDTensors.Dense{ComplexF64, Vector{ComplexF64}} # sepcifical matrix.
 
 ## Create
 
-
 ### const ITensor
 
 ```{julia}
@@ -76,6 +75,7 @@ site_indices = siteinds("Qubit",N);
 O = Vector{ITensor}(undef, N);
 O[1] = op("I", site_indices[1]);
 O[2] = op("X", site_indices[2]);
+O[3] = op("Y", site_indices[3]);
 op("SWAP", sites[3], sites[4]);
 
 # multiplication
@@ -104,7 +104,23 @@ commoninds(O[1], O[1] * O[2]) # return the common indices.
 ### MPO
 
 ```{julia}
-# turn to mpo
-O_mpo = MPO(O, site_indices; cutoff=1e-15); # NOTE: if you do not cut the linkdims it will be full, even is the read singular values are zero.
-linkdims(O_mpo)
+# vec to mpo
+using RandomMeas
+N = 3
+site_indices = siteinds("Qubit",N);
+O = Vector{ITensor}(undef, N);
+O[1] = op("I", site_indices[1]);
+O[2] = op("X", site_indices[2]);
+O[3] = op("Y", site_indices[3]);
+# Transform Vector{ITensor} to MPO
+O_mpo = MPO(O); 
+```
+
+```{julia}
+# Itensor to mpo
+O[1] = op("I", site_indices[1]);
+O[2] = op("I", site_indices[2]);
+O_mpo1 = MPO(O[1] * O[2], site_indices[1:2]); # must more than two sites
+# mpo to itensor
+O = contract(O_mpo1)
 ```

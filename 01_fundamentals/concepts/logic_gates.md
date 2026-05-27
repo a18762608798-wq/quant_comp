@@ -1,8 +1,6 @@
 # logic gates
 
-## thoery 
-
-### single qubit
+## single qubit
 
 ### X
 
@@ -42,6 +40,7 @@ $$
 S = \sqrt Z
 $$
 
+In qiskit we office tag it $Sdg$ .
 ### $R_n(\sigma)$
 
 Definiton
@@ -72,11 +71,11 @@ H = U_3(\frac{\pi}{2}, 0, \pi)
 \end{cases}
 $$
 
-### double qubits
+## mutiple qubits
 
-#### SWAP
+### SWAP
 
-##### Definition
+#### Definition
 
 $$
 SWAP |mn\rangle = |nm\rangle
@@ -105,7 +104,7 @@ therefore
 $$
 SWAP = \sum_i R_{1i} \otimes R_{2i}
 $$
-##### Expansion
+#### Expansion
 
 For n qubit, for instance
 
@@ -146,7 +145,9 @@ $$
 \langle i_1 j_1|SWAP F SWAP^\dagger|i_2j_2\rangle = \langle j_1i_1 | F |j_2 i_2\rangle
 $$
 
-### $RZZ$ and the expansion
+### evolutionary gate
+
+#### $RZZ$ and the expansion
 
 Definition 
 
@@ -209,4 +210,82 @@ $$
 
 Which is noting to do with $R_{YY}$
 
+#### general evolutionary gate
 
+For
+
+$$
+\exp[\tau \int_0 ^t -i H(t') \delta t'] \xrightarrow[\delta t' \rightarrow 0]{} \prod_{n=0}^N \exp [-iH(t)\delta t],
+$$
+
+where
+
+$$
+\exp [-iH(t)\delta t] = \exp [-i\sum_Ptr(PH(t))P \delta t] \rightarrow \prod_P \exp[-i tr(PH)P\delta t] = \prod_R \exp [-i P\theta/2],
+$$
+
+where
+
+$$
+\exp[-iP\theta/2] = R_P(\theta)
+$$
+
+where $P$ is pauli bases, evidently,
+
+$$
+R_P(\theta) = U_{Z\rightarrow P}R_{ZZZ...}(\theta) U^\dagger_{Z\rightarrow P}.
+$$
+
+Now the only question is to contruct $R_{ZZZ}...$ . Ref to $RZZ$ .
+
+$$
+U (I^{\otimes N-1} \otimes R_Z(\theta)) U^\dagger = \exp[-iU(I^{\otimes N-1}\otimes Z) U^\dagger\theta /2)]
+$$
+
+So now our target is to find a U meet 
+
+$$
+U(I^{\otimes N-1}\otimes Z) U^\dagger = Z^{\otimes N}
+$$
+
+Evidently
+
+$$
+Z^{\otimes N} |s_1s_2,...\rangle = (-1)^{s_1+s_2...} |s_1s_2...\rangle
+$$
+
+This effect can be achieved by many different combinations of CNOT operations, for instance,
+
+$$
+\begin{aligned}
+&U^\dagger Z_N\prod_i^{N-1} CX(i, i+1) |s_1s_2...\rangle\\
+&= U^\dagger Z_N|s_1, (s_1 \oplus s_2), (s_1 \oplus s_2 \oplus s_3...)...\rangle \\ 
+&=U^\dagger (-1)^{s_1+s_2...} |s_1, (s_1 \oplus s_2), (s_1 \oplus s_2 \oplus s_3...)...\rangle  \\
+&= (-1)^{s_1+s_2+...} |s_1s_2...\rangle  \\
+&= Z^{\otimes N}|s_1s_2...\rangle
+\end{aligned}
+$$
+
+QED.
+
+**Any CNOT combination can achieve this operation as long as the control and the transmission can reach the last qubit**.
+
+## 表象变换
+
+qiskit 规范是
+
+$$
+\begin{cases}
+Z\rightarrow X := H\\
+Z\rightarrow Y = SH或(\sqrt X)^\dagger
+\end{cases}
+$$
+
+Where
+
+$$
+\begin{cases}
+S = \sqrt Z\\
+\sqrt X = HSH^\dagger
+\end{cases}
+$$

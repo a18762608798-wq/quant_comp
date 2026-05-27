@@ -20,7 +20,7 @@ if test_index == 1
 elseif test_index == 2
     reduced_N = 4
     permuted_order = [x for pair = 1:reduced_N ÷ 2 for x in (pair, N - pair + 1)];
-    @show get_normalized_reflect_expect_shadow(
+    @show get_z_r_shadow(
         group_path,
         site_indices, 
         permuted_order;

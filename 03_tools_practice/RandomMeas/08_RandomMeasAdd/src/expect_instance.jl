@@ -26,14 +26,14 @@ function get_reflect_expect_shadow(
 end
 
 
-function get_normalized_reflect_expect_shadow(
+function get_z_r_shadow(
     filepath::String,
     site_indices, 
     permuted_order;
     shadows_type="dense",
     G = fill(1.0, length(site_indices))::Vector{Float64},
 )
-    println("Now we calculate expectation of numerator:")
+    println("Now we are calculating expectation of numerator:")
     numerator = get_reflect_expect_shadow(
         filepath,
         site_indices, 
@@ -41,7 +41,7 @@ function get_normalized_reflect_expect_shadow(
         shadows_type=shadows_type,
         G = G,
     )
-    println("Now we calculate the expectation of denominator")
+    println("Now we are calculating the expectation of denominator")
     # get the subsystem group
     permuted_group, permuted_indices = import_permuted_group(
         filepath, 
@@ -81,3 +81,12 @@ function get_normalized_reflect_expect_shadow(
     normalized_param = 1 / (sqrt((odd_purity + even_purity) / 2))
     return numerator * normalized_param
 end
+
+
+# time reversal (Z_T)
+#   function get_reversal_expect_shadow(
+#
+#   )
+#
+#
+#   end

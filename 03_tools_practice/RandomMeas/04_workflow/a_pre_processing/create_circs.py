@@ -12,8 +12,7 @@ def create_pre_measured_circ():
 
 
 def create_classical_circ():
-    circ = create_pre_measured_circ()
-    qubits_num = circ.num_qubits
+    qubits_num = 6
     clcirc = QuantumCircuit(qubits_num, qubits_num)
     return clcirc
 

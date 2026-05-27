@@ -15,7 +15,7 @@ julia:
 
 ```{julia}
 using RandomMeas
-siteindices = siteinds("Qubit", 4);
+siteindices = siteinds("Qubit", 6);
 measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
 dense_shadows = get_dense_shadows(measurement_group);
 ```
@@ -24,7 +24,7 @@ dense_shadows = get_dense_shadows(measurement_group);
 
 ```{julia}
 using RandomMeas
-siteindices = siteinds("Qubit", 4);
+siteindices = siteinds("Qubit", 6);
 measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
 factorized_shadows = get_factorized_shadows(measurement_group);
 ```
@@ -34,7 +34,7 @@ factorized_shadows = get_factorized_shadows(measurement_group);
 ```{julia}
 # Prepare classical state
 using RandomMeas
-N = 4
+N = 6
 siteindices = siteinds("Qubit", N);
 ψ0 = MPS(siteindices, fill("1", N))
 ```
@@ -72,7 +72,7 @@ calibration_vec = calibration_data["calibration"]
 ```{julia}
 # product shadows of subsystem.
 using RandomMeas
-N = 4
+N = 6
 siteindices = siteinds("Qubit", N);
 measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
 subrange = [1, 2];

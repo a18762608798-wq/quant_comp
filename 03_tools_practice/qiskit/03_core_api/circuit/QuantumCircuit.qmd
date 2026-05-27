@@ -54,14 +54,19 @@ from qiskit.quantum_info import SparsePauliOp
 from IPython.display import display
  
 hamiltonian = SparsePauliOp.from_list(
-    [("IIZZ", 1), ("IZIZ", 1), ("IZZI", 1), ("ZIIZ", 1), ("ZZII", 1)]
+    [
+        ("IZYX", 1), 
+    ]
 )
 
 qaoa_layer = 1
 ansatz = QAOAAnsatz(hamiltonian, reps=qaoa_layer) # Designing parametric variational circuits based on the Hamiltonian.
 # Draw
 ansatz.decompose(reps=1).draw()
-ansatz.decompose(reps=3).draw()
+ansatz.decompose(reps=2).draw()
+#   ansatz.decompose(reps=3).draw()
+#   ansatz.decompose(reps=4).draw()
+#   ansatz.decompose(reps=5).draw()
 ```
 
 
@@ -94,35 +99,28 @@ from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.synthesis import SuzukiTrotter
 
 H_initial = SparsePauliOp.from_list([
-    ("IXXI", 1.0), 
-    ("IZZI", 1.0),
+    ("XYZX", 1.0), 
 ])
 
 H_problem = SparsePauliOp.from_list([
-    ("XXII", 1.0),
-    ("ZZII", 1.0),
-    ("IIXX", 1.0),
-    ("IIZZ", 1.0),
+    ("XZYX", 1.0),
 ])
 
 n = H_problem.num_qubits
-steps = 2
+steps = 1
 total_time = 5.0
 dt = total_time / steps
 
 qc = QuantumCircuit(n)
 
 # 制备initial state.
-qc.x(1)
-qc.h(2)
-qc.cx(2, 1)
-qc.z(2)
+qc.x(0)
 
 for k in range(steps):
     s = (k + 0.5) / steps
     H_s = (1 - s) * H_initial + s * H_problem
 
-    synth = SuzukiTrotter(order=2, reps=1)
+    synth = SuzukiTrotter(order=1, reps=1)
 
     evo = PauliEvolutionGate(
         H_s,
@@ -133,7 +131,7 @@ for k in range(steps):
     qc.append(evo, range(n))
 
 qc.draw()
-#qc.decompose(reps=1).draw()
+qc.decompose(reps=1).draw()
 ```
 
 ```{python}

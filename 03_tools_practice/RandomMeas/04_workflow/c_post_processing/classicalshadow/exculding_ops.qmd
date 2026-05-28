@@ -14,19 +14,20 @@ julia:
 ```{julia}
 # calibration 
 using NPZ
-calibration_data = npzread("./03_tools_practice/RandomMeas/04_workflow/c_post_processing/classicalshadow/calibration.npz")
+calibration_data = npzread("./04_workflow/c_post_processing/classicalshadow/calibration.npz")
 calibration_vec = calibration_data["calibration"]
 ```
 
 ```{julia}
 # product shadows of subsystem.
 using RandomMeas
-N = 4
+N = 6
 siteindices = siteinds("Qubit", N);
-measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+measurement_group = import_MeasurementGroup("./04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
 subrange = [1, 2];
 subgroup = reduce_to_subsystem(measurement_group, subrange);
-sub_dense_shadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
+#sub_dense_shadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
+sub_dense_shadows = get_dense_shadows(subgroup);
 ```
 
 ## trace

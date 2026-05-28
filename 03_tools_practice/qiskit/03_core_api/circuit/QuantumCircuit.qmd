@@ -51,7 +51,6 @@ qc.append(HGate(), [0]) # append gates
 ```{python}
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit.quantum_info import SparsePauliOp
-from IPython.display import display
  
 hamiltonian = SparsePauliOp.from_list(
     [

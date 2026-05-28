@@ -84,9 +84,9 @@ end
 
 
 # time reversal (Z_T)
-#   function get_reversal_expect_shadow(
-#
-#   )
-#
-#
-#   end
+function get_reversal_expect_shadow(
+
+)
+
+
+end

@@ -41,6 +41,7 @@ S = \sqrt Z
 $$
 
 In qiskit we office tag it $Sdg$ .
+
 ### $R_n(\sigma)$
 
 Definiton

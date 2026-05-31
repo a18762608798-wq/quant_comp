@@ -10,7 +10,7 @@ sub_range = [3, 4, 5, 6];
 sub_group, sub_indices = import_permuted_group(group_path, site_indices, sub_range);
 sub_shadows = get_dense_shadows(sub_group);
 
-test_index = 1
+test_index = 2
 
 if test_index == 1 
     # get expect shadows
@@ -18,6 +18,9 @@ if test_index == 1
     @show linkdims(reflect_op)
     @show modified_get_expect_shadow(reflect_op, sub_shadows, compute_sem=true)
 elseif test_index == 2
-    # get trace moment
+    reflect_op = create_reflect_op(sub_indices)
+    # NOTICE: Which is equal the function `modified_get_trace_moment`
+    @show modified_get_trace_moment(sub_shadows, 1; O = reflect_op, compute_sem = true)
+elseif test_index == 3
     @show modified_get_trace_moment(sub_shadows, 2)
 end

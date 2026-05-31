@@ -9,7 +9,9 @@ julia:
 
 # create ops
 
-## way 1(Recommend)
+## basic
+
+### way 1(Recommend)
 
 ```{julia}
 using RandomMeas
@@ -23,7 +25,7 @@ H = apply(gates, identity_op; cutoff=1e-12)
 linkdims(H)
 ```
 
-## Way 2
+### Way 2
 
 ```{julia}
 using RandomMeas
@@ -60,7 +62,7 @@ H = apply(Rx90, H; cutoff=1e-12) # NOTE: apply只在和子区域缩进的link维
 "S2"      # S^2
 
 
-## Way 3
+### Way 3
 
 ```{julia}
 sites = siteinds("Qubit",4)

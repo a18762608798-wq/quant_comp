@@ -5,14 +5,19 @@ from qiskit.quantum_info import random_unitary
 
 
 def create_pre_measured_circ():
-    circ = QuantumCircuit(6, 6)
-    circ.x([0])
-    circ.x([5])
+    N = 8
+    circ = QuantumCircuit(N, N)
+    for i in range(1, N - 1, 1):
+        circ.x(i)
+    for i in range(1, N - 1, 2):
+        circ.h(i)
+    for i in range(1, N - 2, 2):
+        circ.cx(i, i + 1)
     return circ
 
 
 def create_classical_circ():
-    qubits_num = 6
+    qubits_num = 8
     clcirc = QuantumCircuit(qubits_num, qubits_num)
     return clcirc
 

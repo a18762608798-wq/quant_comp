@@ -9,13 +9,21 @@ julia:
 
 # excluding_classicalshadow
 
+```{julia}
+using RandomMeas
+include("./08_RandomMeasAdd/src/RandomMeasAdd.jl")
+using .RandomMeasAdd
+```
+
 ## purity
 
 ```{julia}
-using RandomMeas
-# product group
-siteindices = siteinds("Qubit",4);
-measurement_group = import_MeasurementGroup("./03_tools_practice/RandomMeas/04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
+# get sub group
+N = 8
+site_indices = siteinds("Qubit", N)
+group_path = "./04_workflow/b_data_acquisition/group.npz"
+sub_range = [3, 4];
+sub_group, sub_indices = import_permuted_group(group_path, site_indices, sub_range);
 # calculate purity
-get_purity(measurement_group)
+get_purity(sub_group)
 ```

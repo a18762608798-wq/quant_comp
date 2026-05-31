@@ -5,6 +5,8 @@ function get_reflect_expect_shadow(
     permuted_order;
     shadows_type="factorized",
     G = fill(1.0, length(site_indices))::Vector{Float64},
+    compute_sem = false,
+    show_progress = true,
 )
     permuted_G = G[permuted_order]
     permuted_group, permuted_indices = import_permuted_group(
@@ -22,7 +24,26 @@ function get_reflect_expect_shadow(
     end
 
     adjacent_swap_op = create_adjacent_swap_op(permuted_indices)
-    return real(modified_get_expect_shadow(adjacent_swap_op, permuted_shadows))
+
+    if compute_sem == false
+        reflect_expect = modified_get_expect_shadow(
+            adjacent_swap_op, 
+            permuted_shadows;
+            compute_sem = compute_sem,
+            show_progress = show_progress,
+        )
+        return real(reflect_expect)
+    elseif compute_sem == true
+        reflect_expect, sem = modified_get_expect_shadow(
+            adjacent_swap_op, 
+            permuted_shadows;
+            compute_sem = compute_sem,
+            show_progress = show_progress,
+        )
+        return real(reflect_expect), sem
+    else
+        error("The values of compute_sem must be true of false")
+    end
 end
 
 
@@ -32,14 +53,18 @@ function get_z_r_shadow(
     permuted_order;
     shadows_type="dense",
     G = fill(1.0, length(site_indices))::Vector{Float64},
+    compute_sem = false,
+    show_progress = true,
 )
     println("Now we are calculating expectation of numerator:")
-    numerator = get_reflect_expect_shadow(
+    numerator, _ = get_reflect_expect_shadow(
         filepath,
         site_indices, 
         permuted_order;
         shadows_type=shadows_type,
         G = G,
+        compute_sem = true,
+        show_progress = show_progress,
     )
     println("Now we are calculating the expectation of denominator")
     # get the subsystem group
@@ -84,9 +109,9 @@ end
 
 
 # time reversal (Z_T)
-function get_reversal_expect_shadow(
-
-)
-
-
-end
+#   function get_reversal_expect_shadow(
+#
+#   )
+#
+#
+#   end

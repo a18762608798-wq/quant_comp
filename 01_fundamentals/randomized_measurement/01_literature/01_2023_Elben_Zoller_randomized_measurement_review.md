@@ -57,6 +57,8 @@ Proof ref to [[Hamming_Core_Estimation]]
 
 ### Error Bounds 
 
+#### Classical Shadow
+
 The special case of Pauli expectation values, an improved scaling of M  
 
 $$
@@ -69,11 +71,10 @@ $$
 M \propto \log(L)4^\omega/\epsilon^2
 $$
 
-Where L is the quantity of operation, $\omega$ is the scale of sub-system, $\epsilon$ is the accuracy requirements.
+Where L is the quantity of operation, $\omega$ is the scale of sub-system, $\epsilon$ is the accuracy of single pauli base result requirements.
 
-<span style="color:red">I will give the proof in the future, may be...</span>
+The proof ref to [[Error_Bounds]]
 
-Some possible relevant evidence [[classical error]]
 
 ### Cases
 

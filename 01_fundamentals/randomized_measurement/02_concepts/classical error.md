@@ -28,10 +28,10 @@ $$
 For the $\pm 1$ variable, $Var(X) \le 1$ ($Var(X) = E(X^2) - [E(X)]^2$), Viz.,
 
 $$
-error \le \frac{1}{\sqrt n}
+error \sim \frac{1}{\sqrt n}
 $$
-Intent to let $error \le \epsilon$, Viz.,
+Intent to let $error \sim \epsilon$, Viz.,
 
 $$
-n \ge \frac{1}{\epsilon^2}
+n \sim \frac{1}{\epsilon^2}
 $$

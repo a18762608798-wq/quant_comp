@@ -11,23 +11,22 @@ julia:
 
 * get shadows of subsystem
 
+
 ```{julia}
-# calibration 
-using NPZ
-calibration_data = npzread("./04_workflow/c_post_processing/classicalshadow/calibration.npz")
-calibration_vec = calibration_data["calibration"]
+using RandomMeas
+include("./08_RandomMeasAdd/src/RandomMeasAdd.jl")
+using .RandomMeasAdd
 ```
 
 ```{julia}
-# product shadows of subsystem.
-using RandomMeas
-N = 6
-siteindices = siteinds("Qubit", N);
-measurement_group = import_MeasurementGroup("./04_workflow/b_data_acquisition/group.npz", site_indices=siteindices);
-subrange = [1, 2];
-subgroup = reduce_to_subsystem(measurement_group, subrange);
-#sub_dense_shadows = get_dense_shadows(subgroup, G=calibration_vec[subrange]);
-sub_dense_shadows = get_dense_shadows(subgroup);
+# get sub shadows
+N = 8
+site_indices = siteinds("Qubit", N)
+group_path = "./04_workflow/b_data_acquisition/group.npz"
+reduced_N = 4
+sub_range = [x for pair = 3:3 + reduced_N ÷ 2 - 1 for x in (pair, N - pair + 1)];
+sub_group, sub_indices = import_permuted_group(group_path, site_indices, sub_range);
+sub_shadows = get_dense_shadows(sub_group);
 ```
 
 ## trace
@@ -35,16 +34,16 @@ sub_dense_shadows = get_dense_shadows(subgroup);
 ```{julia}
 # tr(ρ)
 #@show estimate, bias, sem = get_trace_moment(dense_shadows, 1, compute_sem = true); # Cross-validation, but it consumes a lot of memory.
-@show estimate = get_trace_moment(sub_dense_shadows, 1);
+@show estimate = get_trace_moment(sub_shadows, 1);
 ```
 
 ```{julia}
 # tr(ρ^2)
 #@show estimate, bias, sem = get_trace_moment(dense_shadows, 2, compute_sem = true);
-@show estimate = get_trace_moment(sub_dense_shadows, 2);
+@show estimate = get_trace_moment(sub_shadows, 2);
 ```
 
 ```{julia}
 # multiply
-multiply(sub_dense_shadows[1], sub_dense_shadows[1]);
+multiply(sub_shadows[1], sub_shadows[1]);
 ```

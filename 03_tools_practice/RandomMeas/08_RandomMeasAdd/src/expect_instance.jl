@@ -46,7 +46,6 @@ function get_reflect_expect_shadow(
     end
 end
 
-
 function get_z_r_shadow(
     filepath::String,
     site_indices, 
@@ -56,24 +55,13 @@ function get_z_r_shadow(
     compute_sem = false,
     show_progress = true,
 )
-    println("Now we are calculating expectation of numerator:")
-    numerator, _ = get_reflect_expect_shadow(
-        filepath,
-        site_indices, 
-        permuted_order;
-        shadows_type=shadows_type,
-        G = G,
-        compute_sem = true,
-        show_progress = show_progress,
-    )
-    println("Now we are calculating the expectation of denominator")
-    # get the subsystem group
+    # get the info of three systems
+    # get the groups
     permuted_group, permuted_indices = import_permuted_group(
         filepath, 
         site_indices, 
         permuted_order
-    )
-    permuted_G = G[permuted_order]
+    ) 
     qubits_num = length(permuted_order)
     pairs_num = qubits_num ÷ 2
     odd_order = [2i - 1 for i = 1:pairs_num]
@@ -86,25 +74,48 @@ function get_z_r_shadow(
         permuted_group,
         even_order,
     )
+    # get G for every system
+    permuted_G = G[permuted_order] 
     odd_G = permuted_G[odd_order]
     even_G = permuted_G[even_order]
-
-    if shadows_type == "factorized"
+    # product the shadows
+    if shadows_type == "factorized" 
+        shadows = get_factorized_shadows(permuted_group; G=permuted_G)
         odd_shadows = get_factorized_shadows(odd_group; G=odd_G)
         even_shadows = get_factorized_shadows(even_group; G=even_G)
     elseif shadows_type == "dense" 
+        shadows = get_dense_shadows(permuted_group; G=permuted_G)
         odd_shadows = get_dense_shadows(odd_group; G=odd_G)
         even_shadows = get_dense_shadows(even_group; G=even_G)
     else
         error("wrong shadows type: $shadows_type")
     end
+    # product the op
+    adjacent_swap_op = create_adjacent_swap_op(permuted_indices) 
 
+    # calculate the expectation and sem
+    # get the jackvals info
+    Z_R(R_I_val, P_I1, P_I2) = R_I_val / (sqrt((P_I1 + P_I2) / 2)) # Z_R function
+    println("Now we are calculating R_I_val:")
+    reflect_val, reflect_jackvals = calculate_jackvals_1_moment(
+        shadows;
+        O = adjacent_swap_op,
+        show_progress = show_progress,
+    )
     println("Now we calculate the purity of subsystem 1:")
-    odd_purity = real(modified_get_trace_moment(odd_shadows, 2))
+    purity1, purity1_jackvals = calculate_jackvals_2_moment(
+        odd_shadows;
+        show_progress = show_progress,
+    )
     println("Now we calculate the purity of subsystem 2:")
-    even_purity = real(modified_get_trace_moment(even_shadows, 2))
-    normalized_param = 1 / (sqrt((odd_purity + even_purity) / 2))
-    return numerator * normalized_param
+    purity2, purity2_jackvals = calculate_jackvals_2_moment(
+        even_shadows;
+        show_progress = show_progress,
+    )
+    # calculate the expectation
+    z_r_val = Z_R(reflect_val, purity1, purity2)
+
+    return z_r_val 
 end
 
 

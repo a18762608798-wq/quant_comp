@@ -187,13 +187,56 @@ end
 
 
 function modified_get_trace_moment(
-    shadows::Array{<:AbstractShadow, 1}, 
+    shadows::Vector{<:AbstractShadow},
     kth_moment::Int; 
     kwargs...
 )
     return modified_get_trace_moment(
         reshape(shadows, length(shadows), 1), 
         kth_moment; 
+        kwargs...
+    )
+end
+
+
+# ----------
+# get trace 2 order moment
+# ----------
+function modified_get_trace_2_moments(
+    shadows::Array{<:AbstractShadow,2};
+    O::Union{Nothing,MPO} = nothing,
+    compute_sem::Bool     = false,
+    compute_renyi::Bool        = false,
+    show_progress::Bool = true,
+)
+    n_ru, n_m = size(shadows)
+
+    # loop over desired moments
+    θ_est, jackmat = calculate_jackvals_2_moment(
+        shadows;
+        O = O,
+        compute_renyi = compute_renyi,
+        show_progress = show_progress,
+    )
+
+    # build covariance if requested
+    if compute_sem
+        variance = (n_ru - 1)^2 / n_ru * var(jackmat)
+        sem = sqrt(variance)
+        θ_jack = n_ru * θ_est - (n_ru - 1) * mean(jackmat)
+        return θ_est, θ_est - θ_jack , sem
+    else
+        return θ_est
+    end
+end
+
+
+function modified_get_trace_2_moments(
+    shadows::Vector{<:AbstractShadow};
+    kwargs...
+)
+    return modified_get_trace_2_moments(
+        reshape(shadows, length(shadows), 1);
         kwargs...
     )
 end

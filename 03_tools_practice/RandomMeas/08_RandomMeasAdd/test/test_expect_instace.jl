@@ -26,6 +26,7 @@ elseif test_index == 2
         group_path,
         site_indices, 
         permuted_order;
-        shadows_type="dense",
+        shadows_type="factorized",
+        compute_sem = true,
     )
 end

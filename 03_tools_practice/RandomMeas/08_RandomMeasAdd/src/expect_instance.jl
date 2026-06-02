@@ -95,31 +95,29 @@ function get_z_r_shadow(
 
     # calculate the expectation and sem
     # get the jackvals info
-    Z_R(R_I_val, P_I1, P_I2) = R_I_val / (sqrt((P_I1 + P_I2) / 2)) # Z_R function
-    println("Now we are calculating R_I_val:")
-    reflect_val, reflect_jackvals = calculate_jackvals_1_moment(
-        shadows;
-        O = adjacent_swap_op,
-        show_progress = show_progress,
+    n_ru = size(shadows, 1)
+    z_r_val, z_r_jackvals = calculate_z_r_jackvals(
+        shadows,
+        odd_shadows,
+        even_shadows,
+        adjacent_swap_op,
+        show_progress,
     )
-    println("Now we calculate the purity of subsystem 1:")
-    purity1, purity1_jackvals = calculate_jackvals_2_moment(
-        odd_shadows;
-        show_progress = show_progress,
-    )
-    println("Now we calculate the purity of subsystem 2:")
-    purity2, purity2_jackvals = calculate_jackvals_2_moment(
-        even_shadows;
-        show_progress = show_progress,
-    )
-    # calculate the expectation
-    z_r_val = Z_R(reflect_val, purity1, purity2)
-
-    return z_r_val 
+    # calculate the sem
+    if compute_sem
+        variance = (n_ru - 1)^2 / n_ru * var(z_r_jackvals)
+        sem = sqrt(variance)
+        z_r_jack = n_ru * z_r_val - (n_ru - 1) * mean(z_r_jackvals)
+        return z_r_val, z_r_val - z_r_jack , sem
+    else
+        return z_r_val
+    end
 end
 
+# ---------------------------------------
+# ----------time reversal (Z_T)----------
+# ---------------------------------------
 
-# time reversal (Z_T)
 #   function get_reversal_expect_shadow(
 #
 #   )

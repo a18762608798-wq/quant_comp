@@ -111,15 +111,20 @@ function calculate_jackvals_2_moment(
     θ  = avgfun(perm_avg)
 
     # jackknife groups: permutations not containing unitary i
-    groups = Vector{Vector{Int}}(undef, n_ru)
-    for i in 1:n_ru
-        groups[i] = [idx for (idx,r) in enumerate(perms) if i ∉ r]
+    jackvals = zeros(Float64, n_ru)
+    @threads for i in 1:n_ru
+        s = 0.0
+        count = 0
+        for (idx, r) in enumerate(perms) 
+            if i ∉ r
+                s += perm_avg[idx]
+                count += 1
+            end
+        end
+        μ = s / count
+        jackvals[i] = compute_renyi ? (1 / (1 - 2)) * log2(μ) : μ
     end
 
-    jackvals = zeros(Float64, n_ru)
-    for i in 1:n_ru
-        jackvals[i] = avgfun(perm_avg[groups[i]])
-    end
     return θ, jackvals
 end
 
@@ -152,15 +157,20 @@ function calculate_jackvals_1_moment(
     θ  = mean(perm_avg)
 
     # jackknife groups: permutations not containing unitary i
-    groups = Vector{Vector{Int}}(undef, n_ru)
-    for i in 1:n_ru
-        groups[i] = [idx for (idx,r) in enumerate(perms) if i ∉ r]
+    jackvals = zeros(Float64, n_ru)
+    @threads for i in 1:n_ru
+        s = 0.0
+        count = 0
+        for (idx, r) in enumerate(perms) 
+            if i ∉ r
+                s += perm_avg[idx]
+                count += 1
+            end
+        end
+        μ = s / count
+        jackvals[i] = μ
     end
 
-    jackvals = zeros(Float64, n_ru)
-    for i in 1:n_ru
-        jackvals[i] = mean(perm_avg[groups[i]])
-    end
     return θ, jackvals
 end
 
@@ -206,22 +216,40 @@ function calculate_z_r_jackvals(
     even_expect = mean(even_perms_avg)
 
     # jackknife groups: permutations not containing unitary i.
-    # get the groups be rest.
-    reflect_groups = Vector{Vector{Int}}(undef, n_ru)
-    purity_groups = Vector{Vector{Int}}(undef, n_ru)
-    for i in 1:n_ru
-        reflect_groups[i] = [idx for (idx,r) in enumerate(reflect_perms) if i ∉ r]
-        purity_groups[i] = [idx for (idx,r) in enumerate(purity_perms) if i ∉ r]
-    end
-    # get the jackvals of z_r
     reflect_jackvals = zeros(Float64, n_ru)
     odd_jackvals = zeros(Float64, n_ru)
     even_jackvals = zeros(Float64, n_ru)
     for i in 1:n_ru
-        reflect_jackvals[i] = mean(reflect_perms_avg[reflect_groups[i]])
-        odd_jackvals[i] = mean(odd_perms_avg[purity_groups[i]])
-        even_jackvals[i] = mean(even_perms_avg[purity_groups[i]])
+        reflect_sum = 0.0
+        reflect_count = 0
+        odd_sum = 0.0
+        odd_count = 0
+        even_sum = 0.0
+        even_count = 0
+
+        for (idx, r) in enumerate(reflect_perms) 
+            if i ∉ r
+                reflect_sum += reflect_perms_avg[idx]
+                reflect_count += 1
+            end
+        end
+        μ = reflect_sum / reflect_count
+        reflect_jackvals[i] = μ
+
+        for (idx, r) in enumerate(purity_perms) 
+            if i ∉ r
+                odd_sum += odd_perms_avg[idx]
+                odd_count += 1
+                even_sum += even_perms_avg[idx]
+                even_count += 1
+            end
+        end
+        odd_μ = odd_sum / odd_count
+        even_μ = even_sum / even_count
+        odd_jackvals[i] = odd_μ
+        even_jackvals[i] = even_μ
     end
+
     Z_R(R_I_val, P_I1, P_I2) = R_I_val / sqrt((P_I1 + P_I2) / 2)
     z_r_val = Z_R(reflect_expect, odd_expect, even_expect)
     z_r_jackvals = Z_R.(reflect_jackvals, odd_jackvals, even_jackvals)

@@ -45,6 +45,7 @@ function modified_get_expect_shadow(
     )
 end
 
+
 # ----------
 # get trace moment
 # ----------
@@ -80,7 +81,6 @@ function modified_get_trace_moment(
     end
 end
 
-
 function modified_get_trace_moment(
     shadows::Array{<:AbstractShadow, 1}, 
     kth_moment::Int; 
@@ -93,7 +93,6 @@ function modified_get_trace_moment(
     )
 
 end
-
 
 function modified_get_trace_moments(
     shadows::Array{<:AbstractShadow,2},
@@ -146,14 +145,18 @@ function modified_get_trace_moments(
         end
 
         # jackknife groups: permutations not containing unitary i
-        groups = Vector{Vector{Int}}(undef, n_ru)
-        for i in 1:n_ru
-            groups[i] = [idx for (idx,r) in enumerate(perms) if i ∉ r]
-        end
-
-        jackvals = similar(jackmat, n_ru)
-        for i in 1:n_ru
-            jackvals[i] = avgfun(perm_avg[groups[i]])
+        jackvals = zeros(Float64, n_ru)
+        @threads for i in 1:n_ru
+            s = 0.0
+            count = 0
+            for (idx, r) in enumerate(perms) 
+                if i ∉ r
+                    s += perm_avg[idx]
+                    count += 1
+                end
+            end
+            μ = s / count
+            jackvals[i] = compute_renyi ? (1 / (1 - 2)) * log2(μ) : μ
         end
         return θ, jackvals
     end
@@ -184,7 +187,6 @@ function modified_get_trace_moments(
         return θ_est
     end
 end
-
 
 function modified_get_trace_moment(
     shadows::Vector{<:AbstractShadow},
@@ -229,7 +231,6 @@ function modified_get_trace_2_moments(
         return θ_est
     end
 end
-
 
 function modified_get_trace_2_moments(
     shadows::Vector{<:AbstractShadow};

@@ -1,3 +1,7 @@
+# --------------------------------------
+# ----------room reflect (Z_r)----------
+# --------------------------------------
+
 # reflect expect (Z_r)
 function get_reflect_expect_shadow(
     filepath::String,

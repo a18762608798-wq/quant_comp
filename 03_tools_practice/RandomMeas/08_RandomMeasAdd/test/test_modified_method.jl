@@ -40,7 +40,7 @@ elseif test_index == 4
         sub_shadows, 2;
         compute_sem = true,
     )
-    @show modified_get_trace_2_moments(
+    @show modified_get_purity_shadow(
         sub_shadows;
         compute_sem = true,
     )

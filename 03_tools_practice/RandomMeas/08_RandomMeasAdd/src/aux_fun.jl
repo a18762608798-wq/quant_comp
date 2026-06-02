@@ -53,14 +53,14 @@ end
 # ---------- calculate the jackvals ----------
 # --------------------------------------------
 
-# calculate jackvals perms avg
+# calculate jackvals perms avg(K <= 2)
 function calculate_jackvals_perms_avg(
     shadows::Array{<:AbstractShadow,2},
     k::Int;
     O::Union{Nothing,MPO} = nothing,
     show_progress = true,
 )
-    @assert 0 ≤ k ≤ 2 "k must be in [0, 2]."
+    @assert (k == 2 && isnothing(O)) || (k == 1) "O must be nothing for k=2, and k in the range of [1, 2]"
 
     # pre-enumerate permutations and m–cartesian product
     n_ru, n_m = size(shadows)
@@ -85,13 +85,13 @@ function calculate_jackvals_perms_avg(
 end
 
 # 2 moment
-function calculate_jackvals_2_moment(
+function calculate_purity_jackvals(
     shadows::Array{<:AbstractShadow,2};
-    O::Union{Nothing,MPO} = nothing,
     compute_renyi::Bool        = false,
     show_progress::Bool = true,
 )
     n_ru, n_m = size(shadows)
+    @assert n_ru ≥ 3 "At least 3 random unitaries are required for 2-moment estimation."
     # pre-enumerate permutations
     perms   = collect(combinations(1:n_ru, 2))
 
@@ -99,7 +99,6 @@ function calculate_jackvals_2_moment(
     perm_avg = calculate_jackvals_perms_avg(
         shadows,
         2;
-        O = O,
         show_progress = show_progress,
     )
 
@@ -128,23 +127,24 @@ function calculate_jackvals_2_moment(
     return θ, jackvals
 end
 
-function calculate_jackvals_2_moment(
+function calculate_purity_jackvals(
     shadows::Vector{<:AbstractShadow};
     kwargs...,
 )
-    return calculate_jackvals_2_moment(
+    return calculate_purity_jackvals(
         reshape(shadows, length(shadows), 1);
         kwargs...,
     )
 end
 
 # 1 moment
-function calculate_jackvals_1_moment(
+function calculate_moment1_jackvals(
     shadows::Array{<:AbstractShadow,2};
     O::Union{Nothing,MPO} = nothing,
     show_progress::Bool = true,
 )
     n_ru, _ = size(shadows)
+    @assert n_ru ≥ 2 "At least 2 random unitaries are required for 1-moment estimation."
     perms = collect(combinations(1:n_ru, 1))
 
     # average over measurements for each permutation
@@ -174,11 +174,11 @@ function calculate_jackvals_1_moment(
     return θ, jackvals
 end
 
-function calculate_jackvals_1_moment(
+function calculate_moment1_jackvals(
     shadows::Vector{<:AbstractShadow};
     kwargs...,
 )
-    return calculate_jackvals_1_moment(
+    return calculate_moment1_jackvals(
         reshape(shadows, length(shadows), 1);
         kwargs...,
     )
@@ -194,6 +194,7 @@ function calculate_z_r_jackvals(
 )
     # pre-enumerate permutations (and m–cartesian product)
     n_ru, _ = size(shadows)
+    @assert n_ru ≥ 3 "At least 3 random unitaries are required for z_r estimation."
     reflect_perms   = collect(combinations(1:n_ru, 1))
     purity_perms   = collect(combinations(1:n_ru, 2))
 

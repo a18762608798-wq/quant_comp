@@ -112,6 +112,7 @@ function modified_get_trace_moments(
 
     # --- helper: single-k estimator with optional jackknife ----------------
     function single_k(k::Int)
+        @assert !(k == 1 && compute_renyi) "compute_renyi must be false when k == 1."
         # pre-enumerate permutations and m–cartesian product
         perms   = collect(permutations(1:n_ru, k))
         cprod   = collect(CartesianIndices(ntuple(_ -> 1:n_m, k)))
@@ -156,7 +157,7 @@ function modified_get_trace_moments(
                 end
             end
             μ = s / count
-            jackvals[i] = compute_renyi ? (1 / (1 - 2)) * log2(μ) : μ
+            jackvals[i] = compute_renyi ? (1 / (1 - k)) * log2(μ) : μ
         end
         return θ, jackvals
     end
@@ -202,11 +203,12 @@ end
 
 
 # ----------
-# get trace 2 order moment
+# get purity 
 # ----------
-function modified_get_trace_2_moments(
+
+# This function is only for O == nothing.
+function modified_get_purity_shadow(
     shadows::Array{<:AbstractShadow,2};
-    O::Union{Nothing,MPO} = nothing,
     compute_sem::Bool     = false,
     compute_renyi::Bool        = false,
     show_progress::Bool = true,
@@ -214,9 +216,8 @@ function modified_get_trace_2_moments(
     n_ru, n_m = size(shadows)
 
     # loop over desired moments
-    θ_est, jackmat = calculate_jackvals_2_moment(
+    θ_est, jackmat = calculate_purity_jackvals(
         shadows;
-        O = O,
         compute_renyi = compute_renyi,
         show_progress = show_progress,
     )
@@ -232,11 +233,11 @@ function modified_get_trace_2_moments(
     end
 end
 
-function modified_get_trace_2_moments(
+function modified_get_purity_shadow(
     shadows::Vector{<:AbstractShadow};
     kwargs...
 )
-    return modified_get_trace_2_moments(
+    return modified_get_purity_shadow(
         reshape(shadows, length(shadows), 1);
         kwargs...
     )

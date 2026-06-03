@@ -18,14 +18,10 @@ elseif test_index == 2
 elseif test_index == 3
     part1 = [1, 2, 3, 4]
     unitary_part_reversal_op = create_unitary_part_reversal_op(
-        part1,
-        site_indices;
-        op_type = "ITensor",
+        part1, site_indices; op_type="ITensor"
     )
     unitary_part_reversal_op = create_unitary_part_reversal_op(
-        part1,
-        site_indices;
-        op_type = "MPO",
+        part1, site_indices; op_type="MPO"
     )
     @show linkdims(unitary_part_reversal_op)
 end

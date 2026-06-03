@@ -1,8 +1,8 @@
-# ------------------------------------------------------------------------
-# ----------Import the data from npz accroding to permuted order----------
-# ------------------------------------------------------------------------
+# ---------------------
+# Import the data from npz accroding to permuted order.
+# ---------------------
 
-# This method has the function to reduce.
+# NOTE: This method has the function to reduce.
 function import_permuted_group(filepath::String, site_indices, permuted_order)
     permuted_indices = site_indices[permuted_order]
     group_data = npzread(filepath)
@@ -10,28 +10,25 @@ function import_permuted_group(filepath::String, site_indices, permuted_order)
     settings = ComplexF64.(group_data["measurement_settings"])
     permuted_meas_res = meas_res[:, :, permuted_order]
     permuted_settings = settings[:, permuted_order, :, :]
-    permuted_group = MeasurementGroup(permuted_meas_res, permuted_settings, permuted_indices)
+    permuted_group = MeasurementGroup(
+        permuted_meas_res, permuted_settings, permuted_indices
+    )
     return permuted_group, permuted_indices
 end
 
+# --------------------
+# transform shadows to a mpo
+# --------------------
 
-# ---------------------------------------------- 
-# ----------transform shadows to a mpo---------- 
-# ---------------------------------------------- 
-
-function get_factorized_shadow_mpo(
-    shadow::FactorizedShadow
-)
+function get_factorized_shadow_mpo(shadow::FactorizedShadow)
     return MPO(shadow.shadow_data)
 end
 
-function get_factorized_shadow_mpo(
-    shadows::Matrix{FactorizedShadow}
-)
-    settings_num, shots = size(shadows)    
+function get_factorized_shadow_mpo(shadows::Matrix{FactorizedShadow})
+    settings_num, shots = size(shadows)
     mpo_shadows = Matrix{MPO}(undef, settings_num, shots)
-    for settings = 1:settings_num
-        for shot = 1:shots
+    for settings in 1:settings_num
+        for shot in 1:shots
             shadow = shadows[settings, shot]
             mpo_shadow = get_factorized_shadow_mpo(shadow)
             mpo_shadows[settings, shot] = mpo_shadow
@@ -40,43 +37,39 @@ function get_factorized_shadow_mpo(
     return mpo_shadows
 end
 
-function get_factorized_shadow_mpo(
-    shadows::Vector{FactorizedShadow}
-)
-    return get_factorized_shadow_mpo(
-        reshape(shadows, length(shadows), 1)
-    )
+function get_factorized_shadow_mpo(shadows::Vector{FactorizedShadow})
+    return get_factorized_shadow_mpo(reshape(shadows, length(shadows), 1))
 end
 
+# ---------------------
+# calculate the jackvals
+# ---------------------
 
-# --------------------------------------------
-# ---------- calculate the jackvals ----------
-# --------------------------------------------
-
-# calculate jackvals perms avg(K <= 2)
+# calculate jackvals perms avg(1 ≤ K <= 2)
 function calculate_jackvals_perms_avg(
-    shadows::Array{<:AbstractShadow,2},
+    shadows::Array{<:AbstractShadow, 2},
     k::Int;
-    O::Union{Nothing,MPO} = nothing,
-    show_progress = true,
+    O::Union{Nothing, MPO}=nothing,
+    show_progress=true,
 )
     @assert (k == 2 && isnothing(O)) || (k == 1) "O must be nothing for k=2, and k in the range of [1, 2]"
 
     # pre-enumerate permutations and m–cartesian product
     n_ru, n_m = size(shadows)
-    perms   = collect(combinations(1:n_ru, k))
-    cprod   = collect(CartesianIndices(ntuple(_ -> 1:n_m, k)))
-    perms_num  = length(perms)
+    perms = collect(combinations(1:n_ru, k))
+    cprod = collect(CartesianIndices(ntuple(_ -> 1:n_m, k)))
+    perms_num = length(perms)
 
     # average over measurements for each permutation
     perms_avg = zeros(Float64, perms_num)
-    @showprogress desc="Permutations Processing..." enabled=show_progress @threads for pidx in eachindex(perms)
+    @showprogress desc="Permutations Processing..." enabled=show_progress @threads for pidx in
+                                                                                       eachindex(
+        perms
+    )
         r = perms[pidx]
         ssum = 0.0
         for m in cprod
-            ssum += real(get_trace_product(
-                (shadows[r[i], m[i]] for i in 1:k)...; O
-            ))
+            ssum += real(get_trace_product((shadows[r[i], m[i]] for i in 1:k)...; O))
         end
         perms_avg[pidx] = ssum / length(cprod)
     end
@@ -86,35 +79,27 @@ end
 
 # 2 moment
 function calculate_purity_jackvals(
-    shadows::Array{<:AbstractShadow,2};
-    compute_renyi::Bool        = false,
-    show_progress::Bool = true,
+    shadows::Array{<:AbstractShadow, 2}; compute_renyi::Bool=false, show_progress::Bool=true
 )
     n_ru, n_m = size(shadows)
     @assert n_ru ≥ 3 "At least 3 random unitaries are required for 2-moment estimation."
     # pre-enumerate permutations
-    perms   = collect(combinations(1:n_ru, 2))
+    perms = collect(combinations(1:n_ru, 2))
 
     # average over measurements for each permutation
-    perm_avg = calculate_jackvals_perms_avg(
-        shadows,
-        2;
-        show_progress = show_progress,
-    )
+    perm_avg = calculate_jackvals_perms_avg(shadows, 2; show_progress=show_progress)
 
     # define the averaging functional
-    avgfun(x) = compute_renyi ?
-        (1/ (1 - 2)) * log2(mean(x)) :
-        mean(x)
+    avgfun(x) = compute_renyi ? (1 / (1 - 2)) * log2(mean(x)) : mean(x)
 
-    θ  = avgfun(perm_avg)
+    θ = avgfun(perm_avg)
 
     # jackknife groups: permutations not containing unitary i
     jackvals = zeros(Float64, n_ru)
     @threads for i in 1:n_ru
         s = 0.0
         count = 0
-        for (idx, r) in enumerate(perms) 
+        for (idx, r) in enumerate(perms)
             if i ∉ r
                 s += perm_avg[idx]
                 count += 1
@@ -127,41 +112,30 @@ function calculate_purity_jackvals(
     return θ, jackvals
 end
 
-function calculate_purity_jackvals(
-    shadows::Vector{<:AbstractShadow};
-    kwargs...,
-)
-    return calculate_purity_jackvals(
-        reshape(shadows, length(shadows), 1);
-        kwargs...,
-    )
+function calculate_purity_jackvals(shadows::Vector{<:AbstractShadow}; kwargs...)
+    return calculate_purity_jackvals(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
 # 1 moment
 function calculate_moment1_jackvals(
-    shadows::Array{<:AbstractShadow,2};
-    O::Union{Nothing,MPO} = nothing,
-    show_progress::Bool = true,
+    shadows::Array{<:AbstractShadow, 2};
+    O::Union{Nothing, MPO}=nothing,
+    show_progress::Bool=true,
 )
     n_ru, _ = size(shadows)
     @assert n_ru ≥ 2 "At least 2 random unitaries are required for 1-moment estimation."
     perms = collect(combinations(1:n_ru, 1))
 
     # average over measurements for each permutation
-    perm_avg = calculate_jackvals_perms_avg(
-        shadows,
-        1;
-        O = O,
-        show_progress = show_progress,
-    )
-    θ  = mean(perm_avg)
+    perm_avg = calculate_jackvals_perms_avg(shadows, 1; O=O, show_progress=show_progress)
+    θ = mean(perm_avg)
 
     # jackknife groups: permutations not containing unitary i
     jackvals = zeros(Float64, n_ru)
     @threads for i in 1:n_ru
         s = 0.0
         count = 0
-        for (idx, r) in enumerate(perms) 
+        for (idx, r) in enumerate(perms)
             if i ∉ r
                 s += perm_avg[idx]
                 count += 1
@@ -174,45 +148,35 @@ function calculate_moment1_jackvals(
     return θ, jackvals
 end
 
-function calculate_moment1_jackvals(
-    shadows::Vector{<:AbstractShadow};
-    kwargs...,
-)
-    return calculate_moment1_jackvals(
-        reshape(shadows, length(shadows), 1);
-        kwargs...,
-    )
+function calculate_moment1_jackvals(shadows::Vector{<:AbstractShadow}; kwargs...)
+    return calculate_moment1_jackvals(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
 # calculate z_r jackvals
 function calculate_z_r_jackvals(
-    shadows::Array{<:AbstractShadow,2},
-    odd_shadows::Array{<:AbstractShadow,2},
-    even_shadows::Array{<:AbstractShadow,2},
+    shadows::Array{<:AbstractShadow, 2},
+    odd_shadows::Array{<:AbstractShadow, 2},
+    even_shadows::Array{<:AbstractShadow, 2},
     reflect_op::MPO,
-    show_progress::Bool = true,
+    show_progress::Bool=true,
 )
     # pre-enumerate permutations (and m–cartesian product)
     n_ru, _ = size(shadows)
     @assert n_ru ≥ 3 "At least 3 random unitaries are required for z_r estimation."
-    reflect_perms   = collect(combinations(1:n_ru, 1))
-    purity_perms   = collect(combinations(1:n_ru, 2))
+    reflect_perms = collect(combinations(1:n_ru, 1))
+    purity_perms = collect(combinations(1:n_ru, 2))
 
     # average over measurements for each permutation
     reflect_perms_avg = calculate_jackvals_perms_avg(
-        shadows, 1; 
-        O = reflect_op,
-        show_progress = show_progress,
+        shadows, 1; O=reflect_op, show_progress=show_progress
     )
     reflect_expect = mean(reflect_perms_avg)
     odd_perms_avg = calculate_jackvals_perms_avg(
-        odd_shadows, 2;
-        show_progress = show_progress,
+        odd_shadows, 2; show_progress=show_progress
     )
     odd_expect = mean(odd_perms_avg)
     even_perms_avg = calculate_jackvals_perms_avg(
-        even_shadows, 2;
-        show_progress = show_progress,
+        even_shadows, 2; show_progress=show_progress
     )
     even_expect = mean(even_perms_avg)
 
@@ -228,7 +192,7 @@ function calculate_z_r_jackvals(
         even_sum = 0.0
         even_count = 0
 
-        for (idx, r) in enumerate(reflect_perms) 
+        for (idx, r) in enumerate(reflect_perms)
             if i ∉ r
                 reflect_sum += reflect_perms_avg[idx]
                 reflect_count += 1
@@ -237,7 +201,7 @@ function calculate_z_r_jackvals(
         μ = reflect_sum / reflect_count
         reflect_jackvals[i] = μ
 
-        for (idx, r) in enumerate(purity_perms) 
+        for (idx, r) in enumerate(purity_perms)
             if i ∉ r
                 odd_sum += odd_perms_avg[idx]
                 odd_count += 1
@@ -259,11 +223,11 @@ function calculate_z_r_jackvals(
 end
 
 function calculate_z_r_jackvals(
-    shadows::Array{<:AbstractShadow,1},
-    odd_shadows::Array{<:AbstractShadow,1},
-    even_shadows::Array{<:AbstractShadow,1},
+    shadows::Array{<:AbstractShadow, 1},
+    odd_shadows::Array{<:AbstractShadow, 1},
+    even_shadows::Array{<:AbstractShadow, 1},
     reflect_op::MPO,
-    show_progress::Bool = true,
+    show_progress::Bool=true,
 )
     return calculate_z_r_jackvals(
         reshape(shadows, length(shadows), 1),

@@ -2,6 +2,35 @@
 # get expect shadow
 # --------------------
 
+"""
+modified_get_expect_shadow(O, shadows; compute_sem=false, show_progress=true)
+
+Estimate the expectation value of operator O using an array of classical shadows.
+
+Arguments
+- O::MPO
+    The operator (as an MPO) whose expectation value is to be estimated.
+- shadows::AbstractArray{<:AbstractShadow, 2}
+    A 2D array of shadows with dimensions (settings_num, shots). Each element is an
+    AbstractShadow representing the classical shadow for a given random unitary and shot.
+
+Keyword arguments
+- compute_sem::Bool=false
+    If true, return (mean, sem) where sem is the standard error of the mean across
+    different random-unitary settings.
+- show_progress::Bool=true
+    If true, display progress bars for inner loops.
+
+Returns
+- If compute_sem == false: returns mean_value::ComplexF64 (mean expectation).
+- If compute_sem == true: returns (mean_value::ComplexF64, sem_value::Float64).
+
+Notes
+This function computes expectation values for each (setting, shot) pair by calling
+get_expect_shadow, averages over shots and settings, and optionally computes the
+standard error (SEM) across settings. A dispatch overload accepts a 1D vector of
+shadows and reshapes it to the expected 2D form.
+"""
 function modified_get_expect_shadow(
     O::MPO,
     shadows::AbstractArray{<:AbstractShadow, 2};
@@ -36,6 +65,12 @@ function modified_get_expect_shadow(
     end
 end
 
+"""
+modified_get_expect_shadow(O, shadows::AbstractShadow[]; kwargs...)
+
+Overload for a 1D vector of shadows. Internally reshapes the vector into a
+single-column 2D array and calls the 2D implementation.
+"""
 function modified_get_expect_shadow(
     O::MPO, shadows::AbstractArray{<:AbstractShadow, 1}; kwargs...
 )
@@ -46,6 +81,39 @@ end
 # get trace moment
 # --------------------
 
+"""
+modified_get_trace_moment(shadows, kth_moment; O=nothing, compute_sem=false, compute_renyi=false, show_progress=true)
+
+Estimate the k-th trace moment (e.g. Tr(ρ^k) when O==nothing or generalized trace products when O provided)
+using classical shadows.
+
+Arguments
+- shadows::Array{<:AbstractShadow, 2}
+    A 2D array of shadows with dimensions (n_ru, n_m), where n_ru is the number of
+    random-unitary settings and n_m the number of measurement shots per setting.
+- kth_moment::Int
+    The moment k to estimate.
+
+Keyword arguments
+- O::Union{Nothing, MPO}=nothing
+    Optional operator inserted into the trace product. When O==nothing the routine
+    estimates pure trace moments of the state.
+- compute_sem::Bool=false
+    If true, compute and return jackknife-based bias and standard error.
+- compute_renyi::Bool=false
+    If true, transform estimates to Rényi entropy form (uses (1/(1-k)) * log2(mean)).
+- show_progress::Bool=true
+    Toggle progress display.
+
+Returns
+- If compute_sem == false: returns scalar moment estimate::Float64.
+- If compute_sem == true: returns (estimate::Float64, bias::Float64, sem::Float64).
+
+Notes
+This function delegates to modified_get_trace_moments which supports vectorized k
+inputs and covariance estimation. A 1D shadows overload reshapes input to the
+expected 2D form.
+"""
 function modified_get_trace_moment(
     shadows::Array{<:AbstractShadow, 2},
     kth_moment::Int;
@@ -77,6 +145,12 @@ function modified_get_trace_moment(
     end
 end
 
+"""
+modified_get_trace_moment(shadows::AbstractShadow[]..., kth_moment; kwargs...)
+
+Overload for 1D shadow vectors. Reshapes shadows to a 2D single-column array and
+calls the main implementation.
+"""
 function modified_get_trace_moment(
     shadows::Array{<:AbstractShadow, 1}, kth_moment::Int; kwargs...
 )
@@ -85,6 +159,36 @@ function modified_get_trace_moment(
     )
 end
 
+"""
+modified_get_trace_moments(shadows, k_vec; O=nothing, compute_cov=false, compute_renyi=false, show_progress=true)
+
+Estimate multiple trace moments specified by k_vec. Returns a vector of estimates
+and optionally jackknife-based bias and covariance matrix.
+
+Algorithm
+- Enumerates all permutations of k distinct random-unitary settings and the
+  Cartesian product over shots for those settings.
+- Computes per-permutation averages of trace products (via get_trace_product).
+- Optionally applies a Rényi transform for compute_renyi.
+- If compute_cov is true, computes jackknife values by leaving out each unitary
+  and constructs a covariance matrix and bias-corrected estimates.
+
+Arguments
+- shadows::Array{<:AbstractShadow, 2}
+    Shadows arranged as (n_ru, n_m).
+- k_vec::Vector{Int}
+    List of integer moments to compute.
+
+Keyword arguments
+- O::Union{Nothing, MPO}=nothing
+- compute_cov::Bool=false
+- compute_renyi::Bool=false
+- show_progress::Bool=true
+
+Returns
+- If compute_cov == false: returns θ_est::Vector{Float64} of length nK.
+- If compute_cov == true: returns (θ_est, bias_vec, Σ) where bias_vec = θ_est - θ_jack and Σ is the covariance matrix.
+"""
 function modified_get_trace_moments(
     shadows::Array{<:AbstractShadow, 2},
     k_vec::Vector{Int};
@@ -180,6 +284,11 @@ function modified_get_trace_moments(
     end
 end
 
+"""
+modified_get_trace_moment(shadows::Vector{<:AbstractShadow}, kth_moment::Int; kwargs...)
+
+Overload for vector of shadows. Reshapes to 2D and calls modified_get_trace_moment.
+"""
 function modified_get_trace_moment(
     shadows::Vector{<:AbstractShadow}, kth_moment::Int; kwargs...
 )
@@ -193,6 +302,30 @@ end
 # --------------------
 
 # This function is only for O == nothing.
+"""
+modified_get_purity_shadow(shadows; compute_sem=false, compute_renyi=false, show_progress=true)
+
+Estimate the purity Tr(ρ^2) of the underlying quantum state using classical shadows.
+
+Arguments
+- shadows::Array{<:AbstractShadow, 2}
+    Shadows arranged as (n_ru, n_m).
+
+Keyword arguments
+- compute_sem::Bool=false
+    If true, compute and return jackknife-based bias and standard error.
+- compute_renyi::Bool=false
+    If true, adapt the jackknife values for Rényi transform if applicable.
+- show_progress::Bool=true
+
+Returns
+- If compute_sem == false: returns purity_estimate::Float64.
+- If compute_sem == true: returns (purity_estimate::Float64, bias::Float64, sem::Float64).
+
+Notes
+This function relies on calculate_purity_jackvals to obtain jackknife values for
+the purity estimator and then computes bias and SEM when requested.
+"""
 function modified_get_purity_shadow(
     shadows::Array{<:AbstractShadow, 2};
     compute_sem::Bool=false,
@@ -217,6 +350,11 @@ function modified_get_purity_shadow(
     end
 end
 
+"""
+modified_get_purity_shadow(shadows::Vector{<:AbstractShadow}; kwargs...)
+
+Overload for vector-of-shadows input. Reshapes to 2D and delegates to the main function.
+"""
 function modified_get_purity_shadow(shadows::Vector{<:AbstractShadow}; kwargs...)
     return modified_get_purity_shadow(reshape(shadows, length(shadows), 1); kwargs...)
 end

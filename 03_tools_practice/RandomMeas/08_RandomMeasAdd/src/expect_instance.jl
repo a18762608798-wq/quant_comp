@@ -2,7 +2,39 @@
 # ----------room reflect (Z_r)----------
 # --------------------------------------
 
-# reflect expect (Z_r)
+"""
+get_reflect_expect_shadow(filepath, site_indices, permuted_order; shadows_type="factorized",
+                          G=fill(1.0, length(site_indices)), compute_sem=false, show_progress=true)
+
+Compute the expectation value of the reflection operator Z_r using classical shadows.
+
+Arguments
+- filepath::String
+    Path to the stored shadow/group data.
+- site_indices
+    Indices of sites (qubits) in the original system.
+- permuted_order
+    Permutation order applied to site_indices before computing shadows.
+
+Keyword arguments
+- shadows_type::String = "factorized" | "dense"
+    Selects shadow representation. Default is "factorized".
+- G::Vector{Float64}
+    Weight vector per site (default: ones). It is permuted according to permuted_order.
+- compute_sem::Bool
+    If true, also compute and return the standard error of the mean (SEM).
+- show_progress::Bool
+    If true, display progress information when performing calculations.
+
+Returns
+- If compute_sem == false: returns real(expectation)::Float64.
+- If compute_sem == true: returns (real(expectation)::Float64, sem::Float64).
+
+Notes
+This function loads a permuted group from filepath, constructs factorized or dense
+shadows for the permuted system, builds the adjacent-swap operator for reflection,
+and delegates the expectation/SEM estimation to modified_get_expect_shadow.
+"""
 function get_reflect_expect_shadow(
     filepath::String,
     site_indices,
@@ -48,6 +80,44 @@ function get_reflect_expect_shadow(
     end
 end
 
+"""
+get_z_r_shadow(filepath, site_indices, permuted_order; shadows_type="dense",
+               G=fill(1.0, length(site_indices)), compute_sem=false, show_progress=true)
+
+Estimate the Z_r quantity (reflection-related observable) using classical shadows,
+where the system is partitioned into adjacent pairs and Z_r is computed from those pairs.
+
+Arguments
+- filepath::String
+    Path to the stored shadow/group data.
+- site_indices
+    Indices of sites (qubits) in the original system.
+- permuted_order
+    Permutation order applied to site_indices before computing shadows.
+
+Keyword arguments
+- shadows_type::String = "factorized" | "dense"
+    Selects shadow representation. Default is "dense".
+- G::Vector{Float64}
+    Weight vector per site (default: ones). It is permuted according to permuted_order.
+- compute_sem::Bool
+    If true, compute and return the jackknife-based bias estimate and SEM.
+- show_progress::Bool
+    If true, display progress information when performing calculations.
+
+Returns
+- If compute_sem == false: returns z_r_val::Float64 (estimated expectation).
+- If compute_sem == true: returns a tuple (z_r_val::Float64, bias_estimate::Float64, sem::Float64),
+  where bias_estimate is (z_r_val - z_r_jack) computed from jackknife values and sem is the standard error.
+
+Notes
+This function:
+- loads the permuted group,
+- splits qubits into adjacent pairs (odd/even subsystems),
+- constructs factorized or dense shadows for full and sub-systems,
+- builds the adjacent-swap operator, and
+- computes jackknife values via calculate_z_r_jackvals to obtain an estimate and (optionally) SEM.
+"""
 function get_z_r_shadow(
     filepath::String,
     site_indices,

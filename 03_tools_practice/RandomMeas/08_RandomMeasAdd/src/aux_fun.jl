@@ -2,7 +2,25 @@
 # Import the data from npz accroding to permuted order.
 # ---------------------
 
-# NOTE: This method has the function to reduce.
+"""
+Import a measurement group saved in an npz file and reorder its entries
+according to a provided permutation.
+
+Arguments
+- filepath::String: path to the .npz file produced by the measurement routines.
+- site_indices: array of site indices corresponding to the group saved in the file.
+- permuted_order: permutation vector indicating the new ordering of sites.
+
+Returns
+- permuted_group::MeasurementGroup: MeasurementGroup with measurement results
+  and settings reordered to match permuted_order.
+- permuted_indices: site_indices reordered by permuted_order.
+
+Notes
+- The function converts measurement_results and measurement_settings fields
+  to the expected types and applies the permutation consistently across
+  measurements and settings.
+"""
 function import_permuted_group(filepath::String, site_indices, permuted_order)
     permuted_indices = site_indices[permuted_order]
     group_data = npzread(filepath)
@@ -20,10 +38,29 @@ end
 # transform shadows to a mpo
 # --------------------
 
+"""
+Convert a FactorizedShadow into an MPO representation.
+
+Arguments
+- shadow::FactorizedShadow: a single factorized shadow instance.
+
+Returns
+- MPO representation constructed from shadow.shadow_data.
+"""
 function get_factorized_shadow_mpo(shadow::FactorizedShadow)
     return MPO(shadow.shadow_data)
 end
 
+"""
+Convert a matrix of FactorizedShadow objects into a matrix of MPOs.
+
+Arguments
+- shadows::Matrix{FactorizedShadow}: a 2D array with dimensions (settings, shots).
+
+Returns
+- Matrix{MPO} with the same dimensions where each entry is the MPO form of
+  the corresponding FactorizedShadow.
+"""
 function get_factorized_shadow_mpo(shadows::Matrix{FactorizedShadow})
     settings_num, shots = size(shadows)
     mpo_shadows = Matrix{MPO}(undef, settings_num, shots)
@@ -37,6 +74,12 @@ function get_factorized_shadow_mpo(shadows::Matrix{FactorizedShadow})
     return mpo_shadows
 end
 
+"""
+Convert a vector of FactorizedShadow objects into a column matrix of MPOs.
+
+This is a convenience overload that reshapes the vector to a (N,1) matrix and
+calls the Matrix{FactorizedShadow} method.
+"""
 function get_factorized_shadow_mpo(shadows::Vector{FactorizedShadow})
     return get_factorized_shadow_mpo(reshape(shadows, length(shadows), 1))
 end
@@ -45,7 +88,24 @@ end
 # calculate the jackvals
 # ---------------------
 
-# calculate jackvals perms avg(1 ≤ K <= 2)
+"""
+Compute averaged trace-products for all k-element permutations of random
+unitaries and over measurement indices.
+
+Arguments
+- shadows::Array{<:AbstractShadow, 2}: a (n_ru, n_m) array of shadow objects
+  where n_ru is number of random unitaries and n_m is measurements per unitary.
+- k::Int: permutation size (supported values 1 or 2).
+
+Keyword Arguments
+- O::Union{Nothing, MPO}=nothing: optional MPO operator passed to get_trace_product
+  (only allowed for k == 1).
+- show_progress::Bool=true: enable progress display.
+
+Returns
+- Array{Float64} of length choose(n_ru, k) with the mean trace-product for each
+  k-permutation averaged over measurement Cartesian products.
+"""
 function calculate_jackvals_perms_avg(
     shadows::Array{<:AbstractShadow, 2},
     k::Int;
@@ -78,6 +138,23 @@ function calculate_jackvals_perms_avg(
 end
 
 # 2 moment
+"""
+Estimate the second moment (purity) from shadow data and compute jackknife
+estimates over random unitaries.
+
+Arguments
+- shadows::Array{<:AbstractShadow, 2}: (n_ru, n_m) shadow data.
+
+Keyword Arguments
+- compute_renyi::Bool=false: if true, return the Rényi-2 entropy estimate
+  (uses log2 of the averaged purity); otherwise returns purity.
+- show_progress::Bool=true: show progress during permutation averaging.
+
+Returns
+- θ: scalar estimate (purity or Rényi-2 depending on compute_renyi).
+- jackvals::Vector{Float64}: leave-one-out jackknife estimates for each random
+  unitary.
+"""
 function calculate_purity_jackvals(
     shadows::Array{<:AbstractShadow, 2}; compute_renyi::Bool=false, show_progress::Bool=true
 )
@@ -116,7 +193,23 @@ function calculate_purity_jackvals(shadows::Vector{<:AbstractShadow}; kwargs...)
     return calculate_purity_jackvals(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
-# 1 moment
+"""
+Estimate the first moment (expectation value) from shadow data and compute
+jackknife estimates.
+
+Arguments
+- shadows::Array{<:AbstractShadow, 2}: (n_ru, n_m) shadow data.
+
+Keyword Arguments
+- O::Union{Nothing, MPO}=nothing: optional MPO operator used in the trace
+  product evaluation (for expectation value estimation).
+- show_progress::Bool=true: show progress during permutation averaging.
+
+Returns
+- θ: scalar estimate (mean expectation value).
+- jackvals::Vector{Float64}: leave-one-out jackknife estimates for each random
+  unitary.
+"""
 function calculate_moment1_jackvals(
     shadows::Array{<:AbstractShadow, 2};
     O::Union{Nothing, MPO}=nothing,
@@ -152,7 +245,28 @@ function calculate_moment1_jackvals(shadows::Vector{<:AbstractShadow}; kwargs...
     return calculate_moment1_jackvals(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
-# calculate z_r jackvals
+"""
+Compute the z_r estimator and jackknife values combining reflect and purity
+estimates.
+
+Arguments
+- shadows::Array{<:AbstractShadow, 2}: shadows used for the reflect operator
+  evaluation (n_ru, n_m).
+- odd_shadows::Array{<:AbstractShadow, 2}: shadows for one purity partition.
+- even_shadows::Array{<:AbstractShadow, 2}: shadows for the complementary purity partition.
+- reflect_op::MPO: operator used for the reflect expectation.
+
+Keyword Arguments
+- show_progress::Bool=true: show progress while averaging permutations.
+
+Returns
+- z_r_val::Float64: combined estimator value.
+- z_r_jackvals::Vector{Float64}: jackknife leave-one-out estimates for z_r.
+
+Notes
+- z_r is computed as R / sqrt((P_odd + P_even)/2) where R is the reflect
+  expectation and P_odd/P_even are the two purity estimates.
+"""
 function calculate_z_r_jackvals(
     shadows::Array{<:AbstractShadow, 2},
     odd_shadows::Array{<:AbstractShadow, 2},
@@ -222,6 +336,10 @@ function calculate_z_r_jackvals(
     return z_r_val, z_r_jackvals
 end
 
+"""
+Convenience overload accepting vectors for shadows; reshapes inputs to the
+2D form and forwards to the main calculate_z_r_jackvals function.
+"""
 function calculate_z_r_jackvals(
     shadows::Array{<:AbstractShadow, 1},
     odd_shadows::Array{<:AbstractShadow, 1},

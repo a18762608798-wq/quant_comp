@@ -25,7 +25,7 @@ In the paper [[2023_Elben-Zoller_Randomized-measurement_Nat.Rev.Phys.pdf]]
 $$
 std(\overline X) = \frac{std(X)}{\sqrt{n}}
 $$
-For the $\pm 1$ variable, $Var(X) \le 1$ ($Var(X) = E(X^2) - [E(X)]^2$), Viz.,
+For the $\pm 1$ variable, $Var(X) \le 1$ ($Var(X) = E(X^2) - [E(X)]^2$，方差必然大于0，证明小于1即可), Viz.,
 
 $$
 error \sim \frac{1}{\sqrt n}

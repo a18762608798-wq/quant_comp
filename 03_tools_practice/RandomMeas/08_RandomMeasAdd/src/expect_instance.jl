@@ -160,17 +160,17 @@ function get_z_r_shadow(
     # calculate the expectation and sem
     # get the jackvals info
     n_ru = size(shadows, 1)
-    z_r_val, z_r_jackvals = calculate_z_r_jackvals(
+    z_r_est, z_r_loos = calculate_z_r_loos(
         shadows, odd_shadows, even_shadows, adjacent_swap_op, show_progress
     )
     # calculate the sem
     if compute_sem
-        variance = (n_ru - 1)^2 / n_ru * var(z_r_jackvals)
+        variance = (n_ru - 1)^2 / n_ru * var(z_r_loos)
         sem = sqrt(variance)
-        z_r_jack = n_ru * z_r_val - (n_ru - 1) * mean(z_r_jackvals)
-        return z_r_val, z_r_val - z_r_jack, sem
+        z_r_jack = n_ru * z_r_est - (n_ru - 1) * mean(z_r_loos)
+        return z_r_est, z_r_est - z_r_jack, sem
     else
-        return z_r_val
+        return z_r_est
     end
 end
 

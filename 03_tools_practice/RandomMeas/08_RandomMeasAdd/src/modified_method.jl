@@ -335,15 +335,15 @@ function modified_get_purity_shadow(
     n_ru, n_m = size(shadows)
 
     # loop over desired moments
-    θ_est, jackmat = calculate_purity_jackvals(
+    θ_est, loos = calculate_purity_loos(
         shadows; compute_renyi=compute_renyi, show_progress=show_progress
     )
 
     # build covariance if requested
     if compute_sem
-        variance = (n_ru - 1)^2 / n_ru * var(jackmat)
+        variance = (n_ru - 1)^2 / n_ru * var(loos)
         sem = sqrt(variance)
-        θ_jack = n_ru * θ_est - (n_ru - 1) * mean(jackmat)
+        θ_jack = n_ru * θ_est - (n_ru - 1) * mean(loos)
         return θ_est, θ_est - θ_jack, sem
     else
         return θ_est

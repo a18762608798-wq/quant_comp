@@ -85,7 +85,7 @@ function get_factorized_shadow_mpo(shadows::Vector{FactorizedShadow})
 end
 
 # ---------------------
-# calculate the jackvals
+# calculate the jackknife loos
 # ---------------------
 
 """
@@ -106,7 +106,7 @@ Returns
 - Array{Float64} of length choose(n_ru, k) with the mean trace-product for each
   k-permutation averaged over measurement Cartesian products.
 """
-function calculate_jackvals_perms_avg(
+function calculate_comb_avgs(
     shadows::Array{<:AbstractShadow, 2},
     k::Int;
     O::Union{Nothing, MPO}=nothing,
@@ -116,25 +116,46 @@ function calculate_jackvals_perms_avg(
 
     # pre-enumerate permutations and m–cartesian product
     n_ru, n_m = size(shadows)
-    perms = collect(combinations(1:n_ru, k))
+    combs = collect(combinations(1:n_ru, k))
     cprod = collect(CartesianIndices(ntuple(_ -> 1:n_m, k)))
-    perms_num = length(perms)
+    combs_num = length(combs)
 
     # average over measurements for each permutation
-    perms_avg = zeros(Float64, perms_num)
-    @showprogress desc="Permutations Processing..." enabled=show_progress @threads for pidx in
-                                                                                       eachindex(
-        perms
-    )
-        r = perms[pidx]
+    comb_avgs = zeros(Float64, combs_num)
+    @showprogress desc="Permutations Processing..." enabled=show_progress @threads for pidx in eachindex(combs)
+        r = combs[pidx]
         ssum = 0.0
         for m in cprod
             ssum += real(get_trace_product((shadows[r[i], m[i]] for i in 1:k)...; O))
         end
-        perms_avg[pidx] = ssum / length(cprod)
+        comb_avgs[pidx] = ssum / length(cprod)
     end
 
-    return perms_avg
+    return comb_avgs
+end
+
+function calculate_combs_loos(
+    n_ru::Int64,
+    combs::Vector{Vector{Int64}},
+    avgs::Vector{Float64},
+)
+    k = length(first(combs))
+    ssum = sum(avgs) # The sum of avg
+    incident_threads = zeros(Float64, n_ru, Threads.maxthreadid()) # Sums of combinations that contain each random unitary.
+    # Calculate leave-one-out.
+    @threads for idx in eachindex(combs)
+        tid = threadid()
+        incident_indices = combs[idx] # Record incidented items.
+        incident_val = avgs[idx]
+        for index in incident_indices 
+            incident_threads[index, tid] += incident_val
+        end
+    end
+    incidents = vec(sum(incident_threads; dims=2))
+    denom = binomial(n_ru - 1, k)
+    loos = (ssum .- incidents) ./ denom # Get loos
+
+    return loos
 end
 
 # 2 moment
@@ -152,45 +173,37 @@ Keyword Arguments
 
 Returns
 - θ: scalar estimate (purity or Rényi-2 depending on compute_renyi).
-- jackvals::Vector{Float64}: leave-one-out jackknife estimates for each random
+- loos::Vector{Float64}: leave-one-out jackknife estimates for each random
   unitary.
 """
-function calculate_purity_jackvals(
+function calculate_purity_loos(
     shadows::Array{<:AbstractShadow, 2}; compute_renyi::Bool=false, show_progress::Bool=true
 )
     n_ru, n_m = size(shadows)
     @assert n_ru ≥ 3 "At least 3 random unitaries are required for 2-moment estimation."
     # pre-enumerate permutations
-    perms = collect(combinations(1:n_ru, 2))
+    combs = collect(combinations(1:n_ru, 2))
 
     # average over measurements for each permutation
-    perm_avg = calculate_jackvals_perms_avg(shadows, 2; show_progress=show_progress)
+    comb_avgs = calculate_comb_avgs(shadows, 2; show_progress=show_progress)
 
     # define the averaging functional
     avgfun(x) = compute_renyi ? (1 / (1 - 2)) * log2(mean(x)) : mean(x)
 
-    θ = avgfun(perm_avg)
+    θ = avgfun(comb_avgs)
 
-    # jackknife groups: permutations not containing unitary i
-    jackvals = zeros(Float64, n_ru)
-    @threads for i in 1:n_ru
-        s = 0.0
-        count = 0
-        for (idx, r) in enumerate(perms)
-            if i ∉ r
-                s += perm_avg[idx]
-                count += 1
-            end
-        end
-        μ = s / count
-        jackvals[i] = compute_renyi ? (1 / (1 - 2)) * log2(μ) : μ
-    end
+    # jackknife loo groups: permutations not containing unitary i
+    loos = calculate_combs_loos(
+        n_ru,
+        combs,
+        comb_avgs,
+    )
 
-    return θ, jackvals
+    return θ, loos
 end
 
-function calculate_purity_jackvals(shadows::Vector{<:AbstractShadow}; kwargs...)
-    return calculate_purity_jackvals(reshape(shadows, length(shadows), 1); kwargs...)
+function calculate_purity_loos(shadows::Vector{<:AbstractShadow}; kwargs...)
+    return calculate_purity_loos(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
 """
@@ -207,42 +220,34 @@ Keyword Arguments
 
 Returns
 - θ: scalar estimate (mean expectation value).
-- jackvals::Vector{Float64}: leave-one-out jackknife estimates for each random
+- loos::Vector{Float64}: leave-one-out jackknife estimates for each random
   unitary.
 """
-function calculate_moment1_jackvals(
+function calculate_moment1_loos(
     shadows::Array{<:AbstractShadow, 2};
     O::Union{Nothing, MPO}=nothing,
     show_progress::Bool=true,
 )
     n_ru, _ = size(shadows)
     @assert n_ru ≥ 2 "At least 2 random unitaries are required for 1-moment estimation."
-    perms = collect(combinations(1:n_ru, 1))
+    combs = collect(combinations(1:n_ru, 1))
 
     # average over measurements for each permutation
-    perm_avg = calculate_jackvals_perms_avg(shadows, 1; O=O, show_progress=show_progress)
-    θ = mean(perm_avg)
+    comb_avgs = calculate_comb_avgs(shadows, 1; O=O, show_progress=show_progress)
+    θ = mean(comb_avgs)
 
-    # jackknife groups: permutations not containing unitary i
-    jackvals = zeros(Float64, n_ru)
-    @threads for i in 1:n_ru
-        s = 0.0
-        count = 0
-        for (idx, r) in enumerate(perms)
-            if i ∉ r
-                s += perm_avg[idx]
-                count += 1
-            end
-        end
-        μ = s / count
-        jackvals[i] = μ
-    end
+    # jackknife loo groups: permutations not containing unitary i
+    loos = calculate_combs_loos(
+        n_ru,
+        combs,
+        comb_avgs,
+    )
 
-    return θ, jackvals
+    return θ, loos
 end
 
-function calculate_moment1_jackvals(shadows::Vector{<:AbstractShadow}; kwargs...)
-    return calculate_moment1_jackvals(reshape(shadows, length(shadows), 1); kwargs...)
+function calculate_moment1_loos(shadows::Vector{<:AbstractShadow}; kwargs...)
+    return calculate_moment1_loos(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
 """
@@ -261,93 +266,77 @@ Keyword Arguments
 
 Returns
 - z_r_val::Float64: combined estimator value.
-- z_r_jackvals::Vector{Float64}: jackknife leave-one-out estimates for z_r.
+- z_r_loos::Vector{Float64}: jackknife leave-one-out estimates for z_r.
 
 Notes
 - z_r is computed as R / sqrt((P_odd + P_even)/2) where R is the reflect
   expectation and P_odd/P_even are the two purity estimates.
 """
-function calculate_z_r_jackvals(
+function calculate_z_r_loos(
     shadows::Array{<:AbstractShadow, 2},
     odd_shadows::Array{<:AbstractShadow, 2},
     even_shadows::Array{<:AbstractShadow, 2},
     reflect_op::MPO,
     show_progress::Bool=true,
 )
-    # pre-enumerate permutations (and m–cartesian product)
+    # Pre-enumerate permutations (and m–cartesian product)
     n_ru, _ = size(shadows)
     @assert n_ru ≥ 3 "At least 3 random unitaries are required for z_r estimation."
-    reflect_perms = collect(combinations(1:n_ru, 1))
-    purity_perms = collect(combinations(1:n_ru, 2))
+    reflect_combs = collect(combinations(1:n_ru, 1))
+    purity_combs = collect(combinations(1:n_ru, 2))
 
     # average over measurements for each permutation
-    reflect_perms_avg = calculate_jackvals_perms_avg(
+    reflect_comb_avgs = calculate_comb_avgs(
         shadows, 1; O=reflect_op, show_progress=show_progress
     )
-    reflect_expect = mean(reflect_perms_avg)
-    odd_perms_avg = calculate_jackvals_perms_avg(
+    reflect_expect = mean(reflect_comb_avgs)
+    odd_comb_avgs = calculate_comb_avgs(
         odd_shadows, 2; show_progress=show_progress
     )
-    odd_expect = mean(odd_perms_avg)
-    even_perms_avg = calculate_jackvals_perms_avg(
+    odd_expect = mean(odd_comb_avgs)
+    even_comb_avgs = calculate_comb_avgs(
         even_shadows, 2; show_progress=show_progress
     )
-    even_expect = mean(even_perms_avg)
+    even_expect = mean(even_comb_avgs)
 
-    # jackknife groups: permutations not containing unitary i.
-    reflect_jackvals = zeros(Float64, n_ru)
-    odd_jackvals = zeros(Float64, n_ru)
-    even_jackvals = zeros(Float64, n_ru)
-    for i in 1:n_ru
-        reflect_sum = 0.0
-        reflect_count = 0
-        odd_sum = 0.0
-        odd_count = 0
-        even_sum = 0.0
-        even_count = 0
-
-        for (idx, r) in enumerate(reflect_perms)
-            if i ∉ r
-                reflect_sum += reflect_perms_avg[idx]
-                reflect_count += 1
-            end
-        end
-        μ = reflect_sum / reflect_count
-        reflect_jackvals[i] = μ
-
-        for (idx, r) in enumerate(purity_perms)
-            if i ∉ r
-                odd_sum += odd_perms_avg[idx]
-                odd_count += 1
-                even_sum += even_perms_avg[idx]
-                even_count += 1
-            end
-        end
-        odd_μ = odd_sum / odd_count
-        even_μ = even_sum / even_count
-        odd_jackvals[i] = odd_μ
-        even_jackvals[i] = even_μ
-    end
-
+    # Loo groups: leave-one-out.
+    # Calculate reflect leave-one-out.
+    reflect_loos = calculate_combs_loos(
+        n_ru,
+        reflect_combs,
+        reflect_comb_avgs,
+    )
+    # calculate purity leave-one-out.
+    odd_loos = calculate_combs_loos(
+        n_ru,
+        purity_combs,
+        odd_comb_avgs,
+    )
+    even_loos = calculate_combs_loos(
+        n_ru,
+        purity_combs,
+        even_comb_avgs,
+    )
+    # Calculate z_r_loos
     Z_R(R_I_val, P_I1, P_I2) = R_I_val / sqrt((P_I1 + P_I2) / 2)
-    z_r_val = Z_R(reflect_expect, odd_expect, even_expect)
-    z_r_jackvals = Z_R.(reflect_jackvals, odd_jackvals, even_jackvals)
+    z_r_est = Z_R(reflect_expect, odd_expect, even_expect)
+    z_r_loos = Z_R.(reflect_loos, odd_loos, even_loos)
 
-    return z_r_val, z_r_jackvals
+    return z_r_est, z_r_loos
 end
 
 """
 Convenience overload accepting vectors for shadows; reshapes inputs to the
-2D form and forwards to the main calculate_z_r_jackvals function.
+2D form and forwards to the main calculate_z_r_loos function.
 """
-function calculate_z_r_jackvals(
+function calculate_z_r_loos(
     shadows::Array{<:AbstractShadow, 1},
     odd_shadows::Array{<:AbstractShadow, 1},
     even_shadows::Array{<:AbstractShadow, 1},
     reflect_op::MPO,
     show_progress::Bool=true,
 )
-    return calculate_z_r_jackvals(
+    return calculate_z_r_loos(
         reshape(shadows, length(shadows), 1),
         reshape(odd_shadows, length(odd_shadows), 1),
         reshape(even_shadows, length(even_shadows), 1),

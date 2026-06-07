@@ -60,6 +60,6 @@ def savez_reflect_data(settings_num, shots):
 
 if __name__ == "__main__":
     # get measured_res
-    settings_num = 2**10
-    shots = 2**8
+    settings_num = 2**8
+    shots = 2**7
     savez_reflect_data(settings_num, shots)

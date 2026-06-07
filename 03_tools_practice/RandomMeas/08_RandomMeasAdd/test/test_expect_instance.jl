@@ -7,7 +7,7 @@ N = 8
 site_indices = siteinds("Qubit", N)
 group_path = "./04_workflow/b_data_acquisition/group.npz"
 
-test_index = 2
+test_index = 1
 
 if test_index == 1
     reduced_N = 4

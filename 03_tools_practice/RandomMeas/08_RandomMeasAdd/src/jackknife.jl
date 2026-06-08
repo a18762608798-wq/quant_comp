@@ -36,7 +36,7 @@ function calculate_comb_avgs(
 
     # average over measurements for each permutation
     comb_avgs = zeros(Float64, combs_num)
-    @showprogress desc="Permutations Processing..." enabled=show_progress @threads for pidx in eachindex(combs)
+    @showprogress desc="Combinations Processing..." enabled=show_progress @threads for pidx in eachindex(combs)
         r = combs[pidx]
         ssum = 0.0
         for m in cprod

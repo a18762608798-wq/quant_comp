@@ -123,13 +123,21 @@ function get_reflect_expect(
 
     # get reflect_est
     ssum = 0
-    for u_idx = 1:u_num
+    @showprogress desc="hamming_est..." enabled=show_progress @threads  for u_idx = 1:u_num
         data = datas[u_idx]
         reflect_ests[u_idx] = get_reflect_expect(data)
     end
+    
     reflect_est = mean(reflect_ests)
 
-    return reflect_est
+    if compute_sem
+        sem = std(reflect_ests) / sqrt(u_num)
+        return reflect_est, sem
+    else
+        reflect_est = mean(reflect_ests)
+        return reflect_est
+    end
+
 end
 
 """

@@ -4,7 +4,7 @@ using RandomMeas
 
 N = 8
 site_indices = siteinds("Qubit", N);
-group_path = joinpath(@__DIR__, "../../04_workflow/b_data_acquisition/group.npz")
+group_path = "./04_workflow/b_data_acquisition/random_group.npz"
 
 test_index = 1
 

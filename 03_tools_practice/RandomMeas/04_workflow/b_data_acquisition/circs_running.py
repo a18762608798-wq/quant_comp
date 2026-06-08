@@ -1,10 +1,10 @@
 import sys
 from pathlib import Path
+from tqdm.auto import tqdm
 
 import numpy as np
 from qiskit_aer import Aer
 from qiskit import transpile
-from tqdm.auto import tqdm
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
@@ -42,7 +42,7 @@ def random_measure_circs(circs, backend="aer_simulator", shots=2**9):
         measured_res = measured_res[:, :, ::-1]
     return measured_res
 
-def savez_reflect_data(meas_fun, data_path, settings_num, shots):
+def savez_meas_data(meas_fun, data_path, settings_num, shots):
     circs, local_unitary_settings = create_measured_circs(
         meas_fun,
         create_pre_measured_circ,
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     # NOTE: The demand of RandomMeas.jl, the tags of arrs are fixed.
     HERE = Path(__file__).resolve().parent
     out_path = HERE / "./random_group.npz"
-    savez_reflect_data(add_random_meas, out_path, settings_num, shots)
+    savez_meas_data(add_random_meas, out_path, settings_num, shots)
     out_path = HERE / "./conditional_random_group.npz"
-    savez_reflect_data(add_conditional_random_meas, out_path, settings_num, shots)
+    savez_meas_data(add_conditional_random_meas, out_path, settings_num, shots)

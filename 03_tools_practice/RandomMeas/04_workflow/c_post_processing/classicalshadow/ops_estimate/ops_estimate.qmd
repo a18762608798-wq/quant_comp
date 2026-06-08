@@ -24,9 +24,9 @@ using .RandomMeasAdd
 # get sub shadows
 N = 8
 site_indices = siteinds("Qubit", N)
-group_path = "./04_workflow/b_data_acquisition/group.npz"
+group_path = "./04_workflow/b_data_acquisition/random_group.npz"
 reduced_N = 4
-sub_range = [x for pair = 3:3 + reduced_N ÷ 2 - 1 for x in (pair, N - pair + 1)];
+sub_range = [3, 4, 5, 6];
 sub_group, sub_indices = import_permuted_group(group_path, site_indices, sub_range);
 sub_shadows = get_dense_shadows(sub_group);
 # get op
@@ -39,14 +39,14 @@ reflect_op = create_reflect_op(sub_indices);
 ```{julia}
 N = 8
 site_indices = siteinds("Qubit", N)
-group_path = "./04_workflow/b_data_acquisition/group.npz"
+group_path = "./04_workflow/b_data_acquisition/random_group.npz"
 reduced_N = 4
 permuted_order = [x for pair = 3:3 + reduced_N ÷ 2 - 1 for x in (pair, N - pair + 1)];
 @show get_reflect_expect_shadow(
     group_path,
     site_indices, 
-    permuted_order;
-    shadows_type="factorized"
+    permuted_order,
+    "factorized",
 )
 ```
 
@@ -55,13 +55,13 @@ permuted_order = [x for pair = 3:3 + reduced_N ÷ 2 - 1 for x in (pair, N - pair
 ```{julia}
 N = 8
 site_indices = siteinds("Qubit", N)
-group_path = "./04_workflow/b_data_acquisition/group.npz"
+group_path = "./04_workflow/b_data_acquisition/random_group.npz"
 reduced_N = 4
 permuted_order = [x for pair = 3:3 + reduced_N ÷ 2 - 1 for x in (pair, N - pair + 1)];
 @show get_z_r_shadow(
     group_path,
     site_indices, 
-    permuted_order;
-    shadows_type="dense",
+    permuted_order,
+    "dense",
 )
 ```

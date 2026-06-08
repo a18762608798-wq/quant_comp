@@ -38,8 +38,8 @@ and delegates the expectation/SEM estimation to modified_get_expect_shadow.
 function get_reflect_expect_shadow(
     filepath::String,
     site_indices,
-    permuted_order;
-    shadows_type="factorized",
+    permuted_order,
+    shadows_type;
     G=fill(1.0, length(site_indices))::Vector{Float64},
     compute_sem=false,
     show_progress=true,
@@ -78,6 +78,58 @@ function get_reflect_expect_shadow(
     else
         error("The values of compute_sem must be true of false")
     end
+end
+
+function get_reflect_expect(
+    data::MeasurementData,
+)
+    # get data
+    qubits_num = data.N
+    m_num = data.NM
+    results = data.measurement_results
+    pairs_num = qubits_num ÷ 2
+    odd_order = [2i - 1 for i in 1:pairs_num]
+    even_order = [2i for i in 1:pairs_num]
+
+    # get reflect_est
+    ssum = 0
+    for m_idx = 1:m_num
+        result = results[m_idx, :]
+        odd_result = result[odd_order]
+        even_result = result[even_order]
+        hamming_dist = sum(odd_result .!= even_result)
+        ssum += 2.0^pairs_num * (-2.0)^(-hamming_dist)
+    end
+
+    reflect_est = ssum / m_num
+
+    return reflect_est
+end
+
+function get_reflect_expect(
+    filepath::String,
+    site_indices,
+    permuted_order;
+    compute_sem=false,
+    show_progress=true,
+)
+    # get data
+    group, _ = import_permuted_group(
+        filepath, site_indices, permuted_order
+    )
+    u_num = group.NU
+    datas = group.measurements
+    reflect_ests = Vector{Float64}(undef, u_num)
+
+    # get reflect_est
+    ssum = 0
+    for u_idx = 1:u_num
+        data = datas[u_idx]
+        reflect_ests[u_idx] = get_reflect_expect(data)
+    end
+    reflect_est = mean(reflect_ests)
+
+    return reflect_est
 end
 
 """
@@ -121,8 +173,8 @@ This function:
 function get_z_r_shadow(
     filepath::String,
     site_indices,
-    permuted_order;
-    shadows_type="dense",
+    permuted_order,
+    shadows_type;
     G=fill(1.0, length(site_indices))::Vector{Float64},
     compute_sem=false,
     show_progress=true,

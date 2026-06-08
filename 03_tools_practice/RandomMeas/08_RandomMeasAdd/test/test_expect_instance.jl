@@ -13,12 +13,18 @@ if test_index == 1
     reduced_N = 4
     permuted_order = [x for pair in 3:(3 + reduced_N ÷ 2 - 1) for x in (pair, N - pair + 1)];
     @show get_reflect_expect_shadow(
-        group_path, site_indices, permuted_order; shadows_type="dense", compute_sem=true
+        group_path, site_indices, permuted_order, "dense"; compute_sem=true,
     )
 elseif test_index == 2
     reduced_N = 4
     permuted_order = [x for pair in 3:(3 + reduced_N ÷ 2 - 1) for x in (pair, N - pair + 1)];
     @show get_z_r_shadow(
-        group_path, site_indices, permuted_order; shadows_type="dense", compute_sem=true
+        group_path, site_indices, permuted_order, "dense"; compute_sem=true,
+    )
+elseif test_index == 3
+    reduced_N = 4
+    permuted_order = [x for pair in 3:(3 + reduced_N ÷ 2 - 1) for x in (pair, N - pair + 1)];
+    @show get_reflect_expect(
+        group_path, site_indices, permuted_order,
     )
 end

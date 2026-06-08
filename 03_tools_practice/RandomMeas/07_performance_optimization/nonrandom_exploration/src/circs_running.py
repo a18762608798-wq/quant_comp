@@ -6,8 +6,8 @@ from qiskit_aer import Aer
 from qiskit import transpile
 from tqdm.auto import tqdm
 
-from create_circs import create_measured_circs
-from create_circs import create_pre_measured_circ
+from circs_creator import create_measured_circs
+from circs_creator import create_pre_measured_circ
 
 
 def random_measure_circs(circs, backend="aer_simulator", shots=2**9):
@@ -64,8 +64,8 @@ def savez_random_measure_datas(data_paths, settings_num_vec, shots_vec):
 
 if __name__ == "__main__":
     # get measured_res
-    settings_num_vec = [i**2 for i in range(20, 60, 5)]
-    shots_vec = [i**2 for i in range(20, 60, 5)]
+    settings_num_vec = [i**2 for i in range(20, 80, 1)]
+    shots_vec = [i**2 for i in range(20, 80, 1)]
     # NOTE: The demand of RandomMeas.jl, the tags of arrs are fixed.
     HERE = Path(__file__).resolve().parent
     data_paths = [HERE / f"../data/random/shadow/group{i + 1}.npz" for i in range(len(settings_num_vec))]

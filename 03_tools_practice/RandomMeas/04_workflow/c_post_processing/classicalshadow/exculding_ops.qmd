@@ -22,7 +22,7 @@ using .RandomMeasAdd
 # get sub shadows
 N = 8
 site_indices = siteinds("Qubit", N)
-group_path = "./04_workflow/b_data_acquisition/group.npz"
+group_path = "./04_workflow/b_data_acquisition/random_group.npz"
 reduced_N = 4
 sub_range = [x for pair = 3:3 + reduced_N ÷ 2 - 1 for x in (pair, N - pair + 1)];
 sub_group, sub_indices = import_permuted_group(group_path, site_indices, sub_range);

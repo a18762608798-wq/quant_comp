@@ -1,5 +1,7 @@
-# aux fun
+# I/O
 export import_permuted_group
+
+# shadow utils
 export get_factorized_shadow_mpo
 
 # create ops
@@ -15,3 +17,4 @@ export modified_get_purity_shadow
 # expect_instance
 export get_reflect_expect_shadow
 export get_z_r_shadow
+export get_reflect_expect

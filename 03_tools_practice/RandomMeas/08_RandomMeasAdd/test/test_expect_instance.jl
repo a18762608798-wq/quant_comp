@@ -25,6 +25,10 @@ elseif test_index == 3
         group_path, site_indices, permuted_order; compute_sem=true,
     )
 elseif test_index == 4
+    @show get_purity_hamming(
+        group_path, site_indices, permuted_order; compute_sem=true,
+    )
+elseif test_index == 5
     @show get_z_r_shadow(
         group_path, site_indices, permuted_order; compute_sem=true,
     )

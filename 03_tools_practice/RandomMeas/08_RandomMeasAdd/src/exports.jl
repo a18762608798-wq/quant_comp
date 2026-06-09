@@ -19,3 +19,4 @@ export get_reflect_shadow
 export get_z_r_shadow
 export get_reflect_hamming
 export get_purity_shadow
+export get_purity_hamming

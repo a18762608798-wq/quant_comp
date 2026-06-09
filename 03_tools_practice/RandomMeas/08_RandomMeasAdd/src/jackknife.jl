@@ -89,7 +89,6 @@ function get_combs_loos_shadow(
     return loos
 end
 
-# 2 moment
 """
 Estimate the second moment (purity) from shadow data and compute jackknife
 estimates over random unitaries.

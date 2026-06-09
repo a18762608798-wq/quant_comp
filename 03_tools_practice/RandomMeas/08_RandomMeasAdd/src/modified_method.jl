@@ -335,7 +335,7 @@ function modified_get_purity_shadow(
     n_ru, n_m = size(shadows)
 
     # loop over desired moments
-    θ_est, loos = calculate_purity_loos(
+    θ_est, loos = get_purity_loos_shadow(
         shadows; compute_renyi=compute_renyi, show_progress=show_progress
     )
 

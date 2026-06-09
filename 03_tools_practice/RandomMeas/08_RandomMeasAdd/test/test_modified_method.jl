@@ -6,11 +6,11 @@ using RandomMeas
 N = 8
 site_indices = siteinds("Qubit", N)
 group_path = "./04_workflow/b_data_acquisition/random_group.npz"
-sub_range = [2, 7, 3, 4, 5, 6];
+sub_range = [3, 4, 5, 6];
 sub_group, sub_indices = import_permuted_group(group_path, site_indices, sub_range);
 sub_shadows = get_dense_shadows(sub_group);
 
-test_index = 4
+test_index = 2
 
 if test_index == 1
     # get expect shadows

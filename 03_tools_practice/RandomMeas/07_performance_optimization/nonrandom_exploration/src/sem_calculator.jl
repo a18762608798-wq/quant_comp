@@ -19,13 +19,13 @@ function save_reflect_sems_shadow(
     sems = Vector{Float64}(undef, group_num)
     @showprogress desc="reflect_sems_shadow_calculating..." for (i, fname) in enumerate(group_files)
         group_path = joinpath(group_dir, fname)
-        ests[i], sems[i] = get_reflect_expect_shadow(
+        ests[i], sems[i] = get_reflect_shadow(
             group_path, site_indices, permuted_order; compute_sem=true, show_progress=false,
         )
     end
 
     npzwrite(
-        joinpath(group_dir, "reflect_shadow_sems.npz"),
+        joinpath(group_dir, "reflect_sems_shadow.npz"),
         Dict(
             "ests" => ests,
             "sems" => sems,
@@ -45,15 +45,15 @@ function save_reflect_sems_hamming(
     # calculate the sems
     ests = Vector{Float64}(undef, group_num)
     sems = Vector{Float64}(undef, group_num)
-    @showprogress desc="reflect_sems_calculating..." for (i, fname) in enumerate(group_files)
+    @showprogress desc="reflect_sems_hamming_calculating..." for (i, fname) in enumerate(group_files)
         group_path = joinpath(group_dir, fname)
-        ests[i], sems[i] = get_reflect_expect(
+        ests[i], sems[i] = get_reflect_hamming(
             group_path, site_indices, permuted_order; compute_sem=true, show_progress=false,
         )
     end
 
     npzwrite(
-        joinpath(group_dir, "reflect_hamming_sems.npz"),
+        joinpath(group_dir, "reflect_sems_hamming.npz"),
         Dict(
             "ests" => ests,
             "sems" => sems,
@@ -75,13 +75,13 @@ function save_purity_sems_shadow(
     sems = Vector{Float64}(undef, group_num)
     @showprogress desc="purity_sems_shadow_calculating..." for (i, fname) in enumerate(group_files)
         group_path = joinpath(group_dir, fname)
-        ests[i], sems[i] = get_purity_expect_shadow(
+        ests[i], sems[i] = get_purity_shadow(
             group_path, site_indices, permuted_order; compute_sem=true, show_progress=false,
         )
     end
 
     npzwrite(
-        joinpath(group_dir, "purity_shadow_sems.npz"),
+        joinpath(group_dir, "purity_sems_shadow.npz"),
         Dict(
             "ests" => ests,
             "sems" => sems,
@@ -95,11 +95,11 @@ if abspath(PROGRAM_FILE) == @__FILE__
     permuted_order = [2, 7, 3, 6, 4, 5]
     # save swap shadows sems
     group_dir = joinpath(@__DIR__, "../data/random/")
-    #save_reflect_sems_shadow(group_dir, site_indices, permuted_order)
+    save_reflect_sems_shadow(group_dir, site_indices, permuted_order)
     # save swap hamming sems
     group_dir = joinpath(@__DIR__, "../data/random/")
     save_reflect_sems_hamming(group_dir, site_indices, permuted_order)
     # save purity shadows sems
     group_dir = joinpath(@__DIR__, "../data/random/")
-    #save_purity_sems_shadow(group_dir, site_indices, permuted_order)
+    save_purity_sems_shadow(group_dir, site_indices, permuted_order)
 end

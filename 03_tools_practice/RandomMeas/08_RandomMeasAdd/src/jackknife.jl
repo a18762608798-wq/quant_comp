@@ -1,5 +1,5 @@
 # ---------------------
-# calculate the jackknife loos
+# get the jackknife loos
 # ---------------------
 
 """
@@ -20,7 +20,7 @@ Returns
 - Array{Float64} of length choose(n_ru, k) with the mean trace-product for each
   k-permutation averaged over measurement Cartesian products.
 """
-function calculate_comb_avgs(
+function get_comb_avgs_shadow(
     shadows::Array{<:AbstractShadow, 2},
     k::Int;
     O::Union{Nothing, MPO}=nothing,
@@ -48,7 +48,7 @@ function calculate_comb_avgs(
     return comb_avgs
 end
 
-function calculate_combs_loos(
+function get_combs_loos_shadow(
     n_ru::Int64,
     combs::Vector{Vector{Int64}},
     avgs::Vector{Float64},
@@ -56,7 +56,7 @@ function calculate_combs_loos(
     k = length(first(combs))
     ssum = sum(avgs) # The sum of avg
     incident_threads = zeros(Float64, n_ru, Threads.maxthreadid()) # Sums of combinations that contain each random unitary.
-    # Calculate leave-one-out.
+    # get leave-one-out.
     @threads for idx in eachindex(combs)
         tid = threadid()
         incident_indices = combs[idx] # Record incidented items.
@@ -90,7 +90,7 @@ Returns
 - loos::Vector{Float64}: leave-one-out jackknife estimates for each random
   unitary.
 """
-function calculate_purity_loos(
+function get_purity_loos_shadow(
     shadows::Array{<:AbstractShadow, 2}; compute_renyi::Bool=false, show_progress::Bool=true
 )
     n_ru, n_m = size(shadows)
@@ -99,7 +99,7 @@ function calculate_purity_loos(
     combs = collect(combinations(1:n_ru, 2))
 
     # average over measurements for each permutation
-    comb_avgs = calculate_comb_avgs(shadows, 2; show_progress=show_progress)
+    comb_avgs = get_comb_avgs_shadow(shadows, 2; show_progress=show_progress)
 
     # define the averaging functional
     avgfun(x) = compute_renyi ? (1 / (1 - 2)) * log2(mean(x)) : mean(x)
@@ -107,7 +107,7 @@ function calculate_purity_loos(
     θ = avgfun(comb_avgs)
 
     # jackknife loo groups: permutations not containing unitary i
-    loos = calculate_combs_loos(
+    loos = get_combs_loos_shadow(
         n_ru,
         combs,
         comb_avgs,
@@ -116,8 +116,8 @@ function calculate_purity_loos(
     return θ, loos
 end
 
-function calculate_purity_loos(shadows::Vector{<:AbstractShadow}; kwargs...)
-    return calculate_purity_loos(reshape(shadows, length(shadows), 1); kwargs...)
+function get_purity_loos_shadow(shadows::Vector{<:AbstractShadow}; kwargs...)
+    return get_purity_loos_shadow(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
 """
@@ -137,7 +137,7 @@ Returns
 - loos::Vector{Float64}: leave-one-out jackknife estimates for each random
   unitary.
 """
-function calculate_moment1_loos(
+function get_momnet1_loos_shadow(
     shadows::Array{<:AbstractShadow, 2};
     O::Union{Nothing, MPO}=nothing,
     show_progress::Bool=true,
@@ -147,11 +147,11 @@ function calculate_moment1_loos(
     combs = collect(combinations(1:n_ru, 1))
 
     # average over measurements for each permutation
-    comb_avgs = calculate_comb_avgs(shadows, 1; O=O, show_progress=show_progress)
+    comb_avgs = get_comb_avgs_shadow(shadows, 1; O=O, show_progress=show_progress)
     θ = mean(comb_avgs)
 
     # jackknife loo groups: permutations not containing unitary i
-    loos = calculate_combs_loos(
+    loos = get_combs_loos_shadow(
         n_ru,
         combs,
         comb_avgs,
@@ -160,8 +160,8 @@ function calculate_moment1_loos(
     return θ, loos
 end
 
-function calculate_moment1_loos(shadows::Vector{<:AbstractShadow}; kwargs...)
-    return calculate_moment1_loos(reshape(shadows, length(shadows), 1); kwargs...)
+function get_momnet1_loos_shadow(shadows::Vector{<:AbstractShadow}; kwargs...)
+    return get_momnet1_loos_shadow(reshape(shadows, length(shadows), 1); kwargs...)
 end
 
 """
@@ -186,7 +186,7 @@ Notes
 - z_r is computed as R / sqrt((P_odd + P_even)/2) where R is the reflect
   expectation and P_odd/P_even are the two purity estimates.
 """
-function calculate_z_r_loos(
+function get_z_r_loos_shadow(
     shadows::Array{<:AbstractShadow, 2},
     odd_shadows::Array{<:AbstractShadow, 2},
     even_shadows::Array{<:AbstractShadow, 2},
@@ -200,38 +200,38 @@ function calculate_z_r_loos(
     purity_combs = collect(combinations(1:n_ru, 2))
 
     # average over measurements for each permutation
-    reflect_comb_avgs = calculate_comb_avgs(
+    reflect_comb_avgs = get_comb_avgs_shadow(
         shadows, 1; O=reflect_op, show_progress=show_progress
     )
     reflect_expect = mean(reflect_comb_avgs)
-    odd_comb_avgs = calculate_comb_avgs(
+    odd_comb_avgs = get_comb_avgs_shadow(
         odd_shadows, 2; show_progress=show_progress
     )
     odd_expect = mean(odd_comb_avgs)
-    even_comb_avgs = calculate_comb_avgs(
+    even_comb_avgs = get_comb_avgs_shadow(
         even_shadows, 2; show_progress=show_progress
     )
     even_expect = mean(even_comb_avgs)
 
     # Loo groups: leave-one-out.
-    # Calculate reflect leave-one-out.
-    reflect_loos = calculate_combs_loos(
+    # get reflect leave-one-out.
+    reflect_loos = get_combs_loos_shadow(
         n_ru,
         reflect_combs,
         reflect_comb_avgs,
     )
-    # calculate purity leave-one-out.
-    odd_loos = calculate_combs_loos(
+    # get purity leave-one-out.
+    odd_loos = get_combs_loos_shadow(
         n_ru,
         purity_combs,
         odd_comb_avgs,
     )
-    even_loos = calculate_combs_loos(
+    even_loos = get_combs_loos_shadow(
         n_ru,
         purity_combs,
         even_comb_avgs,
     )
-    # Calculate z_r_loos
+    # get z_r_loos
     Z_R(R_I_val, P_I1, P_I2) = R_I_val / sqrt((P_I1 + P_I2) / 2)
     z_r_est = Z_R(reflect_expect, odd_expect, even_expect)
     z_r_loos = Z_R.(reflect_loos, odd_loos, even_loos)
@@ -241,16 +241,16 @@ end
 
 """
 Convenience overload accepting vectors for shadows; reshapes inputs to the
-2D form and forwards to the main calculate_z_r_loos function.
+2D form and forwards to the main get_z_r_loos_shadow function.
 """
-function calculate_z_r_loos(
+function get_z_r_loos_shadow(
     shadows::Array{<:AbstractShadow, 1},
     odd_shadows::Array{<:AbstractShadow, 1},
     even_shadows::Array{<:AbstractShadow, 1},
     reflect_op::MPO,
     show_progress::Bool=true,
 )
-    return calculate_z_r_loos(
+    return get_z_r_loos_shadow(
         reshape(shadows, length(shadows), 1),
         reshape(odd_shadows, length(odd_shadows), 1),
         reshape(even_shadows, length(even_shadows), 1),

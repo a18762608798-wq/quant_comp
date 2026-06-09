@@ -11,12 +11,12 @@ def plot_reflect():
     random_sem_dir = Path(random_sem_dir)
     # get the data
     # shadow
-    shadow_sem_path = random_sem_dir / "reflect_shadow_sems.npz"
+    shadow_sem_path = random_sem_dir / "reflect_sems_shadow.npz"
     shadow_data = np.load(shadow_sem_path)
     shadow_ests = shadow_data["ests"]
     shadow_sems = shadow_data["sems"]
     # hamming
-    hamming_sem_path = random_sem_dir / "reflect_hamming_sems.npz"
+    hamming_sem_path = random_sem_dir / "reflect_sems_hamming.npz"
     hamming_data = np.load(hamming_sem_path)
     hamming_ests = hamming_data["ests"]
     hamming_sems = hamming_data["sems"]
@@ -46,7 +46,7 @@ def plot_purity():
     pic_dir = HERE / "../pics/"
     # get the data
     shadow_sem_dir = Path(shadow_sem_dir)
-    shadow_sem_path = shadow_sem_dir / "purity_shadow_sems.npz"
+    shadow_sem_path = shadow_sem_dir / "purity_sems_shadow.npz"
     shadow_data = np.load(shadow_sem_path)
     shadow_ests = shadow_data["ests"]
     shadow_sems = shadow_data["sems"]
@@ -68,4 +68,4 @@ def plot_purity():
     
 if __name__ == "__main__":
     plot_reflect()
-    #plot_purity()
+    plot_purity()

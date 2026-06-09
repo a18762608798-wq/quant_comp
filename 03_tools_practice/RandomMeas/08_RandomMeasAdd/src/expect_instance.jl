@@ -2,7 +2,7 @@
 # purity
 # ----------
 
-function get_purity_expect_shadow(
+function get_purity_shadow(
     filepath::String,
     site_indices,
     permuted_order;
@@ -72,7 +72,7 @@ This function loads a permuted group from filepath, constructs factorized or den
 shadows for the permuted system, builds the adjacent-swap operator for reflection,
 and delegates the expectation/SEM estimation to modified_get_expect_shadow.
 """
-function get_reflect_expect_shadow(
+function get_reflect_shadow(
     filepath::String,
     site_indices,
     permuted_order;
@@ -106,7 +106,7 @@ function get_reflect_expect_shadow(
     end
 end
 
-function get_reflect_expect(
+function get_reflect_hamming(
     data::MeasurementData,
 )
     # get data
@@ -132,7 +132,7 @@ function get_reflect_expect(
     return reflect_est
 end
 
-function get_reflect_expect(
+function get_reflect_hamming(
     filepath::String,
     site_indices,
     permuted_order;
@@ -151,7 +151,7 @@ function get_reflect_expect(
     ssum = 0
     @showprogress desc="hamming_est..." enabled=show_progress @threads  for u_idx = 1:u_num
         data = datas[u_idx]
-        reflect_ests[u_idx] = get_reflect_expect(data)
+        reflect_ests[u_idx] = get_reflect_hamming(data)
     end
     
     reflect_est = mean(reflect_ests)
@@ -202,7 +202,7 @@ This function:
 - splits qubits into adjacent pairs (odd/even subsystems),
 - constructs factorized or dense shadows for full and sub-systems,
 - builds the adjacent-swap operator, and
-- computes jackknife values via calculate_z_r_jackvals to obtain an estimate and (optionally) SEM.
+- computes jackknife values via get_z_r_jackvals to obtain an estimate and (optionally) SEM.
 """
 function get_z_r_shadow(
     filepath::String,
@@ -234,13 +234,13 @@ function get_z_r_shadow(
     # product the op
     adjacent_swap_op = create_adjacent_swap_op(permuted_indices)
 
-    # calculate the expectation and sem
+    # get the expectation and sem
     # get the jackvals info
     n_ru = size(shadows, 1)
-    z_r_est, z_r_loos = calculate_z_r_loos(
+    z_r_est, z_r_loos = get_z_r_loos_shadow(
         shadows, odd_shadows, even_shadows, adjacent_swap_op, show_progress
     )
-    # calculate the sem
+    # get the sem
     if compute_sem
         variance = (n_ru - 1)^2 / n_ru * var(z_r_loos)
         sem = sqrt(variance)

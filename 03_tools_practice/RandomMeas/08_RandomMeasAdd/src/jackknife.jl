@@ -48,6 +48,23 @@ function get_comb_avgs_shadow(
     return comb_avgs
 end
 
+"""
+get_combs_loos_shadow(n_ru, combs, avgs)
+
+Compute leave-one-out jackknife estimates from permutation averages.
+
+Arguments
+- n_ru::Int64: total number of random unitaries.
+- combs::Vector{Vector{Int64}}: vector of k-element combinations of unitary indices.
+- avgs::Vector{Float64}: averaged trace-products for each combination.
+
+Returns
+- loos::Vector{Float64}: leave-one-out jackknife estimates for each random unitary.
+
+Notes
+The leave-one-out value for unitary i is computed as the mean of the permutation
+averages over all combinations that do NOT contain i.
+"""
 function get_combs_loos_shadow(
     n_ru::Int64,
     combs::Vector{Vector{Int64}},

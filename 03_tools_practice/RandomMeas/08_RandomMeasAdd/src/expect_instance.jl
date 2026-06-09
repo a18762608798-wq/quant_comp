@@ -2,6 +2,29 @@
 # purity
 # ----------
 
+"""
+get_purity_shadow(filepath, site_indices, permuted_order; G, compute_sem, show_progress)
+
+Estimate the purity Tr(ρ²) using classical shadows from saved measurement data.
+
+Arguments
+- filepath::String: path to the .npz file produced by the measurement routines.
+- site_indices: array of site indices corresponding to the group saved in the file.
+- permuted_order: permutation vector indicating the new ordering of sites.
+
+Keyword arguments
+- G::Vector{Float64}: weight vector per site (default: ones). It is permuted according to permuted_order.
+- compute_sem::Bool: if true, also compute and return the standard error of the mean (SEM).
+- show_progress::Bool: if true, display progress information.
+
+Returns
+- If compute_sem == false: returns purity::Float64.
+- If compute_sem == true: returns (purity::Float64, sem::Float64).
+
+Notes
+This function loads a permuted group from filepath, constructs dense shadows,
+and delegates purity estimation to modified_get_purity_shadow.
+"""
 function get_purity_shadow(
     filepath::String,
     site_indices,
@@ -40,8 +63,7 @@ end
 # --------------------------------------
 
 """
-get_reflect_expect_shadow(filepath, site_indices, permuted_order; shadows_type="factorized",
-                          G=fill(1.0, length(site_indices)), compute_sem=false, show_progress=true)
+get_reflect_shadow(filepath, site_indices, permuted_order; G, compute_sem, show_progress)
 
 Compute the expectation value of the reflection operator Z_r using classical shadows.
 
@@ -54,8 +76,6 @@ Arguments
     Permutation order applied to site_indices before computing shadows.
 
 Keyword arguments
-- shadows_type::String = "factorized" | "dense"
-    Selects shadow representation. Default is "factorized".
 - G::Vector{Float64}
     Weight vector per site (default: ones). It is permuted according to permuted_order.
 - compute_sem::Bool
@@ -68,7 +88,7 @@ Returns
 - If compute_sem == true: returns (real(expectation)::Float64, sem::Float64).
 
 Notes
-This function loads a permuted group from filepath, constructs factorized or dense
+This function loads a permuted group from filepath, constructs dense
 shadows for the permuted system, builds the adjacent-swap operator for reflection,
 and delegates the expectation/SEM estimation to modified_get_expect_shadow.
 """
@@ -106,6 +126,22 @@ function get_reflect_shadow(
     end
 end
 
+"""
+get_reflect_hamming(data::MeasurementData)
+
+Compute the reflection expectation value using the Hamming distance method
+for a single MeasurementData object.
+
+Arguments
+- data::MeasurementData: a single measurement dataset.
+
+Returns
+- reflect_est::Float64: estimated reflection expectation value.
+
+Notes
+The estimator uses the formula: R = (1/NM) * Σ_m 2^pairs * (-2)^(-hamming_dist(m)),
+where the system is split into adjacent odd/even site pairs.
+"""
 function get_reflect_hamming(
     data::MeasurementData,
 )
@@ -132,6 +168,31 @@ function get_reflect_hamming(
     return reflect_est
 end
 
+"""
+get_reflect_hamming(filepath, site_indices, permuted_order; compute_sem, show_progress)
+
+Compute the reflection expectation value using the Hamming distance method
+from saved measurement data, averaging over random unitary settings.
+
+Arguments
+- filepath::String: path to the .npz file produced by the measurement routines.
+- site_indices: array of site indices corresponding to the group saved in the file.
+- permuted_order: permutation vector indicating the new ordering of sites.
+
+Keyword arguments
+- compute_sem::Bool: if true, compute and return the standard error of the mean (SEM)
+  across different random-unitary settings.
+- show_progress::Bool: if true, display progress information.
+
+Returns
+- If compute_sem == false: returns reflect_est::Float64.
+- If compute_sem == true: returns (reflect_est::Float64, sem::Float64).
+
+Notes
+This function loads a permuted group, then for each random-unitary setting computes
+the Hamming-distance reflection estimator via get_reflect_hamming(::MeasurementData),
+and averages the results across settings.
+"""
 function get_reflect_hamming(
     filepath::String,
     site_indices,
@@ -167,8 +228,7 @@ function get_reflect_hamming(
 end
 
 """
-get_z_r_shadow(filepath, site_indices, permuted_order; shadows_type="dense",
-               G=fill(1.0, length(site_indices)), compute_sem=false, show_progress=true)
+get_z_r_shadow(filepath, site_indices, permuted_order; G, compute_sem, show_progress)
 
 Estimate the Z_r quantity (reflection-related observable) using classical shadows,
 where the system is partitioned into adjacent pairs and Z_r is computed from those pairs.
@@ -182,8 +242,6 @@ Arguments
     Permutation order applied to site_indices before computing shadows.
 
 Keyword arguments
-- shadows_type::String = "factorized" | "dense"
-    Selects shadow representation. Default is "dense".
 - G::Vector{Float64}
     Weight vector per site (default: ones). It is permuted according to permuted_order.
 - compute_sem::Bool
@@ -200,9 +258,9 @@ Notes
 This function:
 - loads the permuted group,
 - splits qubits into adjacent pairs (odd/even subsystems),
-- constructs factorized or dense shadows for full and sub-systems,
+- constructs dense shadows for full and sub-systems,
 - builds the adjacent-swap operator, and
-- computes jackknife values via get_z_r_jackvals to obtain an estimate and (optionally) SEM.
+- computes jackknife values via get_z_r_loos_shadow to obtain an estimate and (optionally) SEM.
 """
 function get_z_r_shadow(
     filepath::String,

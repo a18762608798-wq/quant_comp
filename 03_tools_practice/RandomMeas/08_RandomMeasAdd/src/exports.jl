@@ -18,3 +18,4 @@ export modified_get_purity_shadow
 export get_reflect_expect_shadow
 export get_z_r_shadow
 export get_reflect_expect
+export get_purity_expect_shadow

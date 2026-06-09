@@ -1,3 +1,40 @@
+# ----------
+# purity
+# ----------
+
+function get_purity_expect_shadow(
+    filepath::String,
+    site_indices,
+    permuted_order;
+    G=fill(1.0, length(site_indices))::Vector{Float64},
+    compute_sem=false,
+    show_progress=true,
+)
+    permuted_G = G[permuted_order]
+    permuted_group, permuted_indices = import_permuted_group(
+        filepath, site_indices, permuted_order
+    )
+    shadows = get_dense_shadows(permuted_group; G=permuted_G)
+
+    if compute_sem
+        purity, _, sem = modified_get_purity_shadow(
+            shadows;
+            compute_sem=compute_sem,
+            show_progress=show_progress,
+        )
+        return purity, sem
+
+    else
+        purity = modified_get_purity_shadow(
+            shadows;
+            compute_sem=compute_sem,
+            show_progress=show_progress,
+        )
+        return purity
+
+    end
+end
+
 # --------------------------------------
 # ----------room reflect (Z_r)----------
 # --------------------------------------
@@ -38,8 +75,7 @@ and delegates the expectation/SEM estimation to modified_get_expect_shadow.
 function get_reflect_expect_shadow(
     filepath::String,
     site_indices,
-    permuted_order,
-    shadows_type;
+    permuted_order;
     G=fill(1.0, length(site_indices))::Vector{Float64},
     compute_sem=false,
     show_progress=true,
@@ -48,26 +84,10 @@ function get_reflect_expect_shadow(
     permuted_group, permuted_indices = import_permuted_group(
         filepath, site_indices, permuted_order
     )
-
-    if shadows_type == "factorized"
-        permuted_shadows = get_factorized_shadows(permuted_group; G=permuted_G)
-    elseif shadows_type == "dense"
-        permuted_shadows = get_dense_shadows(permuted_group; G=permuted_G)
-    else
-        error("wrong shadows type: $shadows_type")
-    end
-
+    permuted_shadows = get_dense_shadows(permuted_group; G=permuted_G)
     adjacent_swap_op = create_adjacent_swap_op(permuted_indices)
 
-    if compute_sem == false
-        reflect_expect = modified_get_expect_shadow(
-            adjacent_swap_op,
-            permuted_shadows;
-            compute_sem=compute_sem,
-            show_progress=show_progress,
-        )
-        return real(reflect_expect)
-    elseif compute_sem == true
+    if compute_sem
         reflect_expect, sem = modified_get_expect_shadow(
             adjacent_swap_op,
             permuted_shadows;
@@ -76,7 +96,13 @@ function get_reflect_expect_shadow(
         )
         return real(reflect_expect), sem
     else
-        error("The values of compute_sem must be true of false")
+        reflect_expect = modified_get_expect_shadow(
+            adjacent_swap_op,
+            permuted_shadows;
+            compute_sem=compute_sem,
+            show_progress=show_progress,
+        )
+        return real(reflect_expect)
     end
 end
 
@@ -181,8 +207,7 @@ This function:
 function get_z_r_shadow(
     filepath::String,
     site_indices,
-    permuted_order,
-    shadows_type;
+    permuted_order;
     G=fill(1.0, length(site_indices))::Vector{Float64},
     compute_sem=false,
     show_progress=true,
@@ -203,17 +228,9 @@ function get_z_r_shadow(
     odd_G = permuted_G[odd_order]
     even_G = permuted_G[even_order]
     # product the shadows
-    if shadows_type == "factorized"
-        shadows = get_factorized_shadows(permuted_group; G=permuted_G)
-        odd_shadows = get_factorized_shadows(odd_group; G=odd_G)
-        even_shadows = get_factorized_shadows(even_group; G=even_G)
-    elseif shadows_type == "dense"
-        shadows = get_dense_shadows(permuted_group; G=permuted_G)
-        odd_shadows = get_dense_shadows(odd_group; G=odd_G)
-        even_shadows = get_dense_shadows(even_group; G=even_G)
-    else
-        error("wrong shadows type: $shadows_type")
-    end
+    shadows = get_dense_shadows(permuted_group; G=permuted_G)
+    odd_shadows = get_dense_shadows(odd_group; G=odd_G)
+    even_shadows = get_dense_shadows(even_group; G=even_G)
     # product the op
     adjacent_swap_op = create_adjacent_swap_op(permuted_indices)
 

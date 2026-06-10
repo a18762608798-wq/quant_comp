@@ -8,7 +8,7 @@ from qiskit import transpile
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from circs_creator import create_measured_circs
+from circs_creator import create_random_meas_circs
 from circs_creator import create_pre_measured_circ
 from circs_creator import add_random_meas
 from circs_creator import add_conditional_random_meas
@@ -43,8 +43,8 @@ def random_measure_circs(circs, backend="aer_simulator", shots=2**9):
     return measured_res
 
 
-def savez_meas_data(meas_fun, data_path, settings_num, shots):
-    circs, local_unitary_settings = create_measured_circs(
+def savz_random_meas_data(meas_fun, data_path, settings_num, shots):
+    circs, local_unitary_settings = create_random_meas_circs(
         meas_fun,
         create_pre_measured_circ,
         settings_num,
@@ -57,12 +57,12 @@ def savez_meas_data(meas_fun, data_path, settings_num, shots):
     )
 
 
-def savez_meas_datas(meas_fun, data_paths, settings_num_vec, shots_vec):
+def savez_random_meas_datas(meas_fun, data_paths, settings_num_vec, shots_vec):
     for data_path_idx in tqdm(range(len(data_paths)), desc="Aer batches process"):
         data_path = data_paths[data_path_idx]
         settings_num = settings_num_vec[data_path_idx]
         shots = shots_vec[data_path_idx]
-        savez_meas_data(meas_fun, data_path, settings_num, shots)
+        savz_random_meas_data(meas_fun, data_path, settings_num, shots)
 
 
 if __name__ == "__main__":
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # random data save
     HERE = Path(__file__).resolve().parent
     data_paths = [HERE / f"../data/random/random_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    savez_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
+    savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
     # conditional random data save
     data_paths = [HERE / f"../data/random/conditional_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    savez_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)
+    savez_random_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)

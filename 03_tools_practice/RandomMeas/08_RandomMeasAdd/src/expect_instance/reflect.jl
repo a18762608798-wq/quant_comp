@@ -97,11 +97,12 @@ function get_reflect_hamming(
     ssum = 0
     for m_idx = 1:m_num
         result = results[m_idx, :]
-        odd_result = result[odd_order]
-        even_result = result[even_order]
+        odd_result = @view result[odd_order]
+        even_result = @view result[even_order]
         hamming_dist = sum(odd_result .!= even_result)
-        ssum += 2.0^pairs_num * (-2.0)^(-hamming_dist)
+        ssum += (-2.0)^(-hamming_dist)
     end
+    ssum *= 2.0^pairs_num
 
     reflect_est = ssum / m_num
 
@@ -167,3 +168,74 @@ function get_reflect_hamming(
 
 end
 
+
+function get_reflect_pauli(
+    nontrivial_meas_re::AbstractArray{<:Integer, 1}, 
+    nontrivial_base::AbstractArray{<:Integer, 1},
+)
+    # get info
+    qubit_num = length(nontrivial_meas_re)
+    pair_num = qubit_num ÷ 2
+    # storage result
+    dims_vec = [4 for _ = 1:qubit_num]
+    general_meas_re = fill(NaN, Tuple(dims_vec))
+
+    # calculate pauli_est
+    # nontrival
+    general_meas_re[nontrivial_base...] = prod(nontrivial_meas_re)
+
+    # include partial trivial and totally trivial
+    for trivial_num = 1:pair_num
+        for trivial_pair_index in combinations(1:pair_num, trivial_num)
+            # find the trivial indices
+            odd_trivial_indices = 2trivial_pair_index .- 1
+            even_trivial_indices = 2trivial_pair_index
+            # revise the trivial re
+            meas_re = copy(nontrivial_meas_re)
+            meas_re[odd_trivial_indices] .= 1
+            meas_re[even_trivial_indices] .= 1
+            pauli_est = prod(meas_re) 
+            # revise the trivial bases
+            general_base = copy(nontrivial_base)
+            general_base[odd_trivial_indices] .= 1
+            general_base[even_trivial_indices] .= 1
+            # storage
+            general_meas_re[general_base...] = pauli_est
+        end
+    end
+
+    return general_meas_re
+end
+
+
+function get_reflect_pauli(
+    nontrivial_meas_res::AbstractArray{<:Integer, 2}, 
+    nontrivial_bases::AbstractArray{<:Integer, 2},
+)
+    # get info
+    nontrivial_bases_num, qubit_num = size(nontrivial_bases)
+    # storage
+    dims_vec = [4 for _ = 1:qubit_num]
+    base_sums = zeros(Tuple(dims_vec))
+    base_count = zeros(Int, Tuple(dims_vec))
+    # calculate the est of pauli bases
+    # calculat the sum of pauli bases
+    for base_idx = 1:nontrivial_bases_num
+        nontrivial_meas_re = @view nontrivial_meas_res[base_idx, :]
+        base = @view nontrivial_bases[base_idx, :]
+        meas_re = get_reflect_pauli(
+            nontrivial_meas_re,
+            base,
+        )
+
+        hit_pos = .!isnan.(meas_re)
+        base_count .+= hit_pos
+        base_sums[hit_pos] .+= meas_re[hit_pos]
+    end
+    # calculate the est of pauli bases
+    hit_pos = base_count .> 0
+    base_ests = base_sums[hit_pos] ./ base_count[hit_pos]
+    base_sum = 1 / 2^qubit_num * sum(base_ests)
+
+    return base_sum
+end

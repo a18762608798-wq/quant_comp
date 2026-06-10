@@ -34,3 +34,17 @@ function import_permuted_group(filepath::String, site_indices, permuted_order)
     return permuted_group, permuted_indices
 end
 
+# ---------------------
+# Import the data from pauli meas accroding to permuted order.
+# ---------------------
+
+function import_permuted_pauli(filepath::String, permuted_order)
+    pauli_data = npzread(filepath)
+    meas_res = pauli_data["measurement_results"]
+    pauli_bases = pauli_data["measurement_settings"]
+    permuted_meas_res = meas_res[:, :, permuted_order]
+    permuted_meas_res = 1 .- 2 .* permuted_meas_res
+    permuted_pauli_bases = pauli_bases[:, permuted_order]
+    println(size(permuted_meas_res), size(permuted_pauli_bases))
+    return permuted_meas_res, permuted_pauli_bases
+end

@@ -51,7 +51,7 @@ def add_conditional_random_meas(circ_fun):
     return circ, local_unitary_setting
 
 
-def create_measured_circs(meas_fun, circ_fun, settings_num):
+def create_random_meas_circs(meas_fun, circ_fun, settings_num):
     circ = circ_fun()
     qubits_num = circ.num_qubits
     circs = []
@@ -67,17 +67,17 @@ def create_measured_circs(meas_fun, circ_fun, settings_num):
 
 if __name__ == "__main__":
     settings_num = 2**7
-    clcircs, classical_local_unitary_settings = create_measured_circs(
+    clcircs, classical_local_unitary_settings = create_random_meas_circs(
         add_random_meas,
         create_classical_circ,
         settings_num,
     )
-    circs, local_unitary_settings = create_measured_circs(
+    circs, local_unitary_settings = create_random_meas_circs(
         add_random_meas,
         create_pre_measured_circ,
         settings_num,
     )
-    condition_circs, conditional_local_unitary_settings = create_measured_circs(
+    condition_circs, conditional_local_unitary_settings = create_random_meas_circs(
         add_conditional_random_meas,
         create_pre_measured_circ,
         settings_num,

@@ -1,6 +1,6 @@
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import UnitaryGate
+from qiskit.circuit.library import UnitaryGate, HGate, SdgGate
 from qiskit.quantum_info import random_unitary
 
 
@@ -51,7 +51,20 @@ def add_conditional_random_meas(circ_fun):
     return circ, local_unitary_setting
 
 
-def create_measured_circs(meas_fun, circ_fun, settings_num):
+def add_pauli_meas(circ_fun, pauli_base):
+    circ = circ_fun()
+    qubits_num = circ.num_qubits
+    for index in range(qubits_num):
+        if pauli_base[index] == 2:
+            circ.append(HGate(), [index])
+        elif pauli_base[index] == 3:
+            circ.append(SdgGate(), [index])
+            circ.append(HGate(), [index])
+    circ.measure(range(qubits_num), range(qubits_num))
+    return circ
+
+
+def create_random_meas_circs(meas_fun, circ_fun, settings_num):
     circ = circ_fun()
     qubits_num = circ.num_qubits
     circs = []
@@ -65,27 +78,43 @@ def create_measured_circs(meas_fun, circ_fun, settings_num):
     return circs, local_unitary_settings
 
 
+def create_pauli_meas_circs(circ_fun, pauli_bases):
+    pauli_num = len(pauli_bases)
+    circs = []
+    for index in range(pauli_num):
+        pauli_base = pauli_bases[index]
+        circ = add_pauli_meas(circ_fun, pauli_base)
+        circs.append(circ)
+    return circs
+
+
 if __name__ == "__main__":
     settings_num = 2**7
-    clcircs, classical_local_unitary_settings = create_measured_circs(
+    clcircs, classical_local_unitary_settings = create_random_meas_circs(
         add_random_meas,
         create_classical_circ,
         settings_num,
     )
-    circs, local_unitary_settings = create_measured_circs(
+    print(clcircs[0].decompose(reps=1).draw())
+
+    circs, local_unitary_settings = create_random_meas_circs(
         add_random_meas,
         create_pre_measured_circ,
         settings_num,
     )
-    condition_circs, conditional_local_unitary_settings = create_measured_circs(
+    print(circs[1].decompose(reps=1).draw())
+
+    condition_circs, conditional_local_unitary_settings = create_random_meas_circs(
         add_conditional_random_meas,
         create_pre_measured_circ,
         settings_num,
     )
-
-    print(len(clcircs), np.shape(classical_local_unitary_settings))
-    print(len(circs), np.shape(local_unitary_settings))
-    print(len(condition_circs), np.shape(conditional_local_unitary_settings))
-    print(circs[0].decompose(reps=1).draw())
-    print(clcircs[1].decompose(reps=1).draw())
     print(condition_circs[0].decompose(reps=1).draw())
+
+    pauli_bases = [[1, 1, 1, 1, 2, 2, 3, 3] for i in range(10)]
+    pauli_circs = create_pauli_meas_circs(
+        create_pre_measured_circ,
+        pauli_bases,
+    )
+    print(pauli_circs[0].draw())
+

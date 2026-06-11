@@ -246,7 +246,7 @@ function get_reflect_pauli(
 )
     shot_num = size(nontrivial_meas_res, 2)
     base_ests = Vector{Float64}(undef, shot_num)
-    for shot_idx = 1:shot_num
+    @threads for shot_idx = 1:shot_num
         nontrivial_meas_re = nontrivial_meas_res[:, shot_idx, :]
         base_ests[shot_idx] = get_reflect_pauli(
             nontrivial_meas_re,

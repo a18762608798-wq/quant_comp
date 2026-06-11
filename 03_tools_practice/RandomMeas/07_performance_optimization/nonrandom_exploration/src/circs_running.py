@@ -155,11 +155,11 @@ if __name__ == "__main__":
     pauli_shots = [settings_num_vec[i] * shots_vec[i] for i in range(len(shots_vec))]
     # random data save
     HERE = Path(__file__).resolve().parent
-    data_paths = [HERE / f"../data/random/random_group{i + 1}.npz" for i in range(len(settings_num_vec))]
+    data_paths = [HERE / f"../data/random_group{i + 1}.npz" for i in range(len(settings_num_vec))]
     savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
     # conditional random data save
-    data_paths = [HERE / f"../data/random/conditional_group{i + 1}.npz" for i in range(len(settings_num_vec))]
+    data_paths = [HERE / f"../data/conditional_group{i + 1}.npz" for i in range(len(settings_num_vec))]
     savez_random_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)
     # reflect pauli datas
-    data_paths = [HERE / f"../data/random/reflect_pauli_group{i + 1}.npz" for i in range(len(settings_num_vec))]
+    data_paths = [HERE / f"../data/reflect_pauli_group{i + 1}.npz" for i in range(len(pauli_shots))]
     savez_reflect_pauli_meas_datas(data_paths, pauli_shots)

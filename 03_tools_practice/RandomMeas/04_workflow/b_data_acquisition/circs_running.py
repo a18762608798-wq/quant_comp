@@ -85,7 +85,7 @@ def savez_reflect_pauli_meas_data(data_path, shots):
     circ = create_pre_measured_circ()
     qubit_num = circ.num_qubits
     pair_num = qubit_num // 2
-    bases = [1, 2, 3]
+    bases = [2, 3, 4]
     pauli_bases = [] 
     for combo in itertools.product(bases, repeat=pair_num):
         base_arr = np.ones(qubit_num, dtype=np.int64)  
@@ -111,7 +111,7 @@ def savez_reflect_pauli_meas_data(data_path, shots):
 def savez_purity_pauli_meas_data(data_path, shots):
     circ = create_pre_measured_circ()
     qubit_num = circ.num_qubits
-    bases = [1, 2, 3]
+    bases = [2, 3, 4]
     pauli_bases = [] 
     for combo in itertools.product(bases, repeat=qubit_num):
         base_arr = np.ones(qubit_num, dtype=np.int64)  
@@ -138,9 +138,9 @@ if __name__ == "__main__":
     shots = 2**8
     HERE = Path(__file__).resolve().parent
     out_path = HERE / "./random_group.npz"
-    savez_random_meas_data(add_random_meas, out_path, settings_num, shots)
+    #savez_random_meas_data(add_random_meas, out_path, settings_num, shots)
     out_path = HERE / "./conditional_random_group.npz"
-    savez_random_meas_data(add_conditional_random_meas, out_path, settings_num, shots)
+    #savez_random_meas_data(add_conditional_random_meas, out_path, settings_num, shots)
     out_path = HERE / "./reflect_pauli_group.npz"
     savez_reflect_pauli_meas_data(out_path, settings_num * shots)
     out_path = HERE / "./purity_pauli_group.npz"

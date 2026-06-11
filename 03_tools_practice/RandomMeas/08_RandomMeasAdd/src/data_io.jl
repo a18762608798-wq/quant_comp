@@ -43,8 +43,7 @@ function import_permuted_pauli(filepath::String, permuted_order)
     meas_res = pauli_data["measurement_results"]
     pauli_bases = pauli_data["measurement_settings"]
     permuted_meas_res = meas_res[:, :, permuted_order]
-    permuted_meas_res = 1 .- 2 .* permuted_meas_res
+    permuted_meas_res = 1 .- 2permuted_meas_res
     permuted_pauli_bases = pauli_bases[:, permuted_order]
-    println(size(permuted_meas_res), size(permuted_pauli_bases))
     return permuted_meas_res, permuted_pauli_bases
 end

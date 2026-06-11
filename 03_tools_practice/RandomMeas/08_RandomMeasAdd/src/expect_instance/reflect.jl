@@ -168,7 +168,6 @@ function get_reflect_hamming(
 
 end
 
-
 function get_reflect_pauli(
     nontrivial_meas_re::AbstractArray{<:Integer, 1}, 
     nontrivial_base::AbstractArray{<:Integer, 1},
@@ -235,7 +234,41 @@ function get_reflect_pauli(
     # calculate the est of pauli bases
     hit_pos = base_count .> 0
     base_ests = base_sums[hit_pos] ./ base_count[hit_pos]
-    base_sum = 1 / 2^qubit_num * sum(base_ests)
+    base_sum = 1 / sqrt(2)^qubit_num * sum(base_ests)
 
     return base_sum
+end
+
+function get_reflect_pauli(
+    nontrivial_meas_res::AbstractArray{<:Integer, 3}, 
+    nontrivial_bases::AbstractArray{<:Integer, 2};
+    compute_sem=false,
+)
+    shot_num = size(nontrivial_meas_res, 2)
+    base_ests = Vector{Float64}(undef, shot_num)
+    for shot_idx = 1:shot_num
+        nontrivial_meas_re = nontrivial_meas_res[:, shot_idx, :]
+        base_ests[shot_idx] = get_reflect_pauli(
+            nontrivial_meas_re,
+            nontrivial_bases,
+        )
+    end
+    est = mean(base_ests)
+    if compute_sem
+        sem = std(base_ests) / sqrt(shot_num)
+        return est, sem
+    else
+        return est
+    end
+
+end
+
+function get_reflect_pauli(
+    filepath,
+    permuted_order;
+    kwargs...
+)
+    res, bases = import_permuted_pauli(filepath, permuted_order)
+    return get_reflect_pauli(res, bases; kwargs...)
+
 end

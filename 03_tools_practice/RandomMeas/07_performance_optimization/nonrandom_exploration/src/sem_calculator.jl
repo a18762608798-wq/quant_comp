@@ -5,6 +5,9 @@ using ProgressMeter
 include("../../../08_RandomMeasAdd/src/RandomMeasAdd.jl")
 using .RandomMeasAdd
 
+# ----------
+# reflect
+# ----------
 function save_reflect_sems_shadow(
     group_dir, 
     site_indices, 
@@ -61,6 +64,37 @@ function save_reflect_sems_hamming(
     )
 end
 
+
+function save_reflect_sems_pauli(
+    group_dir, 
+    permuted_order, 
+)
+    # find the group data files
+    group_files = filter(file -> occursin(r"^conditional_group\d+\.npz$", file), readdir(group_dir))
+    group_num = length(group_files)
+    sort!(group_files; by = file -> parse(Int, match(r"conditional_group(\d+)\.npz", file)[1]))
+    # calculate the sems
+    ests = Vector{Float64}(undef, group_num)
+    sems = Vector{Float64}(undef, group_num)
+    @showprogress desc="reflect_sems_hamming_calculating..." for (i, fname) in enumerate(group_files)
+        group_path = joinpath(group_dir, fname)
+        ests[i], sems[i] = get_reflect_hamming(
+            group_path, site_indices, permuted_order; compute_sem=true, show_progress=false,
+        )
+    end
+
+    npzwrite(
+        joinpath(group_dir, "reflect_sems_hamming.npz"),
+        Dict(
+            "ests" => ests,
+            "sems" => sems,
+        ),
+    )
+end
+
+# ----------
+# purity
+# ----------
 function save_purity_sems_shadow(
     group_dir, 
     site_indices, 

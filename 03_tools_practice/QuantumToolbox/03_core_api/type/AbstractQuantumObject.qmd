@@ -47,6 +47,45 @@ fieldnames(QuantumObject)
 fieldnames(QuantumObjectEvolution)
 ```
 
+>(:data, :type, :dimensions)
+>data::DataType
+>type::ObjType
+>dimensions::DimType
+
 ### methods
 
-Wait for the usage.
+---
+QobjEvo(
+    op_func_list::Union{Tuple, AbstractQuantumObject};
+    type = nothing,
+)
+
+```{julia}
+# a case
+H0 = 0.5 * sigmaz()
+H1 = sigmax()
+p = (T = 100.0) # p are parameters
+s(p, t) = t / p.T
+H = QobjEvo((
+    H0,
+    (H0 - H1, s), # s*(H0 - H1)
+))
+```
+
+---
+QobjEvo(op::QuantumObject, f::Function; type = nothing)
+
+>The f parameter is time-dependent coefficient that multiplies the operator.
+>So the function could only be use to calculate single term with time.
+
+---
+QobjEvo(A::QuantumObjectEvolution)(p, t)
+>得到具体时刻的op.
+
+---
+QobjEvo(A::QuantumObjectEvolution)(ψout, ψin, p, t)
+>直接写入已有的 ψout.
+
+---
+QobjEvo(A::QuantumObjectEvolution)(ψ, p, t)
+>直接计算 H(p,t)∣ψ⟩.

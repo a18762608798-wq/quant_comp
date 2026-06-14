@@ -1,0 +1,44 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# operation
+
+```{julia}
+# basic number operation
+A = sigmax()
+exp(A)
+sin(A)
+cos(A)
+sqrtm(A)
+logm(A)
+expm(A)
+```
+
+```{julia}
+# basic matrix operation
+ket2dm(ψ)        # ket -> density matrix
+expect(O, ψ)     # 期望值
+variance(O, ψ)   # 方差
+ptrace(ρ, sel)   # partial trace
+tr(A)            # trace
+norm(A)          # 范数
+normalize(A)
+unit(A)          # normalize 的同义函数
+```
+
+```{julia}
+# eigen
+using QuantumToolbox
+
+H = sigmax()
+eigenenergies(H) # eigenvalues
+eigenstates(H) # 本征值 + 本征态
+eigsolve(H; eigvals=1) # 稀疏/大矩阵部分本征解
+```
+

@@ -1,0 +1,52 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# AbstractQuantumObject
+
+```{julia}
+using QuantumToolbox
+```
+
+```{julia}
+@doc AbstractQuantumObject
+subtypes(AbstractQuantumObject)
+```
+
+>QuantumObject
+>QuantumObjectEvolution
+
+## QuantumObject
+
+```{julia}
+@doc QuantumObject
+```
+
+### fields
+
+```{julia}
+fieldnames(QuantumObject)
+```
+
+>(:data, :type, :dimensions)
+
+## QuantumObjectEvolution
+
+```{julia}
+@doc QuantumObjectEvolution
+```
+
+### fields
+
+```{julia}
+fieldnames(QuantumObjectEvolution)
+```
+
+### methods
+
+Wait for the usage.

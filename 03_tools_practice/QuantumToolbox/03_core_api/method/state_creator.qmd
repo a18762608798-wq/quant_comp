@@ -1,0 +1,121 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# state creator
+
+```{julia}
+using QuantumToolbox
+```
+
+## basis(fock)
+
+These two writing methods have the same effect.
+
+```{julia}
+@doc basis
+```
+
+---
+basis([T::Type=ComplexF64,] N::Int, j::Int=0; dims::Union{Int,AbstractVector{Int},Tuple}=N, sparse::Union{Bool,Val}=Val(false))    
+
+>Generates a fock state \ket{\psi} of dimension N with element type T = ComplexF64 (default).
+>j::Int: The index of eigenvector, **start from 0**.
+>sparse::Union{Bool,Val}: Use sparse or not.
+
+```{julia}
+# single bits
+ψ = basis(ComplexF32, 2, 0; sparse=Val(true))
+```
+
+```{julia}
+# multiple bits
+dims = (2, 2, 2)
+ψ = basis(ComplexF32, 2^3, 7; dims=dims, sparse=Val(true))
+```
+
+## fock_dm
+
+```{julia}
+@doc fock_dm
+```
+
+---
+fock_dm([T::Type=ComplexF64,] N::Int, j::Int=0; dims::Union{Int,AbstractVector{Int},Tuple}=N, sparse::Union{Bool,Val}=Val(false))
+
+>Density matrix representation of a Fock state with element type T = ComplexF64 (default).
+
+```{julia}
+dims = (2, 2, 2)
+ψ = fock_dm(ComplexF32, 2^3, 0; dims=dims, sparse=Val(true))
+```
+
+## rand
+
+### ket
+
+```{julia}
+@doc rand_ket
+```
+
+---
+rand_ket([T::Type=ComplexF64,] dimensions)
+
+```{julia}
+rand_ket(ComplexF32, (2, 3, 3)) # the room: 2 * 3 * 3
+```
+
+### dm
+
+```{julia}
+@doc rand_dm
+```
+
+```{julia}
+rand_dm(ComplexF32, (2, 3, 3)) # the room: 2 * 3 * 3
+```
+
+---
+rand_dm([T::Type=ComplexF64,] dimensions; rank::Int=get_hilbert_size(dimensions)[1])
+
+## zero
+
+```{julia}
+@doc zero_ket
+```
+
+---
+zero_ket([T::Type=ComplexF64,] dimensions)
+
+>Returns a zero Ket vector with given argument dimensions and element type T = ComplexF64
+(default).
+>dimensions::Int: Number of basis states in the Hilbert space.
+>dimensions::Union{ProductDimensions,AbstractVector{Int}, Tuple}: list of dimensions representing the each number of basis in the subsystems.
+
+```{julia}
+zero_ket(ComplexF32, (2, 3, 3)) # the room: 2 * 3 * 3
+```
+
+## conherent 
+
+```{julia}
+@doc coherent
+```
+
+---
+coherent(N::Int, α::Number)
+
+>Fock basis 里构造的单模态. 暂时不用管他.
+
+## conherent_dm
+
+## thermal_dm
+
+## thermal_dm(N, nbar)
+
+## maximally_mixed_dm(N)

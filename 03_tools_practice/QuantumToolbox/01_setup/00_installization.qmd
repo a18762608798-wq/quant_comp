@@ -14,9 +14,10 @@ julia:
 ## RandomMeas
 
 ```{julia}
-using Pkg
 Pkg.activate(".")
-Pkg.add("LanguageServer") # which provides the language server for julia, and it is the dependency of the vscode extension of julia.
-Pkg.add("RandomMeas")
-Pkg.add("ITensors")
+using Pkg
+Pkg.add("LanguageServer") 
+Pkg.add("QuantumToolbox")
+Pkg.add("LinearAlgebra")
+Pkg.add("SparseArrays")
 ```

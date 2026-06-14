@@ -55,7 +55,7 @@ reduced_data = reduce_to_subsystem(data, [1])
 ---
 reduce_to_subsystem(group::MeasurementGroup{T},subsystem::Vector{Int}
 
-Reduce a MeasurementGroup object (T <: LocalMeasurementSetting) to a specified subsystem.
+>Reduce a MeasurementGroup object (T <: LocalMeasurementSetting) to a specified subsystem.
 
 ```{julia}
 setting = LocalUnitaryMeasurementSetting(2, ensemble=Haar);

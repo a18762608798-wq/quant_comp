@@ -17,7 +17,9 @@ from circs_creator import add_pauli_meas
 from circs_creator import create_pauli_meas_circs
 
 
+# ----------------------
 # random measure circs
+# ----------------------
 def random_measure_circs(circs, backend="aer_simulator", shots=2**9):
     settings_num = len(circs)
     qubits_num = circs[0].num_qubits
@@ -61,8 +63,9 @@ def savez_random_meas_data(meas_fun, data_path, settings_num, shots):
         measurement_settings=local_unitary_settings,
     )
 
-
+# --------------------
 # pauli measure circs
+# --------------------
 def pauli_measure_circs(circs, pauli_bases, backend="aer_simulator", shots=2**9):
     qubit_num = circs[0].num_qubits
     base_num = len(pauli_bases)
@@ -132,7 +135,9 @@ def savez_purity_pauli_meas_data(data_path, shots):
         measurement_settings=pauli_bases,
     )
 
+# ---------------------
 # savez datas for nonrandom exploration 
+# ---------------------
 def savez_random_meas_datas(meas_fun, data_paths, settings_num_vec, shots_vec):
     for data_path_idx in tqdm(range(len(data_paths)), desc="Aer batches process"):
         data_path = data_paths[data_path_idx]
@@ -148,10 +153,15 @@ def savez_reflect_pauli_meas_datas(data_paths, shot_nums):
         savez_reflect_pauli_meas_data(data_path, shot_num)
 
 
+# base settings for grid scan
+base_vals = [i**2 for i in range(3, 25, 1)]
+pairs = list(itertools.product(base_vals, base_vals))
+
 if __name__ == "__main__":
-    # get measured_res
-    settings_num_vec = [i**2 for i in range(20, 25, 1)]
-    shots_vec = [i**2 for i in range(20, 25, 1)]
+    # get measured_res: grid scan and flatten
+
+    settings_num_vec = [p[0] for p in pairs]
+    shots_vec = [p[1] for p in pairs]
     pauli_shots = [settings_num_vec[i] * shots_vec[i] for i in range(len(shots_vec))]
     # random data save
     HERE = Path(__file__).resolve().parent

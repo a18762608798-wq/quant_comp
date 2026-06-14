@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from seaborn import lineplot
 
+from circs_running import base_vals
+from circs_running import pairs
+
+step = max(1, len(pairs) // len(base_vals))
+tick_positions = list(range(0, len(pairs), step))
+tick_labels = [f"({int(np.sqrt(nu))},{int(np.sqrt(s))})" for nu, s in pairs][::step]
+
+
 def plot_reflect():
     HERE = Path(__file__).resolve().parent
     sem_dir = HERE / "../data/"
@@ -28,21 +36,25 @@ def plot_reflect():
 
     # plot sems
     df = pd.DataFrame({
-        "√NU or √ NM": [i for i in range(20, 25, 1)] * 3,
+        "(√NU, √NM)": list(range(len(pairs))) * 3,
         "ests": np.append(shadow_ests, np.append(hamming_ests, pauli_ests)),
         "1/sems": np.append(1 / shadow_sems, np.append(1 / hamming_sems, 1 / pauli_sems)),
-        "calculate_way": ["shadow" for i in range(20, 25)] + ["hamming" for i in range(20, 25)] + ["pauli" for i in range(20, 25)] 
+        "calculate_way": ["shadow"] * len(pairs) + ["hamming"] * len(pairs) + ["pauli"] * len(pairs)
     })
-    lineplot(data=df, x='√NU or √ NM', y='1/sems', hue="calculate_way", marker="o",)  
+    plt.figure(figsize=(36, 3))
+    lineplot(data=df, x='(√NU, √NM)', y='1/sems', hue="calculate_way", marker="o",)
+    plt.xticks(ticks=tick_positions, labels=tick_labels, rotation=45, ha='right')
     plt.title('reflect_sems')
-    plt.savefig(pic_dir / "reflect_sems.png")
-    plt.clf()  
+    plt.savefig(pic_dir / "reflect_sems.png", bbox_inches='tight')
+    plt.clf()
 
     # plot ests
-    lineplot(data=df, x='√NU or √ NM', y='ests', hue="calculate_way", marker="o",)  
+    plt.figure(figsize=(36, 3))
+    lineplot(data=df, x='(√NU, √NM)', y='ests', hue="calculate_way", marker="o",)
+    plt.xticks(ticks=tick_positions, labels=tick_labels, rotation=45, ha='right')
     plt.title('reflect_ests')
-    plt.savefig(pic_dir / "reflect_ests.png")
-    plt.clf()  
+    plt.savefig(pic_dir / "reflect_ests.png", bbox_inches='tight')
+    plt.clf()
 
 
 def plot_purity():
@@ -64,22 +76,27 @@ def plot_purity():
 
     # plot sems
     df = pd.DataFrame({
-        "√NU or √ NM": [i for i in range(20, 25, 1)] * 2,
+        "(√NU, √NM)": list(range(len(pairs))) * 2,
         "ests": np.append(shadow_ests, hamming_ests),
         "1/sems": np.append(1 / shadow_sems, 1 / hamming_sems),
-        "calculate_way": ["shadow" for i in range(20, 25)] + ["hamming" for i in range(20, 25)] 
+        "calculate_way": ["shadow"] * len(pairs) + ["hamming"] * len(pairs)
     })
-    lineplot(data=df, x='√NU or √ NM', y='1/sems', hue="calculate_way", marker="o",)  
+    plt.figure(figsize=(36, 3))
+    lineplot(data=df, x='(√NU, √NM)', y='1/sems', hue="calculate_way", marker="o",)
+    plt.xticks(ticks=tick_positions, labels=tick_labels, rotation=45, ha='right')
     plt.title('purity_sems')
-    plt.savefig(pic_dir / "purity_sems.png")
-    plt.clf()  
+    plt.savefig(pic_dir / "purity_sems.png", bbox_inches='tight')
+    plt.clf()
 
     # plot ests
-    lineplot(data=df, x='√NU or √ NM', y='ests', hue="calculate_way", marker="o",)  
+    plt.figure(figsize=(36, 3))
+    lineplot(data=df, x='(√NU, √NM)', y='ests', hue="calculate_way", marker="o",)
+    plt.xticks(ticks=tick_positions, labels=tick_labels, rotation=45, ha='right')
     plt.title('purity_ests')
-    plt.savefig(pic_dir / "purity_ests.png")
-    plt.clf()  
-    
+    plt.savefig(pic_dir / "purity_ests.png", bbox_inches='tight')
+    plt.clf()
+
+
 if __name__ == "__main__":
     plot_reflect()
     plot_purity()

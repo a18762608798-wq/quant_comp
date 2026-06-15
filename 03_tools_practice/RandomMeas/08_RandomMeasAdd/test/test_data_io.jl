@@ -5,7 +5,7 @@ using RandomMeas
 N = 8
 site_indices = siteinds("Qubit", N);
 
-test_index = 2
+test_index = 3
 
 if test_index == 1
     group_path = "./04_workflow/b_data_acquisition/random_group.npz"
@@ -15,6 +15,12 @@ if test_index == 1
     )
 elseif test_index == 2
     pauli_path = "./04_workflow/b_data_acquisition/reflect_pauli_group.npz"
+    permuted_order = [3, 6, 4, 5];
+    res, bases = import_permuted_pauli(
+        pauli_path, permuted_order
+    );
+elseif test_index == 3
+    pauli_path = "./04_workflow/b_data_acquisition/purity_pauli_group.npz"
     permuted_order = [3, 6, 4, 5];
     res, bases = import_permuted_pauli(
         pauli_path, permuted_order

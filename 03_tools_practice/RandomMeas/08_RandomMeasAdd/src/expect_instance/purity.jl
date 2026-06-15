@@ -1,7 +1,6 @@
 # ----------
 # purity
 # ----------
-
 """
 get_purity_shadow(filepath, site_indices, permuted_order; G, compute_sem, show_progress)
 
@@ -115,3 +114,32 @@ function get_purity_hamming(
 
     end
 end
+
+# ------------
+# get pauli purity
+# ------------
+function get_purity_pauli(
+    pauli_path::String,
+    permuted_order::Vector;
+    compute_sem=false,
+    show_progress=true,
+)
+    res, bases = import_permuted_pauli(
+        pauli_path, permuted_order
+    );
+    shot_num = size(res, 2)
+    base_ests = clean_pauli_data(res, bases)
+    purity_est, loos = get_purity_loos_pauli(
+        base_ests;
+        show_progress=show_progress,
+    )
+
+    if compute_sem
+        variance = (shot_num - 1)^2 / shot_num * var(loos)
+        sem = sqrt(variance)
+        return purity_est, sem
+    else
+        return purity_est
+    end
+end
+

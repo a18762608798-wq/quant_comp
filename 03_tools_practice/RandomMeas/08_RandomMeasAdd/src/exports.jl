@@ -22,3 +22,4 @@ export get_reflect_hamming
 export get_purity_shadow
 export get_purity_hamming
 export get_reflect_pauli
+export get_purity_pauli

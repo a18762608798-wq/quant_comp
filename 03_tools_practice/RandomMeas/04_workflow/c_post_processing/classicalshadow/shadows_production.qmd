@@ -10,7 +10,7 @@ julia:
 # product shadows
 
 ```{julia}
-include("../src/RandomMeasAdd.jl")
+include("./08_RandomMeasAdd/src/RandomMeasAdd.jl")
 using .RandomMeasAdd
 using RandomMeas
 ```
@@ -68,7 +68,7 @@ calibration_data = npzread("./04_workflow/c_post_processing/classicalshadow/cali
 calibration_vec = calibration_data["calibration"]
 group_path = "./04_workflow/b_data_acquisition/random_group.npz"
 sub_range = [3, 4, 5, 6];
-sub_group, sub_indices = import_permuted_group(group_path, site_indices, sub_range);
+sub_group, sub_indices = import_permuted_group(group_path, siteindices, sub_range);
 sub_shadows = get_factorized_shadows(sub_group, G=calibration_vec[sub_range]);
 ```
 

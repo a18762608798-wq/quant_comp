@@ -73,13 +73,18 @@ def plot_purity():
     hamming_data = np.load(hamming_sem_path)
     hamming_ests = hamming_data["ests"]
     hamming_sems = hamming_data["sems"]
+    # pauli
+    pauli_sem_path = sem_dir / "purity_sems_pauli.npz"
+    pauli_data = np.load(pauli_sem_path)
+    pauli_ests = pauli_data["ests"]
+    pauli_sems = pauli_data["sems"]
 
     # plot sems
     df = pd.DataFrame({
-        "(√NU, √NM)": list(range(len(pairs))) * 2,
-        "ests": np.append(shadow_ests, hamming_ests),
-        "1/sems": np.append(1 / shadow_sems, 1 / hamming_sems),
-        "calculate_way": ["shadow"] * len(pairs) + ["hamming"] * len(pairs)
+        "(√NU, √NM)": list(range(len(pairs))) * 3,
+        "ests": np.append(shadow_ests, np.append(hamming_ests, pauli_ests)),
+        "1/sems": np.append(1 / shadow_sems, np.append(1 / hamming_sems, 1 / pauli_sems)),
+        "calculate_way": ["shadow"] * len(pairs) + ["hamming"] * len(pairs) + ["pauli"] * len(pairs)
     })
     plt.figure(figsize=(36, 3))
     lineplot(data=df, x='(√NU, √NM)', y='1/sems', hue="calculate_way", marker="o",)

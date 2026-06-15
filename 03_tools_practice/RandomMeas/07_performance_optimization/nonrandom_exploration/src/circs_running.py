@@ -128,7 +128,6 @@ def savez_purity_pauli_meas_data(data_path, shots):
         pauli_bases,
     )
     measured_res = pauli_measure_circs(circs, pauli_bases, shots=shots)
-    print(np.shape(measured_res), np.shape(pauli_bases))
     np.savez(
         data_path,
         measurement_results=measured_res,
@@ -153,8 +152,15 @@ def savez_reflect_pauli_meas_datas(data_paths, shot_nums):
         savez_reflect_pauli_meas_data(data_path, shot_num)
 
 
+def savez_purity_pauli_meas_datas(data_paths, shot_nums):
+    for idx in tqdm(range(len(data_paths)), desc="Aer batches process"):
+        data_path = data_paths[idx]
+        shot_num = shot_nums[idx]
+        savez_purity_pauli_meas_data(data_path, shot_num)
+
+
 # base settings for grid scan
-base_vals = [i**2 for i in range(3, 25, 1)]
+base_vals = [i**2 for i in range(9, 25, 1)]
 pairs = list(itertools.product(base_vals, base_vals))
 
 if __name__ == "__main__":
@@ -166,10 +172,13 @@ if __name__ == "__main__":
     # random data save
     HERE = Path(__file__).resolve().parent
     data_paths = [HERE / f"../data/random_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
+    #savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
     # conditional random data save
     data_paths = [HERE / f"../data/conditional_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    savez_random_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)
+    #savez_random_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)
     # reflect pauli datas
     data_paths = [HERE / f"../data/reflect_pauli_group{i + 1}.npz" for i in range(len(pauli_shots))]
-    savez_reflect_pauli_meas_datas(data_paths, pauli_shots)
+    #savez_reflect_pauli_meas_datas(data_paths, pauli_shots)
+    # purity pauli datas
+    data_paths = [HERE / f"../data/purity_pauli_group{i + 1}.npz" for i in range(len(pauli_shots))]
+    savez_purity_pauli_meas_datas(data_paths, pauli_shots)

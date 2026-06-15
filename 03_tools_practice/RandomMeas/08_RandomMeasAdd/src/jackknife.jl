@@ -48,6 +48,27 @@ function get_comb_avgs_shadow(
     return comb_avgs
 end
 
+function get_comb_avgs_pauli(
+    base_ests::Vector;
+    show_progress=true,
+)
+    # pre-enumerate permutations and m–cartesian product
+    shot_num = length(base_ests)
+    combs = collect(combinations(1:shot_num, 2))
+    combs_num = length(combs)
+
+    # average over measurements for each permutation
+    comb_avgs = zeros(Float64, combs_num)
+    @showprogress desc="Combinations Processing..." enabled=show_progress @threads for pidx in eachindex(combs)
+        r = combs[pidx]
+        ssum = 0.0
+        ssum += sum(base_ests[r[1]] .* base_ests[r[2]])
+        comb_avgs[pidx] = ssum
+    end
+
+    return comb_avgs
+end
+
 """
 get_combs_loos_shadow(n_ru, combs, avgs)
 
@@ -84,6 +105,29 @@ function get_combs_loos_shadow(
     end
     incidents = vec(sum(incident_threads; dims=2))
     denom = binomial(n_ru - 1, k)
+    loos = (ssum .- incidents) ./ denom # Get loos
+
+    return loos
+end
+
+function get_combs_loos_pauli(
+    shot_num::Int64,
+    combs::Vector{Vector{Int64}},
+    avgs::Vector{Float64},
+)
+    ssum = sum(avgs) # The sum of avg
+    incident_threads = zeros(Float64, shot_num, Threads.maxthreadid()) # Sums of combinations that contain each shot.
+    # get leave-one-out.
+    @threads for idx in eachindex(combs)
+        tid = threadid()
+        incident_indices = combs[idx] # Record incidented items.
+        incident_val = avgs[idx]
+        for index in incident_indices 
+            incident_threads[index, tid] += incident_val
+        end
+    end
+    incidents = vec(sum(incident_threads; dims=2))
+    denom = binomial(shot_num - 1, 2)
     loos = (ssum .- incidents) ./ denom # Get loos
 
     return loos
@@ -134,6 +178,30 @@ end
 
 function get_purity_loos_shadow(shadows::Vector{<:AbstractShadow}; kwargs...)
     return get_purity_loos_shadow(reshape(shadows, length(shadows), 1); kwargs...)
+end
+
+
+function get_purity_loos_pauli(
+    base_ests::Vector;
+    show_progress=true,
+)
+    shot_num = length(base_ests)
+    # pre-enumerate permutations
+    combs = collect(combinations(1:shot_num, 2))
+
+    # average over measurements for each permutation
+    comb_avgs = get_comb_avgs_pauli(base_ests; show_progress=show_progress)
+
+    purity_est = mean(comb_avgs)
+
+    # jackknife loo groups: permutations not containing unitary i
+    loos = get_combs_loos_pauli(
+        shot_num,
+        combs,
+        comb_avgs,
+    )
+
+    return purity_est, loos
 end
 
 """

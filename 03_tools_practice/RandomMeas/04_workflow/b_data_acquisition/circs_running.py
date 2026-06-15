@@ -45,6 +45,7 @@ def random_measure_circs(circs, backend="aer_simulator", shots=2**9):
         measured_res = measured_res[:, :, ::-1]
     return measured_res
 
+
 def savez_random_meas_data(meas_fun, data_path, settings_num, shots):
     circs, local_unitary_settings = create_random_meas_circs(
         meas_fun,
@@ -138,9 +139,9 @@ if __name__ == "__main__":
     shots = 2**8
     HERE = Path(__file__).resolve().parent
     out_path = HERE / "./random_group.npz"
-    #savez_random_meas_data(add_random_meas, out_path, settings_num, shots)
+    savez_random_meas_data(add_random_meas, out_path, settings_num, shots)
     out_path = HERE / "./conditional_random_group.npz"
-    #savez_random_meas_data(add_conditional_random_meas, out_path, settings_num, shots)
+    savez_random_meas_data(add_conditional_random_meas, out_path, settings_num, shots)
     out_path = HERE / "./reflect_pauli_group.npz"
     savez_reflect_pauli_meas_data(out_path, settings_num * shots)
     out_path = HERE / "./purity_pauli_group.npz"

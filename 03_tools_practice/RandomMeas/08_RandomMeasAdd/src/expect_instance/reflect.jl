@@ -1,5 +1,5 @@
 # -------------
-# reflect operator 
+# get reflect shadow 
 # -------------
 
 """
@@ -66,6 +66,9 @@ function get_reflect_shadow(
     end
 end
 
+# -------------
+# get reflect hamming 
+# -------------
 """
 get_reflect_hamming(data::MeasurementData)
 
@@ -168,7 +171,10 @@ function get_reflect_hamming(
 
 end
 
-function get_reflect_pauli(
+# ------------------
+# get reflect pauli
+# ------------------
+function clean_reflect_data(
     nontrivial_meas_re::AbstractArray{<:Integer, 1}, 
     nontrivial_base::AbstractArray{<:Integer, 1},
 )
@@ -206,7 +212,6 @@ function get_reflect_pauli(
     return general_meas_re
 end
 
-
 function get_reflect_pauli(
     nontrivial_meas_res::AbstractArray{<:Integer, 2}, 
     nontrivial_bases::AbstractArray{<:Integer, 2},
@@ -222,7 +227,7 @@ function get_reflect_pauli(
     for base_idx = 1:nontrivial_bases_num
         nontrivial_meas_re = @view nontrivial_meas_res[base_idx, :]
         base = @view nontrivial_bases[base_idx, :]
-        meas_re = get_reflect_pauli(
+        meas_re = clean_reflect_data(
             nontrivial_meas_re,
             base,
         )
@@ -234,9 +239,9 @@ function get_reflect_pauli(
     # calculate the est of pauli bases
     hit_pos = base_count .> 0
     base_ests = base_sums[hit_pos] ./ base_count[hit_pos]
-    base_sum = 1 / sqrt(2)^qubit_num * sum(base_ests)
+    base_est = 1 / sqrt(2)^qubit_num * sum(base_ests)
 
-    return base_sum
+    return base_est
 end
 
 function get_reflect_pauli(

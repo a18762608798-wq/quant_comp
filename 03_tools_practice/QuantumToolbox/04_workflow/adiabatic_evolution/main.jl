@@ -4,8 +4,8 @@ include("./src/evolution_calculater.jl")
 function main()
     # setting
     qubit_num = 8 # the const setting
-    dt = 0.01
-    p = (T = 10,)
+    dt = 0.005
+    p = (T = 20,)
     tlist = range(0, p.T; step = dt)
     H = create_ssh_H(qubit_num, p); # the ops setting
     Mz = create_magnet_quantity(qubit_num);

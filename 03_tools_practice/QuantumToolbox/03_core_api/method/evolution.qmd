@@ -47,6 +47,7 @@ state0 = sol.states[1];
 dot(state0[1], ψ0[1])
 z = real(sol.expect[1, :]); # 对应的是你传进去的两个 e_ops
 y = real(sol.expect[2, :]);
+reduce(hcat, [s.data for s in sol.states[1]]) # 把一堆态向量横向拼接成一个一般矩阵。
 ```
 
 ## mesolve

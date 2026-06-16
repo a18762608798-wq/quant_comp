@@ -1,0 +1,56 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# adiabatic_evolution
+
+## Create ops 
+
+```{julia}
+include("./04_workflow/adiabatic_evolution/src/op_creator.jl")
+```
+
+```{julia}
+# H
+qubit_num = 8
+p = (T = 1,)
+H = create_ssh_H(qubit_num, p);
+```
+
+```{julia}
+# magnet quantity
+Mz = create_magnet_quantity(qubit_num);
+```
+
+## spectrum
+
+```{julia}
+include("./04_workflow/adiabatic_evolution/src/eigen_calculator.jl")
+dt = 0.01
+tlist = range(0, p.T; step = dt)
+Es, eigen_states, Mz_ground_vals = get_eigen(H, p, tlist, Mz; energy_num=20);
+Mz_ground_vals[end-2:end]
+```
+
+## evolution
+
+```{julia}
+ψ0 = eigen_states[:, 1, 1];
+qubit_dims = ntuple(_ -> 2, qubit_num);
+ψ0 = Qobj(ψ0; type = Ket(), dims = qubit_dims);
+sol = sesolve(H, ψ0, tlist; params = p, e_ops = [Mz], saveat = tlist,);
+```
+
+```{julia}
+# 检验
+# initial states are equal.
+ψ0 == sol.states[1]
+norm(dot(ψ0, sol.states[1]))
+# get the vals of Mz
+Mzt_vals = real(sol.expect[1, :]);
+```

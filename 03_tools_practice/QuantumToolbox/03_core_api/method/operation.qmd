@@ -22,6 +22,7 @@ expm(A)
 
 ```{julia}
 # basic matrix operation
+dot(ψ1, ψ2) # 内积
 ket2dm(ψ)        # ket -> density matrix
 expect(O, ψ)     # 期望值
 variance(O, ψ)   # 方差
@@ -37,8 +38,16 @@ unit(A)          # normalize 的同义函数
 using QuantumToolbox
 
 H = sigmax()
-eigenenergies(H) # eigenvalues
-eigenstates(H) # 本征值 + 本征态
-eigsolve(H; eigvals=1) # 稀疏/大矩阵部分本征解
+vec = eigenenergies(H) # Es
 ```
 
+```{julia}
+Es, states, U = eigenstates(H) # Es(从小到大排序), QuantumObject 类型的本征态向量, matrix of eigenvector.
+Es[1]
+states[1]
+U[:, 1]
+```
+
+```{julia}
+Es, states, U = eigsolve(H; eigvals=1) # 稀疏/大矩阵部分本征解(排序不靠E)
+```

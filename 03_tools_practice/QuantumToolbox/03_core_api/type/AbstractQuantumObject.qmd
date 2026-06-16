@@ -61,14 +61,15 @@ QobjEvo(
 )
 
 ```{julia}
+using QuantumToolbox
 # a case
 H0 = 0.5 * sigmaz()
 H1 = sigmax()
-p = (T = 100.0) # p are parameters
+p = (T = 100.0, ) # p are parameters
 s(p, t) = t / p.T
 H = QobjEvo((
     H0,
-    (H0 - H1, s), # s*(H0 - H1)
+    (H1 - H0, s), # s*(H0 - H1)
 ))
 ```
 
@@ -81,6 +82,10 @@ QobjEvo(op::QuantumObject, f::Function; type = nothing)
 ---
 QobjEvo(A::QuantumObjectEvolution)(p, t)
 >得到具体时刻的op.
+
+```{julia}
+H(p, 4.) # p could be nothing.
+```
 
 ---
 QobjEvo(A::QuantumObjectEvolution)(ψout, ψin, p, t)

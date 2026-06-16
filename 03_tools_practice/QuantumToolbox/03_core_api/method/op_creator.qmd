@@ -9,20 +9,21 @@ julia:
 
 # op creator
 
+```{julia}
+using QuantumToolbox
+```
+
 ## bosonic
 
 ```{julia}
 N = 2
-qeye(N)        # 单位算符
+0 * qeye(2) # 全0算符
+qeye(2^N; dims=(2, 2))        # 单位算符, 但是多体
 eye(N)         # qeye 的同义函数
 destroy(N)    # 湮灭算符 a
 create(N)     # 产生算符 a†
 num(N)        # 数算符 a†a
-position(N)   # 位置算符
-momentum(N)   # 动量算符
-displace(N, α) # 这三个没学过
-squeeze(N, z)
-phase(N)
+phase(N) # 这个没学过
 ```
 
 ## spin
@@ -62,7 +63,15 @@ A ⊗ B
 ```
 
 ```{julia}
+# mutiple op
+qubit_dims = ntuple(_ -> 2, qubit_num)
+op1 = 0 * qeye(2^qubit_num; dims=qubit_dims)
+```
+
+```{julia}
 # multiple site
-dims = (2, 2, 2, 2)
-op = multisite_operator(dims, 2 => sigmax(), 4 => sigmaz())
+dims = (2, 3, 4, 2) # general system
+op = multisite_operator(dims, 1 => sigmax(), 4 => sigmaz())
+# for qubits system
+op = multisite_operator(Val(4), 2 => sigmax(), 4 => sigmaz())
 ```

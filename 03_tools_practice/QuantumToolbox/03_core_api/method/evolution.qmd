@@ -1,0 +1,69 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# evolution
+
+## sesolve
+
+```{julia}
+@doc sesolve
+```
+
+---
+sesolve(
+    H::Union{AbstractQuantumObject{Operator},Tuple},
+    ψ0::QuantumObject{Ket},
+    tlist::AbstractVector;
+    alg::AbstractODEAlgorithm = Vern7(lazy=false),
+    e_ops::Union{Nothing,AbstractVector,Tuple} = nothing,
+    params = NullParameters(),
+    progress_bar::Union{Val,Bool} = Val(true),
+    inplace::Union{Val,Bool} = Val(true),
+    kwargs...,
+)
+
+>alg: the alg to choose
+>params: the params in H.
+>, saveat = tlist,
+
+```{julia}
+# cases
+using QuantumToolbox
+
+H = 0.5 * sigmax()
+ψ0 = basis(2, 0)
+p = (T = 1,)
+tlist = LinRange(0, p.T, 200)
+
+sol = sesolve(H, ψ0, tlist; e_ops = [sigmaz(), sigmay()], params = p, saveat = tlist) # e_ops: 顺便记录哪些观测量期望值; use saveat to show all the states(t)
+
+state0 = sol.states[1];
+dot(state0[1], ψ0[1])
+z = real(sol.expect[1, :]); # 对应的是你传进去的两个 e_ops
+y = real(sol.expect[2, :]);
+```
+
+## mesolve
+
+```{julia}
+γ = 0.1
+
+H = 0.5 * sigmax()
+ψ0 = basis(2, 1)
+c_ops = [sqrt(γ) * sigmam()] # 耗散项
+tlist = LinRange(0, 20, 300)
+
+sol = mesolve(H, ψ0, tlist, c_ops; e_ops = [sigmaz()])
+```
+
+### Liouvillian 和 Lindblad 工具
+
+## mcsolve 
+
+暂时用不到.

@@ -65,10 +65,10 @@ def plot_purity():
     sem_dir = Path(sem_dir)
     # get the data
     # shadow
-    shadow_sem_path = sem_dir / "purity_sems_shadow.npz"
-    shadow_data = np.load(shadow_sem_path)
-    shadow_ests = shadow_data["ests"]
-    shadow_sems = shadow_data["sems"]
+    #   shadow_sem_path = sem_dir / "purity_sems_shadow.npz"
+    #   shadow_data = np.load(shadow_sem_path)
+    #   shadow_ests = shadow_data["ests"]
+    #   shadow_sems = shadow_data["sems"]
     # hamming
     hamming_sem_path = sem_dir / "purity_sems_hamming.npz"
     hamming_data = np.load(hamming_sem_path)
@@ -81,11 +81,17 @@ def plot_purity():
     pauli_sems = pauli_data["sems"]
 
     # plot sems
+    #   df = pd.DataFrame({
+    #       "(√NU, √NM)": list(range(len(pairs))) * 3,
+    #       "ests": np.append(shadow_ests, np.append(hamming_ests, pauli_ests)),
+    #       "1/sems": np.append(1 / shadow_sems, np.append(1 / hamming_sems, 1 / pauli_sems)),
+    #       "calculate_way": ["shadow"] * len(pairs) + ["hamming"] * len(pairs) + ["pauli"] * len(pairs)
+    #   })
     df = pd.DataFrame({
-        "(√NU, √NM)": list(range(len(pairs))) * 3,
-        "ests": np.append(shadow_ests, np.append(hamming_ests, pauli_ests)),
-        "1/sems": np.append(1 / shadow_sems, np.append(1 / hamming_sems, 1 / pauli_sems)),
-        "calculate_way": ["shadow"] * len(pairs) + ["hamming"] * len(pairs) + ["pauli"] * len(pairs)
+        "(√NU, √NM)": list(range(len(pairs))) * 2,
+        "ests": np.append(hamming_ests, pauli_ests),
+        "1/sems": np.append(1 / hamming_sems, 1 / pauli_sems),
+        "calculate_way": ["hamming"] * len(pairs) + ["pauli"] * len(pairs),
     })
     plt.figure(figsize=(36, 3))
     lineplot(data=df, x='(√NU, √NM)', y='1/sems', hue="calculate_way", marker="o",)

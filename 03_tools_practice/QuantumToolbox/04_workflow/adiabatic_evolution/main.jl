@@ -3,7 +3,7 @@ include("./src/evolution_calculater.jl")
 
 function main()
     # setting
-    qubit_num = 20 # the const setting
+    qubit_num = 12 # the const setting
     dt = 0.05
     p = (T = 2,)
     tlist = range(0, p.T; step = dt)

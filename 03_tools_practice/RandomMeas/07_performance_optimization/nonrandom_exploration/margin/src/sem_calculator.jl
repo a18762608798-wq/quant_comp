@@ -186,16 +186,16 @@ if abspath(PROGRAM_FILE) == @__FILE__
     permuted_order = [2, 7, 3, 6, 4, 5]
     # save reflect shadows sems
     group_dir = joinpath(@__DIR__, "../data/")
-    save_reflect_sems_shadow(group_dir, site_indices, permuted_order)
+    #save_reflect_sems_shadow(group_dir, site_indices, permuted_order)
     # save reflect hamming sems
     group_dir = joinpath(@__DIR__, "../data/")
-    save_reflect_sems_hamming(group_dir, site_indices, permuted_order)
+    #save_reflect_sems_hamming(group_dir, site_indices, permuted_order)
     # save reflect pauli sems
     group_dir = joinpath(@__DIR__, "../data/")
-    save_reflect_sems_pauli(group_dir, permuted_order)
+    #save_reflect_sems_pauli(group_dir, permuted_order)
     # save purity shadows sems
     group_dir = joinpath(@__DIR__, "../data/")
-    save_purity_sems_shadow(group_dir, site_indices, permuted_order)
+    #save_purity_sems_shadow(group_dir, site_indices, permuted_order)
     # save purity hamming sems
     group_dir = joinpath(@__DIR__, "../data/")
     save_purity_sems_hamming(group_dir, site_indices, permuted_order)

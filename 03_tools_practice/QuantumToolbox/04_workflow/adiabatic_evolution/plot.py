@@ -85,7 +85,7 @@ if __name__ == "__main__":
     plot_spectrum(eigen_data_path, pic_path)
     evolution_data_path = HERE / "./data/evolution.npz"
     pic_path = HERE / "./pic/Mzt.png"
-    #plot_Mzt(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
+    plot_Mzt(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
     pic_path = HERE / "./pic/overlaps.png"
-    #plot_overlap(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
+    plot_overlap(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
 

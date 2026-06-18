@@ -13,7 +13,7 @@ function create_ssh_H(qubit_num::Int, p)
     for pair_idx = 1:pair_num 
         odd_idx = 2pair_idx - 1
         even_idx = 2pair_idx
-        for op in [X, Y, Z]
+        for op in [X, Z]
             H1 += multisite_operator(
                 Val(qubit_num),
                 odd_idx => op, even_idx => op,
@@ -23,7 +23,7 @@ function create_ssh_H(qubit_num::Int, p)
     for pair_idx = 1:pair_num - 1 
         odd_idx = 2pair_idx + 1
         even_idx = 2pair_idx
-        for op in [X, Y, Z]
+        for op in [X, Z]
             H2 += multisite_operator(
                 Val(qubit_num),
                 odd_idx => op, even_idx => op,

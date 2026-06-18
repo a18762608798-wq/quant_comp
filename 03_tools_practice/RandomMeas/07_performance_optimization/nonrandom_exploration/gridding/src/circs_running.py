@@ -7,8 +7,6 @@ import numpy as np
 from qiskit_aer import Aer
 from qiskit import transpile
 
-sys.path.append(str(Path(__file__).resolve().parents[1]))
-
 from circs_creator import create_random_meas_circs
 from circs_creator import create_pre_measured_circ
 from circs_creator import add_random_meas
@@ -172,13 +170,13 @@ if __name__ == "__main__":
     # random data save
     HERE = Path(__file__).resolve().parent
     data_paths = [HERE / f"../data/random_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    #savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
+    savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
     # conditional random data save
     data_paths = [HERE / f"../data/conditional_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    #savez_random_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)
+    savez_random_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)
     # reflect pauli datas
     data_paths = [HERE / f"../data/reflect_pauli_group{i + 1}.npz" for i in range(len(pauli_shots))]
-    #savez_reflect_pauli_meas_datas(data_paths, pauli_shots)
+    savez_reflect_pauli_meas_datas(data_paths, pauli_shots)
     # purity pauli datas
     data_paths = [HERE / f"../data/purity_pauli_group{i + 1}.npz" for i in range(len(pauli_shots))]
     savez_purity_pauli_meas_datas(data_paths, pauli_shots)

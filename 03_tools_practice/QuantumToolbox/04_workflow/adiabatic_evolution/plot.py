@@ -30,13 +30,13 @@ def plot_Mzt(eigen_path, evolution_path, pic_path):
     eigen_data = np.load(eigen_path)
     evolution_data = np.load(evolution_path)
     tlist = eigen_data["tlist"]
-    ground_Mzt = eigen_data["Ot_vals"]
-    evolution_Mzt = evolution_data["Ot_vals"]
+    eigen_Mzt = eigen_data["Ot_vals"][0:4, :]
+    evolution_Mzt = evolution_data["Ot_vals"][:]
     t_num = np.size(tlist)
-    names = ["ground_Mzt", "evolution_Mzt"]
+    names = np.append([f"eigen_Mzt{i}" for i in range(4)], ["evolution_Mzt"]) 
     df = pd.DataFrame({
-        "t": np.tile(tlist, 2), 
-        "Mz(t)": np.append(ground_Mzt, evolution_Mzt),
+        "t": np.tile(tlist, 5), 
+        "Mz(t)": np.append(eigen_Mzt.ravel(), evolution_Mzt),
         "name": np.repeat(names, t_num)
     })
     # plot
@@ -51,15 +51,17 @@ def plot_overlap(eigen_path, evolution_path, pic_path):
     eigen_data = np.load(eigen_path)
     evolution_data = np.load(evolution_path)
     tlist = eigen_data["tlist"]
-    ground_states = eigen_data["eigen_states_t"][:, 0, :]
+    eigen_states = eigen_data["eigen_states_t"][:, 0:4, :]
     evolution_states = evolution_data["evolution_states_t"][:, :]
-    # overlap = |<ground|evolution>|^2 at each time step
-    overlaps = np.abs(np.sum(np.conj(ground_states) * evolution_states, axis=0)) ** 2
     t_num = np.size(tlist)
-    names = ["overlaps"]
+    # clean data, overlap[k, t] = | <ground_k(t) | psi(t)> |^2
+    overlaps = np.abs(
+        np.einsum("ikt,it->kt", np.conj(eigen_states), evolution_states)
+    ) ** 2
+    names = [f"overlaps{i}" for i in range(4)]
     df = pd.DataFrame({
-        "t": tlist,
-        "overlaps": overlaps,
+        "t": np.tile(tlist, 4),
+        "overlaps": overlaps.ravel(order="C"), 
         "name": np.repeat(names, t_num)
     })
     # plot

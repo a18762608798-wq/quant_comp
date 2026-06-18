@@ -2,7 +2,7 @@ using RandomMeas
 using NPZ
 using ProgressMeter
 
-include("../../../08_RandomMeasAdd/src/RandomMeasAdd.jl")
+include("../../../../08_RandomMeasAdd/src/RandomMeasAdd.jl")
 using .RandomMeasAdd
 
 # ----------

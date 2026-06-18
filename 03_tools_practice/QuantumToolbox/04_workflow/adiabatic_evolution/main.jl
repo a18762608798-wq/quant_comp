@@ -5,7 +5,7 @@ function main()
     # setting
     qubit_num = 8 # the const setting
     dt = 0.005
-    p = (T = 20,)
+    p = (T = 200,)
     tlist = range(0, p.T; step = dt)
     H = create_ssh_H(qubit_num, p); # the ops setting
     Mz = create_magnet_quantity(qubit_num);

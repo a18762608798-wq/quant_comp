@@ -10,12 +10,28 @@ function get_eigen(H, p, tlist, O; energy_num=10)
     Ets = Matrix{ComplexF64}(undef, energy_num, t_num)
     eigen_states_t = Array{ComplexF64}(undef, room_dim, energy_num, t_num)
     qobj_states_t = Vector{Vector{Qobj}}(undef, t_num)
-    for t_idx in eachindex(tlist)
-        t = tlist[t_idx]
-        E, qobj_states, U = eigenstates(H(p, t)); 
-        Ets[:, t_idx] .= E[1:energy_num]
-        eigen_states_t[:, :, t_idx] .= U[:, 1:energy_num]
-        qobj_states_t[t_idx] = qobj_states[1:energy_num]
+    if room_dim <= 2^10
+        for t_idx in eachindex(tlist)
+            t = tlist[t_idx]
+            E, qobj_states, U = eigenstates(H(p, t))
+            Ets[:, t_idx] .= E[1:energy_num]
+            eigen_states_t[:, :, t_idx] .= U[:, 1:energy_num]
+            qobj_states_t[t_idx] = qobj_states[1:energy_num]
+        end
+    else
+        # 找最低能量态：适合 Hermitian Hamiltonian
+        for t_idx in eachindex(tlist)
+            t = tlist[t_idx]
+            E, qobj_states, U = eigenstates(H(p, t);
+                sparse=true,
+                eigvals=energy_num,
+                sortby=real,
+                rev=false,
+            )
+            Ets[:, t_idx] .= E[1:energy_num]
+            eigen_states_t[:, :, t_idx] .= U[:, 1:energy_num]
+            qobj_states_t[t_idx] = qobj_states[1:energy_num]
+        end
     end
     # O info
     Ot_vals = Matrix{Float64}(undef, energy_num, t_num)
@@ -23,7 +39,7 @@ function get_eigen(H, p, tlist, O; energy_num=10)
         t = tlist[t_idx]
         for energy_idx = 1:energy_num
             ψ = qobj_states_t[t_idx][energy_idx]
-            Ot_vals[energy_idx, t_idx] = expect(O, ψ)
+            Ot_vals[energy_idx, t_idx] = real(expect(O, ψ))
         end
     end
     return real.(Ets), eigen_states_t, real.(Ot_vals)

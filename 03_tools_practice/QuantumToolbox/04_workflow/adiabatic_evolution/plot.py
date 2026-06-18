@@ -22,6 +22,10 @@ def plot_spectrum(data_path, pic_path):
     # plot
     plt.figure(figsize=(12, 8))
     lineplot(data=df, x='t', y='E', hue='name')
+    spectrum_min = np.min(spectrum_arr)
+    spectrum_max = np.max(spectrum_arr[:, t_num // 2])
+    spectrum_intvl = spectrum_max - spectrum_min
+    plt.ylim(spectrum_min - spectrum_intvl * 1/6, spectrum_max + spectrum_intvl * 1/6)
     plt.savefig(pic_path, bbox_inches='tight')
     plt.title("spectrum")
 
@@ -78,10 +82,10 @@ if __name__ == "__main__":
     HERE = Path(__file__).resolve().parent
     eigen_data_path = HERE / "./data/eigen.npz"
     pic_path = HERE / "./pic/spectrum.png"
-    #plot_spectrum(eigen_data_path, pic_path)
+    plot_spectrum(eigen_data_path, pic_path)
     evolution_data_path = HERE / "./data/evolution.npz"
     pic_path = HERE / "./pic/Mzt.png"
-    plot_Mzt(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
+    #plot_Mzt(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
     pic_path = HERE / "./pic/overlaps.png"
-    plot_overlap(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
+    #plot_overlap(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
 

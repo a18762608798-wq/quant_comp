@@ -46,6 +46,12 @@ Es, states, U = eigenstates(H) # Es(从小到大排序), QuantumObject 类型的
 Es[1]
 states[1]
 U[:, 1]
+Es, ψ, U = eigenstates(H;
+    sparse=true,
+    eigvals=energy_num,
+    sortby=real,
+    rev=false,
+) # 稀疏计算，估计|λ|大的几个态。
 ```
 
 ```{julia}

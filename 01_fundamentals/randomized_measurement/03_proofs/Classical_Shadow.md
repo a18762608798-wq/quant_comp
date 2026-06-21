@@ -65,6 +65,8 @@ QED.
 
 ### Multiple Qubits
 
+#### operator proof
+
 Target
 
 $$
@@ -123,6 +125,94 @@ therefore
 
 $$
 expr = \sum_R tr(R\rho) \bigotimes_{n=1}^N R_n = \sum_R tr(R\rho) R = \rho.
+$$
+
+QED.
+
+### Scalar proof 
+
+#### The measurement axis is X, Y, Z
+
+Assume any one of pauli base is $P$, then a observable is 
+
+$$
+O = \sum_P c_p P
+$$
+
+For any one of shots with $(U, s)$, definite
+
+$$
+X_O(B, s) = \sum_{P\preceq B} 3^{\omega}c_p y_P(s)\\
+$$
+
+Which is the ests we could get from once measurement result with a nontrival pauli base.
+
+Target
+
+$$
+\mathbb E_{B, s} [X_O(B, s)] = o
+$$
+
+The Estimator
+
+$$
+o = \frac{1}{M} \sum_{m} X^{(m)}_O
+$$
+
+Proof as follow:
+
+$$
+\begin{split}
+&\mathbb E_{B, s}[X_O(B, s)] \\
+&= \mathbb E_{B, s}[\sum_{P\preceq B} 3^{\omega}c_p y_P(s)]\\
+&= \sum_{P}c_P\mathbb E_{B, s}[3^\omega 1_{P \preceq B}y_P(s)] \\
+&= \sum_{P}3^\omega c_P Pr(P \preceq B)\mathbb E_{B, s} [y_P(s)|P\preceq B] + 0 \\
+&= \sum_{P}c_P \mathbb E_{B, s} [y_p(s)|P\preceq B]\\
+&= \sum_{P}c_P \langle P \rangle\\
+&= \langle O \rangle
+\end{split}
+$$
+
+where
+
+* **$B$ is the nontrival pauli bases** of (M, K).
+* $\omega$ is the number of nontrival position in P. Viz, $\omega = |P|$.
+* $y_P(s)$ is the result of expectation of shot = 1.
+
+#### The measurement axis is $\sigma_n$
+
+Assume  any one of a pauli base, there are
+
+$$
+P = \bigotimes_{i \in \text{nontrial}(P)} \sigma_i \otimes I^C, \quad \sigma_i \in \{X, Y, Z\}
+$$
+
+Definite
+
+$$
+X_P = 3^\omega \prod\limits_{i\in \text{nontrial}} s_i (\vec a_i \cdot \vec n_i)
+$$
+
+Where $\vec n$ is the direction to measure, $\vec a$ is the direction of the nontrival part of $P$.
+
+Target: 
+
+$$
+\mathbb E_{\vec n, s} [X_p] = p
+$$
+
+Known
+
+$$
+\begin{split}
+\mathbb E_{\vec n, s} [X_p] &= \mathbb E_{\vec n} [\mathbb E_s[X_P|\vec n]]\\
+& = 3^\omega \mathbb E_{\vec n} [\mathbb E_s[\prod_i s_i|\vec n] (\vec a_i \cdot \vec n_i)]\\
+& = 3^\omega \mathbb E_{\vec n} [\langle \Sigma_{\vec n}\rangle \prod_i(\vec a_i \cdot \vec n_i)]\\
+& = 3^\omega \langle \mathbb E_{\vec n} [\Sigma_{\vec n}\prod_i(\vec a_i \cdot \vec n_i)]\rangle \\
+& = 3^\omega \langle \bigotimes_i \mathbb E_{\vec n}[(\vec \sigma_i \cdot \vec n_i)(\vec a_i \cdot \vec n_i)]\\
+& = 3^\omega\langle \bigotimes_i \frac{1}{3} \vec \sigma_i \cdot \vec n_i \rangle\\
+& = \langle P \rangle
+\end{split}
 $$
 
 QED.

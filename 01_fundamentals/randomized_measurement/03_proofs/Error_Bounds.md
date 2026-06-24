@@ -77,3 +77,4 @@ Var(\sum_pc_p p) \approx \sum_P c_P^2 Var(p) = \sum_P c_P^2 \frac{3^\omega(1 - p
 $$
 
 **这说明对泡利基的均匀扫描稳定精度高于经典阴影。**
+

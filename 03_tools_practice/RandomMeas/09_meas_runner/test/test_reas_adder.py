@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src import get_shadow_params, get_hamming_params, add_meas, run_meas_qc
 
-test_idx = 1
+test_idx = 3
 
 if __name__ == "__main__":
     # add params meas
@@ -27,10 +27,14 @@ if __name__ == "__main__":
     qc = add_meas(qc, [theta, llambda], meas_indices)
     # give specific vals.
     setting_num = 100
-    shots = 100
+    shots = 1024
     if test_idx == 1:
         parameter_binds = get_shadow_params([theta, llambda], meas_indices, setting_num)
         counts_ls = asyncio.run(run_meas_qc(qc, parameter_binds, setting_num, shots))
     elif test_idx == 2:
         parameter_binds = get_hamming_params([theta, llambda], meas_indices, setting_num)
         counts_ls = asyncio.run(run_meas_qc(qc, parameter_binds, setting_num, shots))
+    elif test_idx == 3:
+        parameter_binds = get_hamming_params([theta, llambda], meas_indices, setting_num)
+        counts_ls = asyncio.run(run_meas_qc(qc, parameter_binds, setting_num, shots, backend="Dongling"))
+        print(counts_ls)

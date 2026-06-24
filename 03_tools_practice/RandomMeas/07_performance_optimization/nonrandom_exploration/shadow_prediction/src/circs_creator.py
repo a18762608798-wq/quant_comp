@@ -7,6 +7,8 @@ from qiskit.quantum_info import random_unitary
 def create_pre_measured_circ():
     N = 6
     circ = QuantumCircuit(N, N)
+    circ.x([0])
+    circ.x([1])
     return circ
 
 

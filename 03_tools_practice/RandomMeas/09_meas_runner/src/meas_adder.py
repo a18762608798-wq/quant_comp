@@ -1,5 +1,4 @@
 import os
-import time
 import asyncio
 
 
@@ -21,7 +20,7 @@ def add_meas(qc, params, meas_indices):
     return qc
 
 
-def bound_param(qc, parameter_binds):
+def bound_param(qc, setting_num, parameter_binds):
     binds = parameter_binds[0]
 
     bound_circuits = [
@@ -62,7 +61,7 @@ async def run_quark_qc(
     tid = tmgr.run(task) # shots = repeat*1024
     res = {}
     while res == {}:
-        time.sleep(10)
+        await asyncio.sleep(10)
         res = tmgr.result(tid)
     return res["count"]
 
@@ -96,7 +95,7 @@ async def run_meas_qc(
             counts_list.append(reversed_counts)
 
     else:
-        qasm2_strings = bound_param(qc, parameter_binds)
+        qasm2_strings = bound_param(qc, setting_num, parameter_binds)
         setting_num = len(qasm2_strings)
         tasks = []
         for setting_idx in range(setting_num):
@@ -106,6 +105,7 @@ async def run_meas_qc(
                     qasm2_string,
                     shots,
                     backend=backend, 
+                    name=f"my_hob{setting_idx}"
                 )
             )
             tasks.append(task)

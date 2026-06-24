@@ -131,7 +131,74 @@ QED.
 
 ### Scalar proof 
 
+#### The measurement axis is $\sigma_n$
+
+##### pauli bases
+
+Assume  any one of a pauli base, there are
+
+$$
+P = \bigotimes_{i \in \text{nontrial}(P)} \sigma_i \otimes I^C, \quad \sigma_i \in \{X, Y, Z\}
+$$
+
+Definite
+
+$$
+X_P = 3^\omega \prod\limits_{i\in \text{nontrial}} s_i (\vec a_i \cdot \vec n_i)
+$$
+
+Where $\vec n$ is the direction to measure, $\vec a$ is the direction of the nontrival part of $P$.
+
+Target: 
+
+$$
+\mathbb E_{\vec n, s} [X_p] = p
+$$
+
+Known
+
+$$
+\begin{split}
+\mathbb E_{\vec n, s} [X_p] &= \mathbb E_{\vec n} [\mathbb E_s[X_P|\vec n]]\\
+& = 3^\omega \mathbb E_{\vec n} [\mathbb E_s[\prod_i s_i|\vec n] (\vec a_i \cdot \vec n_i)]\\
+& = 3^\omega \mathbb E_{\vec n} [\langle \Sigma_{\vec n}\rangle \prod_i(\vec a_i \cdot \vec n_i)]\\
+& = 3^\omega \langle \mathbb E_{\vec n} [\Sigma_{\vec n}\prod_i(\vec a_i \cdot \vec n_i)]\rangle \\
+& = 3^\omega \langle \bigotimes_i \mathbb E_{\vec n}[(\vec \sigma_i \cdot \vec n_i)(\vec a_i \cdot \vec n_i)]\\
+& = 3^\omega\langle \bigotimes_i \frac{1}{3} \vec \sigma_i \cdot \vec a_i \rangle\\
+& = \langle P \rangle
+\end{split}
+$$
+
+QED.
+
+<span style="color:red">证明和传统shadow等价：</span>
+
+
+
 #### The measurement axis is X, Y, Z
+
+##### Pauli Base Estimator
+
+Assume we estimate the estimator of pauli base $P$, there are
+
+$$
+p = \langle P \rangle
+$$
+
+The estimator is 
+
+$$
+X_O(B, s) = 3^\omega 1_{P\preceq B} \prod_{i\in nontival(P)} s_i = 3^\omega 1_{P\preceq B} y_P(s)
+$$
+
+Evidently
+
+$$
+\mathbb E_{B, s} [3^\omega 1_{P\preceq B}y_P(s)] = 
+$$
+
+
+#### General Operator
 
 Assume any one of pauli base is $P$, then a observable is 
 
@@ -178,44 +245,6 @@ where
 * **$B$ is the nontrival pauli bases** of (M, K).
 * $\omega$ is the number of nontrival position in P. Viz, $\omega = |P|$.
 * $y_P(s)$ is the result of expectation of shot = 1.
-
-#### The measurement axis is $\sigma_n$
-
-Assume  any one of a pauli base, there are
-
-$$
-P = \bigotimes_{i \in \text{nontrial}(P)} \sigma_i \otimes I^C, \quad \sigma_i \in \{X, Y, Z\}
-$$
-
-Definite
-
-$$
-X_P = 3^\omega \prod\limits_{i\in \text{nontrial}} s_i (\vec a_i \cdot \vec n_i)
-$$
-
-Where $\vec n$ is the direction to measure, $\vec a$ is the direction of the nontrival part of $P$.
-
-Target: 
-
-$$
-\mathbb E_{\vec n, s} [X_p] = p
-$$
-
-Known
-
-$$
-\begin{split}
-\mathbb E_{\vec n, s} [X_p] &= \mathbb E_{\vec n} [\mathbb E_s[X_P|\vec n]]\\
-& = 3^\omega \mathbb E_{\vec n} [\mathbb E_s[\prod_i s_i|\vec n] (\vec a_i \cdot \vec n_i)]\\
-& = 3^\omega \mathbb E_{\vec n} [\langle \Sigma_{\vec n}\rangle \prod_i(\vec a_i \cdot \vec n_i)]\\
-& = 3^\omega \langle \mathbb E_{\vec n} [\Sigma_{\vec n}\prod_i(\vec a_i \cdot \vec n_i)]\rangle \\
-& = 3^\omega \langle \bigotimes_i \mathbb E_{\vec n}[(\vec \sigma_i \cdot \vec n_i)(\vec a_i \cdot \vec n_i)]\\
-& = 3^\omega\langle \bigotimes_i \frac{1}{3} \vec \sigma_i \cdot \vec n_i \rangle\\
-& = \langle P \rangle
-\end{split}
-$$
-
-QED.
 
 ### (The trace of) Polynomials of the Density Matrix
 

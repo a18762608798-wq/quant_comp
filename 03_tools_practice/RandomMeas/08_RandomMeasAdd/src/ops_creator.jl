@@ -56,6 +56,15 @@ function create_adjacent_swap_op(siteindices::Vector{Index{Int64}})
     return adjacent_swap_op
 end
 
+# Z
+function create_z_op(siteindices::Vector{Index{Int64}})
+    bitnum = length(siteindices)
+    identity_op = MPO(siteindices, "Id")
+    gates = [op("Z", siteindices[i]) for i in 1:bitnum]
+    z_op = apply(gates, identity_op)
+    return z_op
+end
+
 # ---------------------
 # the time reversal operator
 # ---------------------

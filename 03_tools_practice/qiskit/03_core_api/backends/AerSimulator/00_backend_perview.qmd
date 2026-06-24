@@ -1,0 +1,29 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+
+# Perview 
+
+```{python}
+from qiskit_aer import Aer
+aer_backends = Aer.backends()
+for i, j in enumerate(aer_backends):
+    print(j) # 前8个是新的，后面的不要用了.
+```
+
+Where
+
+* AerSimulator('aer_simulator')
+* AerSimulator('aer_simulator_statevector')
+* AerSimulator('aer_simulator_density_matrix')
+* AerSimulator('aer_simulator_stabilizer')
+* AerSimulator('aer_simulator_matrix_product_state')
+* AerSimulator('aer_simulator_extended_stabilizer')
+* AerSimulator('aer_simulator_unitary')
+* AerSimulator('aer_simulator_superop')

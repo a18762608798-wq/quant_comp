@@ -9,6 +9,7 @@ export get_factorized_shadow_mpo
 export create_reflect_op
 export create_adjacent_swap_op
 export create_unitary_part_reversal_op
+export create_z_op
 
 # modified method
 export modified_get_expect_shadow

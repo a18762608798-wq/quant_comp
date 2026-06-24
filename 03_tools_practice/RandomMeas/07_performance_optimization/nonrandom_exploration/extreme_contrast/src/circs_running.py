@@ -64,6 +64,7 @@ def savez_random_meas_data(meas_fun, data_path, settings_num, shots):
 # --------------------
 # pauli measure circs
 # --------------------
+
 def pauli_measure_circs(circs, pauli_bases, backend="aer_simulator", shots=2**9):
     qubit_num = circs[0].num_qubits
     base_num = len(pauli_bases)
@@ -84,36 +85,10 @@ def pauli_measure_circs(circs, pauli_bases, backend="aer_simulator", shots=2**9)
     return measured_res
 
 
-def savez_reflect_pauli_meas_data(data_path, shots):
+def savez_z_pauli_meas_data(data_path, shots):
     circ = create_pre_measured_circ()
     qubit_num = circ.num_qubits
-    pair_num = qubit_num // 2
-    bases = [2, 3, 4]
-    pauli_bases = [] 
-    for combo in itertools.product(bases, repeat=pair_num):
-        base_arr = np.ones(qubit_num, dtype=np.int64)  
-        for i, base in enumerate(combo):
-            reflect_i = qubit_num - 1 - i
-            base_arr[i] = base
-            base_arr[reflect_i] = base
-        pauli_bases.append(base_arr)
-
-    circs = create_pauli_meas_circs(
-        create_pre_measured_circ,
-        pauli_bases,
-    )
-    measured_res = pauli_measure_circs(circs, pauli_bases, shots=shots)
-    np.savez(
-        data_path,
-        measurement_results=measured_res,
-        measurement_settings=pauli_bases,
-    )
-
-
-def savez_purity_pauli_meas_data(data_path, shots):
-    circ = create_pre_measured_circ()
-    qubit_num = circ.num_qubits
-    bases = [2, 3, 4]
+    bases = [4]
     pauli_bases = [] 
     for combo in itertools.product(bases, repeat=qubit_num):
         base_arr = np.ones(qubit_num, dtype=np.int64)  
@@ -135,6 +110,7 @@ def savez_purity_pauli_meas_data(data_path, shots):
 # ---------------------
 # savez datas for nonrandom exploration 
 # ---------------------
+
 def savez_random_meas_datas(meas_fun, data_paths, settings_num_vec, shots_vec):
     for data_path_idx in tqdm(range(len(data_paths)), desc="Aer batches process"):
         data_path = data_paths[data_path_idx]
@@ -143,24 +119,21 @@ def savez_random_meas_datas(meas_fun, data_paths, settings_num_vec, shots_vec):
         savez_random_meas_data(meas_fun, data_path, settings_num, shots)
 
 
-def savez_reflect_pauli_meas_datas(data_paths, shot_nums):
+def savez_z_pauli_meas_datas(data_paths, shot_nums):
     for idx in tqdm(range(len(data_paths)), desc="Aer batches process"):
         data_path = data_paths[idx]
         shot_num = shot_nums[idx]
-        savez_reflect_pauli_meas_data(data_path, shot_num)
-
-
-def savez_purity_pauli_meas_datas(data_paths, shot_nums):
-    for idx in tqdm(range(len(data_paths)), desc="Aer batches process"):
-        data_path = data_paths[idx]
-        shot_num = shot_nums[idx]
-        savez_purity_pauli_meas_data(data_path, shot_num)
+        savez_z_pauli_meas_data(data_path, shot_num)
 
 
 # base settings for grid scan
-settings_nums = [i * 3**6 for i in range(40, 43)]  
-shot_nums = [i for i in range(1, 6)]              
-pairs = list(itertools.product(settings_nums, shot_nums))
+settings_nums = [i * 3**6 for i in range(10, 20)]
+shot_nums = [i for i in range(20, 30)]
+random_pairs = list(itertools.product(settings_nums, shot_nums))
+pauli_shot1 = [i for i in range(10, 20)]
+pauli_shot2 = shot_nums 
+pauli_pairs = list(itertools.product(pauli_shot1, pauli_shot2))
+
 
 if __name__ == "__main__":
     # get measured_res: grid scan and flatten
@@ -170,18 +143,14 @@ if __name__ == "__main__":
     if data_dir.exists():
         for f in data_dir.glob("*"):
             f.unlink()
-    settings_num_vec = [p[0] for p in pairs]
-    shots_vec = [p[1] for p in pairs]
-    pauli_shots = [settings_num_vec[i] * shots_vec[i] for i in range(len(shots_vec))]
+    settings_num_vec = [p[0] for p in random_pairs]
+    shots_vec = [p[1] for p in random_pairs]
+    pauli_shot1_vec = [p[0] for p in pauli_pairs]
+    pauli_shot2_vec = [p[1] for p in pauli_pairs]
+    pauli_shots = [pauli_shot1_vec[i] * pauli_shot2_vec[i] for i in range(len(pauli_shot1_vec))]
     # random data save
     data_paths = [HERE / f"../data/random_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    #savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
-    # conditional random data save
-    data_paths = [HERE / f"../data/conditional_group{i + 1}.npz" for i in range(len(settings_num_vec))]
-    savez_random_meas_datas(add_conditional_random_meas, data_paths, settings_num_vec, shots_vec)
-    # reflect pauli datas
-    data_paths = [HERE / f"../data/reflect_pauli_group{i + 1}.npz" for i in range(len(pauli_shots))]
-    savez_reflect_pauli_meas_datas(data_paths, pauli_shots)
+    savez_random_meas_datas(add_random_meas, data_paths, settings_num_vec, shots_vec)
     # purity pauli datas
-    data_paths = [HERE / f"../data/purity_pauli_group{i + 1}.npz" for i in range(len(pauli_shots))]
-    #savez_purity_pauli_meas_datas(data_paths, pauli_shots)
+    data_paths = [HERE / f"../data/pauli_z_group{i + 1}.npz" for i in range(len(pauli_shots))]
+    savez_z_pauli_meas_datas(data_paths, pauli_shots)

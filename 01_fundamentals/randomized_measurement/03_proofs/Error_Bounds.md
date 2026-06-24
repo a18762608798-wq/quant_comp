@@ -19,7 +19,7 @@ $$
 then we calculate the variance simply, assume $E[X_O] = p$
 
 $$
-Var(X_O(B, s)) = \mathbb E[X_O^2] - \mathbb E^2[X_O] = \mathbb E[3^{2\omega}1_{P\preceq B}y_P^2(s)] - p^2 = \mathbb E[3^{2\omega}1_{P\preceq B}^2] - p^2 = 3^{\omega} - p^2 \approx 3^\omega
+Var(X_O(B, s)) = \mathbb E[X_O^2] - \mathbb E^2[X_O] = \mathbb E[3^{2\omega}1_{P\preceq B}y_P^2(s)] - p^2 = 3^{2\omega} \mathbb E[1_{P\preceq B}] - p^2 = 3^{\omega} - p^2 \approx 3^\omega
 $$
 
 For a generate est of mechanical quantity, we could not get a strict expression, but giving a relationship with pauli measurement is simple.

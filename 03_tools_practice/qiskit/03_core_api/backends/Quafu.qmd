@@ -14,7 +14,7 @@ julia:
 
 ```{python}
 from quark import Task
-token = "dYXyLLSQQtMWT7wOoIHo2EmPCmlStsZ`VSfO5NSjzCT/Rg3dUPzZEP45TPzFEOxZUP4dUN7JDd5WnJtJTP1pEPzpEOyBDOz1DOx1jOzBkNjpkJ1GXbjxDN7JDcm[Y[tKDMj13ck6DcqGXctGHemCIR5l{O5BkOzZ{O5FUZjpkJzW3d2Kzf"
+token = "db6uGGC7zIJtVF[8ERhVC1jJU{jzXRKB7VjDuLOUQYQ/RgzZUOzdUO55TN4BUP6dEO5dUN7JDd5WnJtJTNypUN{p{OyBzNz1jOx1jOzBkNjpkJ1GXbjxDN7JDcm[Y[tKDMj13ck6DcqGXctGHemCIR5l{O5BkOzZ{O5FUZjpkJzW3d2Kzf"
 tmgr = Task(token)
 print(tmgr.status()) # express the rows now.
 ```
@@ -41,16 +41,18 @@ qasm2_circ = qasm2.dumps(circ)
 ```{python}
 # submit the ranks to quatum computer
 task = {
-'chip': 'Baihua', # the quantum computer choice,  
+'chip': 'Dongling', # the quantum computer choice,  
 'name': 'my_job',  
 'circuit':qasm2_circ, 
-'compile': True, # (你要是自信自己写的全是基础门就用False.)
+'shots': 1024, # an integer multiple of 1024
 'options':{
+    'compiler': 'qiskit',
     'correct': False,
     'target_qubits': [] # 具体bit而非范围, [] is automatic choice. 
     }
 }
-tid = tmgr.run(task, repeat=1) # shots = repeat*1024
+tid = tmgr.run(task)
+print(tid)  # e.g., 2024041917095371986
 ```
 
 ```{python}
@@ -58,4 +60,55 @@ tid = tmgr.run(task, repeat=1) # shots = repeat*1024
 res = tmgr.result(tid)
 print(res)
 print(res["count"]) # the definition of Hilbert space is normal.
+```
+
+
+## params bind
+
+```{python}
+from qiskit import qasm2
+from qiskit import QuantumCircuit, transpile
+from qiskit.circuit import ParameterVector
+from qiskit_aer import AerSimulator
+import numpy as np
+
+theta = ParameterVector("theta", 3)
+
+qc = QuantumCircuit(3)
+qc.rx(theta[0], 0)
+qc.ry(theta[1], 1)
+qc.rz(theta[2], 2)
+qc.cx(0, 1)
+qc.cx(1, 2)
+qc.measure_all()
+
+# N 组参数，每组 3 个参数
+N = 100
+param_sets = np.column_stack([
+    np.linspace(0, np.pi, N),
+    np.linspace(0, np.pi / 2, N),
+    np.linspace(0, 2 * np.pi, N),
+])
+
+tqc = transpile(qc, sim)
+parameter_binds=[{
+    theta[0]: param_sets[:, 0],
+    theta[1]: param_sets[:, 1],
+    theta[2]: param_sets[:, 2],
+}] 
+
+binds = parameter_binds[0]
+
+bound_circuits = [
+    qc.assign_parameters({
+        param: vals[s]
+        for param, vals in binds.items()
+    })
+    for s in range(N)
+]
+
+qasm2_strings = [
+    qasm2.dumps(bound_qc)
+    for bound_qc in bound_circuits
+]
 ```

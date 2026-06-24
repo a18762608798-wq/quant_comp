@@ -5,7 +5,7 @@ using RandomMeas
 # settings 
 N = 6
 site_indices = siteinds("Qubit", N)
-test_index = 3
+test_index = 4
 
 if test_index == 1
     # reflect op
@@ -24,4 +24,7 @@ elseif test_index == 3
         part1, site_indices; op_type="MPO"
     )
     @show linkdims(unitary_part_reversal_op)
+elseif test_index == 4
+    z_op = create_z_op(site_indices)
+    @show linkdims(z_op)
 end

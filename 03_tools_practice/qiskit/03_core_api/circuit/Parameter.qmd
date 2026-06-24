@@ -59,3 +59,7 @@ values = {
 bound_qc = qc.assign_parameters(values)
 bound_qc.draw()
 ```
+
+## params arr run
+
+

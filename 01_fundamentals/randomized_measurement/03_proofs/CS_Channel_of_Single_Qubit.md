@@ -22,7 +22,7 @@ $$
 \sum_\pm \frac{1}{2}(1 \pm \vec r \cdot \vec n)(\frac{1}{2} I \pm \frac{3}{2} \vec n\cdot \vec \sigma) = \frac{1}{2} I + \frac{3}{2} (\vec r\cdot \vec n)(\vec n\cdot \vec \sigma)
 $$
 
-whereite_indi
+where
 
 $$
 \mathbb E_{\vec n} [(\vec r \cdot \vec n)(\vec n \cdot \vec{ \sigma})] = E_{\vec n}[(\vec r \cdot \vec n)\vec n] \cdot \vec{\hat \sigma},
@@ -76,9 +76,10 @@ $$
 where
 
 $$
-U(\theta, \varphi, \lambda) = \exp\bigr[{\frac{\varphi+\lambda}{2}}\bigr] R_Z(\varphi) R_Y(\theta) R_Z(\lambda)
+U(\theta, \varphi, \lambda) = \exp\bigr[-{\frac{\varphi+\lambda}{2}}\bigr] R_Z(\varphi) R_Y(\theta) R_Z(\lambda)
 $$
 
 therefore $\varphi$ is unused. $\widetilde \rho(\pm)$ is simiar as follow.
 
 Viz., **a single vector $\vec n$ does not utilize all the symmetries of $SU_2$**.
+

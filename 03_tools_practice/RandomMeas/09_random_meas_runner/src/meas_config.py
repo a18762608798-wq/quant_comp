@@ -8,12 +8,11 @@ from qiskit.circuit import ParameterVector
 
 
 @dataclass
-class MeasConfig:
+class RandomMeasConfig:
 
     # ---- required --------------------------------------------------
     qc: QuantumCircuit
-    setting_nums: np.ndarray
-    shot_nums: np.ndarray
+    setting_pairs: list[tuple]
     meas_indices: list[int]
     backend: str = "statevector"
     params: list[ParameterVector] | None = None
@@ -29,7 +28,7 @@ class MeasConfig:
     target_qubits: list[int] = field(default_factory=list) # 防止两个class共享一个列表
 
     # ---- output ----------------------------------------------------
-    output_dir: Path = Path("./results")
+    output_dir: Path = "./data/"
     name: str = "experiment"
 
     # ---- misc ------------------------------------------------------

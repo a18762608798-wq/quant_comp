@@ -11,19 +11,17 @@ from qiskit.circuit import ParameterVector
 # 将 09_reas_runner 目录加入搜索路径
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import MeasConfig
+from src import RandomMeasConfig
 
 test_idx = 1
 
 if __name__ == "__main__":
     qc = QuantumCircuit(6, 4)
     meas_indices = np.array([1, 2])
-    setting_nums = np.array([1, 2])
-    shot_nums = np.array([1, 2])
-    a = MeasConfig(
+    setting_pairs = [(1, 2), (3, 4)]
+    a = RandomMeasConfig(
         qc=qc,
-        setting_nums=setting_nums,
-        shot_nums=shot_nums,
+        setting_pairs=setting_pairs,
         meas_indices=meas_indices,
         backend = "statevector",
     )

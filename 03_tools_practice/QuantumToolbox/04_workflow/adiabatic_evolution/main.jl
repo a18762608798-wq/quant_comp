@@ -15,7 +15,7 @@ function main()
     save_eigen(file_path, H, p, tlist, Mz; energy_num=16);
 
     # evolution calculate
-    ___, states, ___ = eigenstates(H(p, 0)); # set ground state be the initial state.
+    ___, states, ___ = eigenstates(H(p, tlist[1])); # ground state at the FIRST time point
     ψ0 = states[1]
     file_path = joinpath(@__DIR__, "./data/evolution.npz")
     save_evolution(file_path, H, p, ψ0, tlist, Mz);

@@ -91,7 +91,7 @@ def plot_overlap(eigen_path, evolution_path, pic_path, show_eigen_vec = np.array
     # plot
     plt.figure(figsize=(12, 8))
     lineplot(data=df, x='t', y='overlaps', hue='name')
-    plt.ylim(1.0 - 1e-3, 1.0) # limit y to see the variation of overlaps.
+    plt.ylim(1.0 - 1e-2, 1.0) # limit y to see the variation of overlaps.
     plt.savefig(pic_path, bbox_inches='tight')
     plt.title("Overlaps")
 

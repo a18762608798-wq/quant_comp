@@ -9,8 +9,8 @@ from seaborn import scatterplot
 def plot_spectrum(data_path, pic_path, show_eigen_vec=np.array([0, 1, 2, 3])):
     # get data
     data = np.load(data_path)
-    tlist = data["tlist"]
-    spectrum_arr = data["Ets"][show_eigen_vec, :]  # 修改这里，只取指定能级
+    tlist = data["tlist"][1:]
+    spectrum_arr = data["Ets"][show_eigen_vec, 1:]  
     energy_num = np.size(show_eigen_vec) 
     t_num = np.size(tlist)
     names = [f"E_{i}" for i in show_eigen_vec]
@@ -29,8 +29,8 @@ def plot_spectrum(data_path, pic_path, show_eigen_vec=np.array([0, 1, 2, 3])):
 def plot_gap(data_path, pic_path, show_eigen_vec=np.array([1, 2, 3])):
     # get data
     data = np.load(data_path)
-    tlist = data["tlist"]
-    spectrum_arr = data["Ets"]
+    tlist = data["tlist"][1:]
+    spectrum_arr = data["Ets"][:, 1:]
     gap_arr = spectrum_arr[show_eigen_vec, :] - spectrum_arr[0, :]   # shape: (energy_num-1, t_num)
     energy_num = np.size(show_eigen_vec)
     t_num = np.size(tlist)
@@ -51,9 +51,9 @@ def plot_Mzt(eigen_path, evolution_path, pic_path, show_eigen_vec = np.array([0]
     # get data
     eigen_data = np.load(eigen_path)
     evolution_data = np.load(evolution_path)
-    tlist = eigen_data["tlist"]
-    eigen_Mzt = eigen_data["Ot_vals"][show_eigen_vec, :]
-    evolution_Mzt = evolution_data["Ot_vals"][:]
+    tlist = eigen_data["tlist"][1:]
+    eigen_Mzt = eigen_data["Ot_vals"][show_eigen_vec, 1:]
+    evolution_Mzt = evolution_data["Ot_vals"][1:]
     t_num = np.size(tlist)
     show_eigen_num = np.size(show_eigen_vec)
     names = np.append([f"eigen_Mzt{i}" for i in show_eigen_vec], ["evolution_Mzt"])
@@ -73,9 +73,9 @@ def plot_overlap(eigen_path, evolution_path, pic_path, show_eigen_vec = np.array
     # get data
     eigen_data = np.load(eigen_path)
     evolution_data = np.load(evolution_path)
-    tlist = eigen_data["tlist"]
-    eigen_states = eigen_data["eigen_states_t"][:, show_eigen_vec, :]
-    evolution_states = evolution_data["evolution_states_t"][:, :]
+    tlist = eigen_data["tlist"][1:]
+    eigen_states = eigen_data["eigen_states_t"][:, show_eigen_vec, 1:]
+    evolution_states = evolution_data["evolution_states_t"][:, 1:]
     t_num = np.size(tlist)
     show_eigen_num = np.size(show_eigen_vec)
     # clean data, overlap[k, t] = | <ground_k(t) | psi(t)> |^2
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     # Mzt
     evolution_data_path = HERE / "./data/evolution.npz"
     pic_path = HERE / "./pic/Mzt.png"
-    plot_Mzt(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
+    #plot_Mzt(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))
     # overlap
     pic_path = HERE / "./pic/overlaps.png"
     plot_overlap(eigen_data_path, evolution_data_path, pic_path, show_eigen_vec = np.array([0]))

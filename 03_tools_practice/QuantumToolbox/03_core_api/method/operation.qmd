@@ -34,6 +34,13 @@ unit(A)          # normalize 的同义函数
 ```
 
 ```{julia}
+# form
+___, states, ___ = eigenstates(A) 
+matrix_element(states[1], A, states[1]) # get the element of operator.
+Hermitian((A + A') / 2) # Hermitianization
+```
+
+```{julia}
 # eigen
 using QuantumToolbox
 
@@ -56,4 +63,20 @@ Es, ψ, U = eigenstates(H;
 
 ```{julia}
 Es, states, U = eigsolve(H; eigvals=1) # 稀疏/大矩阵部分本征解(排序不靠E)
+```
+
+```{julia}
+# 子空间对角化
+function get_subspace_op(H, states)
+    n = length(states)
+    op = zeros(ComplexF64, n, n)
+
+    for a in 1:n
+        for b in 1:n
+            op[a, b] = matrix_element(states[a], H, states[b])
+        end
+    end
+
+    return Qobj(Hermitian((op + op') / 2))
+end
 ```

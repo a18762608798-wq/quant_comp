@@ -74,4 +74,5 @@ dims = (2, 3, 4, 2) # general system
 op = multisite_operator(dims, 1 => sigmax(), 4 => sigmaz())
 # for qubits system
 op = multisite_operator(Val(4), 2 => sigmax(), 4 => sigmaz())
+op = multisite_operator(Val(4), (i => sigmax() for i in 1:4)...)
 ```

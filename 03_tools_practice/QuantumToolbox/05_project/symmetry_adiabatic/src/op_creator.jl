@@ -41,7 +41,6 @@ function create_ssh_H(qubit_num::Int, p)
 end
 
 function create_magnet_quantity(qubit_num)
-    # Definite the terms without t.
     Z = sigmaz()
     qubit_dims = ntuple(_ -> 2, qubit_num)
     magnet_quantity = 0 * qeye(2^qubit_num; dims=qubit_dims)
@@ -54,3 +53,19 @@ function create_magnet_quantity(qubit_num)
     magnet_quantity = magnet_quantity / qubit_num
     return magnet_quantity
 end
+
+function create_sym_op(qubit_num)
+    qubit_dims = ntuple(_ -> 2, qubit_num)
+    X = sigmax()
+    Z = sigmaz()
+    ux = multisite_operator(
+        Val(qubit_num), 
+        (i => X for i in 1:qubit_num)...
+    )
+    uz = multisite_operator(
+        Val(qubit_num), 
+        (i => Z for i in 1:qubit_num)...
+    )
+    return ux + 2uz 
+end
+

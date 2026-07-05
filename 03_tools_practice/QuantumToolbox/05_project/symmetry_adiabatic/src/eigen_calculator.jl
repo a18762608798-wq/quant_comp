@@ -36,7 +36,6 @@ function get_eigen(H, p, tlist, O; energy_num=10)
     # O info
     Ot_vals = Matrix{Float64}(undef, energy_num, t_num)
     for t_idx in eachindex(tlist)
-        t = tlist[t_idx]
         for energy_idx = 1:energy_num
             ψ = qobj_states_t[t_idx][energy_idx]
             Ot_vals[energy_idx, t_idx] = real(expect(O, ψ))
@@ -64,13 +63,13 @@ end
 if abspath(PROGRAM_FILE) == @__FILE__
     # H
     qubit_num = 8
-    p = (T = 10,)
+    p = (T=10,)
     H = create_ssh_H(qubit_num, p);
     # Mz
     Mz = create_magnet_quantity(qubit_num);
     # spectrum
     dt = 0.01
-    tlist = range(0, p.T; step = dt)
+    tlist = range(0, p.T; step=dt)
     file_path = joinpath(@__DIR__, "../data/eigen.npz")
     save_eigen(file_path, H, p, tlist, Mz; energy_num=20);
 end

@@ -1,15 +1,13 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
 
 @dataclass
 class RandomMeasConfig:
-
     # ---- required --------------------------------------------------
     qc: QuantumCircuit
     setting_pairs: list[tuple]
@@ -18,14 +16,14 @@ class RandomMeasConfig:
     params: list[ParameterVector] | None = None
 
     # ---- measurement strategy --------------------------------------
-    meas_mode: str = "shadow"          # "shadow" | "hamming"
+    meas_mode: str = "shadow"  # "shadow" | "hamming"
 
     # ---- simulator options (Aer) -----------------------------------
     device: str = "CPU"
     precision: str = "single"
 
     # ---- remote backend options (quark) ----------------------------
-    target_qubits: list[int] = field(default_factory=list) # 防止两个class共享一个列表
+    target_qubits: list[int] = field(default_factory=list)  # 防止两个class共享一个列表
 
     # ---- output ----------------------------------------------------
     output_dir: Path = "./data/"

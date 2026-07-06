@@ -1,17 +1,15 @@
 import json
-import asyncio
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from .meas_config import RandomMeasConfig
 from . import params_setting
-from . import meas_runner   
+from . import meas_runner
 
 
 async def run_pipeline(
     config: RandomMeasConfig,
-) -> dict[tuple, list[str, int]]:
+):
 
     # Add measurements
     qc_meas = meas_runner.add_meas(config.qc.copy(), config.params, config.meas_indices)
@@ -19,14 +17,16 @@ async def run_pipeline(
     # Parameter generation
     _get_param_fun = _pick_param_fun(config.meas_mode)
     parameter_bind_groups = [
-        _get_param_fun(config.params, config.meas_indices, config.setting_pairs[setting_idx][0])
+        _get_param_fun(
+            config.params, config.meas_indices, config.setting_pairs[setting_idx][0]
+        )
         for setting_idx in range(len(config.setting_pairs))
     ]
 
     # Run
-    is_aer = (config.backend == "statevector")
+    is_aer = config.backend == "statevector"
     count_groups: list[list[dict[str, int]]] = []
-    res : dict[str, Any] = {}
+    res: dict[str, Any] = {}
 
     for setting_idx in range(len(config.setting_pairs)):
         setting_num = config.setting_pairs[setting_idx][0]
@@ -48,7 +48,7 @@ async def run_pipeline(
                 parameter_binds,
                 setting_num,
                 shot_num,
-                backend=config.backend,                    
+                backend=config.backend,
                 name=f"{config.name}_setting{setting_idx}",
                 target_qubits=config.target_qubits,
             )
@@ -69,6 +69,7 @@ async def run_pipeline(
 # Helpers
 # ------------------------------------------------------------------
 
+
 def _pick_param_fun(meas_mode: str):
     """Return the parameter-generation function for the given mode."""
     mapping = {
@@ -77,8 +78,7 @@ def _pick_param_fun(meas_mode: str):
     }
     if meas_mode not in mapping:
         raise ValueError(
-            f"Unknown meas_mode={meas_mode!r}. "
-            f"Choose from {list(mapping.keys())}."
+            f"Unknown meas_mode={meas_mode!r}. Choose from {list(mapping.keys())}."
         )
     return mapping[meas_mode]
 
@@ -91,7 +91,7 @@ def _build_result_dict(
     return {
         "setting_pairs": config.setting_pairs,
         "count_group": count_groups,
-        "meas_indices": list(config.meas_indices),   # numpy → list
+        "meas_indices": list(config.meas_indices),  # numpy → list
         "meas_mode": config.meas_mode,
         "backend": config.backend,
         "qc_num_qubits": config.qc.num_qubits,
@@ -99,6 +99,6 @@ def _build_result_dict(
     }
 
 
-def _write_json(filepath: Path, data: dict[tuple, list[str, int]]) -> None:
+def _write_json(filepath: Path, data) -> None:
     with open(filepath, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2, ensure_ascii=False, default=str)

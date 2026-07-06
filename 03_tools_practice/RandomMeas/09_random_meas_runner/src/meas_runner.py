@@ -2,11 +2,8 @@ import os
 import asyncio
 
 
-import numpy as np
-from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import ParameterVector
 from qiskit_aer import AerSimulator
-from qiskit import qasm2
+from qiskit import qasm2, transpile
 from quark import Task
 
 
@@ -16,18 +13,20 @@ def add_meas(qc, params, meas_indices):
     for param_idx in range(len(meas_indices)):
         qubit_idx = meas_indices[param_idx]
         qc.u(theta[param_idx], 0, llambda[param_idx], qubit_idx)
-    qc.measure(meas_indices, range(len(meas_indices))) # Adjust the classical bits for fitting the addition mode.
+    qc.measure(
+        meas_indices, range(len(meas_indices))
+    )  # Adjust the classical bits for fitting the addition mode.
     return qc
 
 
 async def run_quark_qc(
-        qc, 
-        parameter_binds, 
-        setting_num, 
-        shot_num, 
-        backend="Dongling",
-        name="my_job",
-        target_qubits=[],
+    qc,
+    parameter_binds,
+    setting_num,
+    shot_num,
+    backend="Baihua",
+    name="my_job",
+    target_qubits=[],
 ):
     qasm2_strings = _bound_param(qc, setting_num, parameter_binds)
     setting_num = len(qasm2_strings)
@@ -38,7 +37,7 @@ async def run_quark_qc(
             _run_quark_qc(
                 qasm2_string,
                 shot_num,
-                backend=backend, 
+                backend=backend,
                 name=f"{name}_U{setting_idx}",
                 target_qubits=target_qubits,
             )
@@ -49,16 +48,11 @@ async def run_quark_qc(
 
 
 def run_aer_qc(
-        qc, 
-        parameter_binds, 
-        setting_num, 
-        shot_num, 
-        device="CPU", 
-        precision="single"
+    qc, parameter_binds, setting_num, shot_num, device="CPU", precision="single"
 ):
     sim = AerSimulator(
         method="statevector",
-        device=device,     
+        device=device,
         precision=precision,
     )
     tqc = transpile(qc, sim)
@@ -67,7 +61,7 @@ def run_aer_qc(
         shot_num=shot_num,
         parameter_binds=parameter_binds,
     )
-    result = job.result()        
+    result = job.result()
     counts = []
     for i in range(setting_num):
         count = result.get_counts(i)
@@ -83,41 +77,35 @@ def _bound_param(qc, setting_num, parameter_binds):
     binds = parameter_binds[0]
 
     bound_circuits = [
-        qc.assign_parameters({
-            param: vals[s]
-            for param, vals in binds.items()
-        })
+        qc.assign_parameters({param: vals[s] for param, vals in binds.items()})
         for s in range(setting_num)
     ]
 
-    qasm2_strings = [
-        qasm2.dumps(bound_qc)
-        for bound_qc in bound_circuits
-    ]
+    qasm2_strings = [qasm2.dumps(bound_qc) for bound_qc in bound_circuits]
     return qasm2_strings
 
 
 async def _run_quark_qc(
     qasm2_string,
     shot_num,
-    backend="Dongling", # an integer multiple of 1024
+    backend="Baihua",  # an integer multiple of 1024
     name="my_job",
     target_qubits=[],
 ):
     token = os.environ["QUARK_TOKEN"]
     tmgr = Task(token)
     task = {
-    'chip': backend, # the quantum computer choice,  
-    'name': name,  
-    'circuit':qasm2_string, 
-    'shots': shot_num, 
-    'options':{
-        'compiler': 'qiskit',
-        'correct': False,
-        'target_qubits': target_qubits # 具体bit而非范围, [] is automatic choice. 
-        }
+        "chip": backend,  # the quantum computer choice,
+        "name": name,
+        "circuit": qasm2_string,
+        "shots": shot_num,
+        "options": {
+            "compiler": "qiskit",
+            "correct": False,
+            "target_qubits": target_qubits,  # 具体bit而非范围, [] is automatic choice.
+        },
     }
-    tid = tmgr.run(task) # shot_num = repeat*1024
+    tid = tmgr.run(task)  # shot_num = repeat*1024
     res = {}
     while res == {}:
         await asyncio.sleep(10)

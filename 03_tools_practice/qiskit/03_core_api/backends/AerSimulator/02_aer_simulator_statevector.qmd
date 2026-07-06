@@ -4,19 +4,29 @@
 # create the circ without measure, then create a stavevector.
 from qiskit import QuantumCircuit
 import numpy as np
+from qiskit_aer import AerSimulator
 
-circ = QuantumCircuit(2, 2)
-circ.ry(np.pi/4, 0)
-vec_circ = circ.copy()  # 复制原始电路
-vec_circ.save_statevector() 
+qc = QuantumCircuit(2, 2)
+qc.ry(np.pi/4, 0)
+vec_qc = qc.copy()  # 复制原始电路
+vec_qc.save_statevector() 
 ```
 
 ```{python}
-from qiskit_aer import Aer
+from qiskit_aer import AerSimulator
+from qiskit import QuantumCircuit, transpile
 from qiskit.visualization import plot_bloch_multivector, plot_state_qsphere
+
 # use backend to calcualte and statistics 
-vec_backend = Aer.get_backend('aer_simulator_statevector')
-job = vec_backend.run(vec_circ)
+sim = AerSimulator(
+    method="statevector",
+    device="CPU",      # 有 GPU 版 Aer 时可以改成 "GPU"
+    precision="single",
+)
+tqc = transpile(vec_qc, sim)
+job = sim.run(
+    tqc,
+)
 vec_result = job.result()
 psi = vec_result.get_statevector()  # get the statevector in matrix form 
 print(psi)

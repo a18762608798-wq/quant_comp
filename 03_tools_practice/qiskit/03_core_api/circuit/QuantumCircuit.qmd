@@ -40,7 +40,7 @@ from qiskit.circuit.library import HGate
 circ = QuantumCircuit(2, 2)
 circ.num_qubits # get the qubits num.
 circ.num_clbits # git the classical bits num.
-qc.append(HGate(), [0]) # append gates
+circ.append(HGate(), [0]) # append gates
 ```
 
 
@@ -106,7 +106,7 @@ H_problem = SparsePauliOp.from_list([
 ])
 
 n = H_problem.num_qubits
-steps = 1
+steps = 2
 total_time = 5.0
 dt = total_time / steps
 

@@ -29,8 +29,6 @@ circ.draw()
 
 ```{python}
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import UnitaryGate
-from qiskit.quantum_info import random_unitary
 
 qc = QuantumCircuit(1)
 qc.u(1, 1, 1, 0) # the last param is index of qubit.

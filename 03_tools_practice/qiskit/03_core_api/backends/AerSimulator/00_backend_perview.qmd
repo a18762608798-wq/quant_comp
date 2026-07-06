@@ -11,19 +11,22 @@ julia:
 # Perview 
 
 ```{python}
-from qiskit_aer import Aer
-aer_backends = Aer.backends()
-for i, j in enumerate(aer_backends):
-    print(j) # 前8个是新的，后面的不要用了.
+from qiskit_aer import AerSimulator
+
+sim = AerSimulator()
+for method in sim.available_methods():
+    print(method)
 ```
 
 Where
 
-* AerSimulator('aer_simulator')
-* AerSimulator('aer_simulator_statevector')
-* AerSimulator('aer_simulator_density_matrix')
-* AerSimulator('aer_simulator_stabilizer')
-* AerSimulator('aer_simulator_matrix_product_state')
-* AerSimulator('aer_simulator_extended_stabilizer')
-* AerSimulator('aer_simulator_unitary')
-* AerSimulator('aer_simulator_superop')
+* `method="automatic"`
+* `method="statevector"`
+* `method="density_matrix"`
+* `method="stabilizer"`
+* `method="matrix_product_state"`
+* `method="extended_stabilizer"`
+* `method="unitary"`
+* `method="superop"`
+* `method="tensor_network"`
+

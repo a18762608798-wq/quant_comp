@@ -3,16 +3,21 @@ import sys
 from pathlib import Path
 
 
-import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import get_shadow_params, get_hamming_params, add_meas, run_quark_qc, run_aer_qc
+from src import (
+    get_shadow_params,
+    get_hamming_params,
+    add_meas,
+    run_quark_qc,
+    run_aer_qc,
+)
 
-test_idx = 1
+test_idx = 3
 
 if __name__ == "__main__":
     # add params meas
@@ -32,10 +37,16 @@ if __name__ == "__main__":
         counts_ls = run_aer_qc(qc, parameter_binds, setting_num, shot_num)
         print(counts_ls)
     elif test_idx == 2:
-        parameter_binds = get_hamming_params([theta, llambda], meas_indices, setting_num)
+        parameter_binds = get_hamming_params(
+            [theta, llambda], meas_indices, setting_num
+        )
         counts_ls = run_aer_qc(qc, parameter_binds, setting_num, shot_num)
         print(counts_ls)
     elif test_idx == 3:
-        parameter_binds = get_hamming_params([theta, llambda], meas_indices, setting_num)
-        counts_ls = asyncio.run(run_quark_qc(qc, parameter_binds, setting_num, shot_num, backend="Dongling"))
+        parameter_binds = get_hamming_params(
+            [theta, llambda], meas_indices, setting_num
+        )
+        counts_ls = asyncio.run(
+            run_quark_qc(qc, parameter_binds, setting_num, shot_num, backend="Baihua")
+        )
         print(counts_ls)

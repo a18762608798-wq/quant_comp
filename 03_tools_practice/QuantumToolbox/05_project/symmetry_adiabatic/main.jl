@@ -79,7 +79,11 @@ if abspath(PROGRAM_FILE) == @__FILE__
         # Get the params to construct the symmetry marked states(sym_val=3)
         @show sym_vals[4]
         @show sym_params[4]
-        @show ψ0 = normalize(sum(sym_params[4][i] * states[i] for i in 1:4))
+        ψ0 = normalize(sum(sym_params[4][i] * states[i] for i in 1:4))
+        @show ρ_23 = ptrace(ψ0, (2, 3))
+        @show ρ_45 = ptrace(ψ0, (4, 5))
+        @show ρ_67 = ptrace(ψ0, (4, 5))
+        @show ρ_bound = ptrace(ψ0, (1, qubit_num))
         # Evolution
         dt = 1e-2 * p.T
         tlist = range(0, p.T; step=dt)

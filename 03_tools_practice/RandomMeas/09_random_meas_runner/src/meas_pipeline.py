@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .meas_config import RandomMeasConfig
+from .meas_config import AerOptions, RandomMeasConfig
 from . import params_setting
 from . import meas_runner
 
@@ -24,7 +24,8 @@ async def run_pipeline(
     ]
 
     # Run
-    is_aer = config.backend == "statevector"
+    opts = config.runner_opts
+    is_aer = isinstance(opts, AerOptions)
     count_groups: list[list[dict[str, int]]] = []
     res: dict[str, Any] = {}
 
@@ -39,8 +40,9 @@ async def run_pipeline(
                 parameter_binds,
                 setting_num,
                 shot_num,
-                device=config.device,
-                precision=config.precision,
+                method=opts.method,
+                device=opts.device,
+                precision=opts.precision,
             )
         else:
             counts = await meas_runner.run_quark_qc(
@@ -48,9 +50,9 @@ async def run_pipeline(
                 parameter_binds,
                 setting_num,
                 shot_num,
-                backend=config.backend,
+                backend=opts.chip,
                 name=f"{config.name}_setting{setting_idx}",
-                target_qubits=config.target_qubits,
+                target_qubits=opts.target_qubits,
             )
         count_groups.append(counts)
 
@@ -73,8 +75,8 @@ async def run_pipeline(
 def _pick_param_fun(meas_mode: str):
     """Return the parameter-generation function for the given mode."""
     mapping = {
-        "shadow": params_setting.get_shadow_params,
-        "hamming": params_setting.get_hamming_params,
+        "random": params_setting.get_random_params,
+        "condition": params_setting.get_condition_params,
     }
     if meas_mode not in mapping:
         raise ValueError(
@@ -93,7 +95,7 @@ def _build_result_dict(
         "count_group": count_groups,
         "meas_indices": list(config.meas_indices),  # numpy → list
         "meas_mode": config.meas_mode,
-        "backend": config.backend,
+        "runner": "aer" if isinstance(config.runner_opts, AerOptions) else "quark",
         "qc_num_qubits": config.qc.num_qubits,
         "qc_num_clbits": config.qc.num_clbits,
     }

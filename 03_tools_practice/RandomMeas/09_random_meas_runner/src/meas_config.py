@@ -7,23 +7,31 @@ from qiskit.circuit import ParameterVector
 
 
 @dataclass
+class AerOptions:
+    method: str = "statevector"  # "statevector" | "stabilizer" | ...
+    device: str = "CPU"
+    precision: str = "single"
+
+
+@dataclass
+class QuarkOptions:
+    chip: str = "Baihua"
+    target_qubits: list[int] = field(default_factory=list)
+
+
+@dataclass
 class RandomMeasConfig:
     # ---- required --------------------------------------------------
     qc: QuantumCircuit
     setting_pairs: list[tuple]
     meas_indices: list[int]
-    backend: str = "statevector"
     params: list[ParameterVector] | None = None
 
+    # ---- runner selection ------------------------------------------
+    runner_opts: AerOptions | QuarkOptions = field(default_factory=AerOptions)
+
     # ---- measurement strategy --------------------------------------
-    meas_mode: str = "shadow"  # "shadow" | "hamming"
-
-    # ---- simulator options (Aer) -----------------------------------
-    device: str = "CPU"
-    precision: str = "single"
-
-    # ---- remote backend options (quark) ----------------------------
-    target_qubits: list[int] = field(default_factory=list)  # 防止两个class共享一个列表
+    meas_mode: str = "random"  # "random" | "condition"
 
     # ---- output ----------------------------------------------------
     output_dir: Path = "./data/"

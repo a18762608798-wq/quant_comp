@@ -10,8 +10,8 @@ from qiskit.circuit import ParameterVector
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src import (
-    get_shadow_params,
-    get_hamming_params,
+    get_random_params,
+    get_condition_params,
     add_meas,
     run_quark_qc,
     run_aer_qc,
@@ -33,20 +33,44 @@ if __name__ == "__main__":
     setting_num = 2
     shot_num = 1024
     if test_idx == 1:
-        parameter_binds = get_shadow_params([theta, llambda], meas_indices, setting_num)
-        counts_ls = run_aer_qc(qc, parameter_binds, setting_num, shot_num)
+        parameter_binds = get_random_params([theta, llambda], meas_indices, setting_num)
+        counts_ls = run_aer_qc(
+            qc,
+            parameter_binds,
+            setting_num,
+            shot_num,
+            method="statevector",
+            device="CPU",
+            precision="single",
+        )
         print(counts_ls)
     elif test_idx == 2:
-        parameter_binds = get_hamming_params(
+        parameter_binds = get_condition_params(
             [theta, llambda], meas_indices, setting_num
         )
-        counts_ls = run_aer_qc(qc, parameter_binds, setting_num, shot_num)
+        counts_ls = run_aer_qc(
+            qc,
+            parameter_binds,
+            setting_num,
+            shot_num,
+            method="statevector",
+            device="CPU",
+            precision="single",
+        )
         print(counts_ls)
     elif test_idx == 3:
-        parameter_binds = get_hamming_params(
+        parameter_binds = get_condition_params(
             [theta, llambda], meas_indices, setting_num
         )
         counts_ls = asyncio.run(
-            run_quark_qc(qc, parameter_binds, setting_num, shot_num, backend="Baihua")
+            run_quark_qc(
+                qc,
+                parameter_binds,
+                setting_num,
+                shot_num,
+                backend="Dongling",
+                name="my_job",
+                target_qubits=[],
+            )
         )
         print(counts_ls)

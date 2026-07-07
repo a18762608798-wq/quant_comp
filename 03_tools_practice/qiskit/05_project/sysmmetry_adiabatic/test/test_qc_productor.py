@@ -25,7 +25,7 @@ if test_idx == 2:
 if test_idx == 3:
     n, c, t_num, T = 8, 8, 4, 50
     initial_state = get_initial_state(n, c)
-    t_ls = get_nonuniform_grid(T, n, steepness=3)
-    qc = get_evolutionary_qc(initial_state, t_ls, T, order=2, reps=1)
+    t_ls = get_nonuniform_grid(T, t_num, steepness=3)
+    qc = get_evolutionary_qc(get_ssh_op, initial_state, t_ls, T, order=2, reps=1)
     print(qc.draw())
     # print(qc.decompose(reps=4).draw())

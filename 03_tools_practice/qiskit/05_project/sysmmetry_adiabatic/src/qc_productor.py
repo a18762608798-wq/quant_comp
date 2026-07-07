@@ -53,6 +53,7 @@ def get_nonuniform_grid(
 
 
 def get_evolutionary_qc(
+    get_op,
     initial_state,
     t_ls,
     T,
@@ -69,7 +70,7 @@ def get_evolutionary_qc(
         dt = t_ls[t_idx + 1] - t_ls[t_idx]
         t = t_ls[t_idx] + 0.5 * dt
         # get H(t)
-        H_t = get_ssh_op(qubit_num, t, T)
+        H_t = get_op(qubit_num, t, T)
         # add evolution gate
         evo = PauliEvolutionGate(
             H_t,

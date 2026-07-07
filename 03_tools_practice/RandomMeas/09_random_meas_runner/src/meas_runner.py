@@ -48,10 +48,10 @@ async def run_quark_qc(
 
 
 def run_aer_qc(
-    qc, parameter_binds, setting_num, shot_num, device="CPU", precision="single"
+    qc, parameter_binds, setting_num, shot_num, method="statevector", device="CPU", precision="single"
 ):
     sim = AerSimulator(
-        method="statevector",
+        method=method,
         device=device,
         precision=precision,
     )

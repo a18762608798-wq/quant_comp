@@ -8,7 +8,7 @@ from qiskit import QuantumCircuit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src import RandomMeasConfig, run_pipeline
+from src import QuarkOptions, RandomMeasConfig, run_pipeline
 
 
 if __name__ == "__main__":
@@ -20,8 +20,8 @@ if __name__ == "__main__":
         qc=qc,
         setting_pairs=setting_pairs,
         meas_indices=meas_indices,
-        meas_mode="hamming",
-        backend="Baihua",
+        meas_mode="random",
+        runner_opts=QuarkOptions(chip="Dongling", target_qubits=[]),
         output_dir=HERE / "./data",
         name="test",
     )

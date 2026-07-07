@@ -54,14 +54,13 @@ def get_nonuniform_grid(
 
 def get_evolutionary_qc(
     initial_state,
-    t_num,
+    t_ls,
     T,
-    steepness=3,
     order=2,
     reps=1,
 ):
     # clean the data
-    t_ls = get_nonuniform_grid(T, t_num, steepness=steepness)
+    t_num = len(t_ls)
     qubit_num = initial_state.num_qubits
     synth = SuzukiTrotter(order=order, reps=reps)
     # evolution

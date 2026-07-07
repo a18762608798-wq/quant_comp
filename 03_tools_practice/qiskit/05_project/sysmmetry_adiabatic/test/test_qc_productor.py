@@ -3,7 +3,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from qc_productor import get_evolutionary_qc, get_initial_state, get_ssh_op
+from qc_productor import (
+    get_evolutionary_qc,
+    get_initial_state,
+    get_ssh_op,
+    get_nonuniform_grid,
+)
 
 test_idx = 3
 
@@ -18,8 +23,9 @@ if test_idx == 2:
     print("ssh_op:", ssh_op)
 
 if test_idx == 3:
-    n, c, t_num, T = 8, 8, 4, 1.0
+    n, c, t_num, T = 8, 8, 4, 50
     initial_state = get_initial_state(n, c)
-    qc = get_evolutionary_qc(initial_state, t_num, T)
+    t_ls = get_nonuniform_grid(T, n, steepness=3)
+    qc = get_evolutionary_qc(initial_state, t_ls, T, order=2, reps=1)
     print(qc.draw())
-    print(qc.decompose(reps=4).draw())
+    # print(qc.decompose(reps=4).draw())

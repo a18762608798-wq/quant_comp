@@ -3,5 +3,7 @@
 *.tmp
 *.npz
 *.ipynb
-undergraduate_courses/
+*.json
+__pycache__/
 copilot/
+undergraduate_courses/

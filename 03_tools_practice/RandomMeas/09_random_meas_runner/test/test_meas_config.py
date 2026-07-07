@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -29,6 +30,10 @@ if __name__ == "__main__":
         qc=qc,
         setting_pairs=setting_pairs,
         meas_indices=meas_indices,
-        runner_opts=src.QuarkOptions(chip="Baihua", target_qubits=[]),
+        runner_opts=src.QuarkOptions(
+            chip="Baihua",
+            target_qubits=[],
+            token=os.environ["QUARK_TOKEN"],
+        ),
     )
     print(b)

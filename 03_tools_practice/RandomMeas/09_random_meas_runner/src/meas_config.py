@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -8,15 +9,24 @@ from qiskit.circuit import ParameterVector
 
 @dataclass
 class AerOptions:
-    method: str = "statevector"  # "statevector" | "stabilizer" | ...
+    method: str = "statevector"
     device: str = "CPU"
     precision: str = "single"
+
+
+@dataclass
+class CorrectionInput:
+    trivial_qc: QuantumCircuit | None = None
+    trivial_parameter_binds: Any = None
+    trivial_shot_num: int = 1024
 
 
 @dataclass
 class QuarkOptions:
     chip: str = "Baihua"
     target_qubits: list[int] = field(default_factory=list)
+    token: str = field(default_factory=lambda: os.environ.get("QUARK_TOKEN", ""))
+    correction_input: CorrectionInput | None = None
 
 
 @dataclass

@@ -4,6 +4,7 @@ import asyncio
 
 from qiskit_aer import AerSimulator
 from qiskit import qasm2, transpile
+from .meas_config import CorrectionInput
 from quark import Task
 
 
@@ -24,31 +25,68 @@ async def run_quark_qc(
     parameter_binds,
     setting_num,
     shot_num,
+    token=os.environ["QUARK_TOKEN"],
     backend="Baihua",
     name="my_job",
     target_qubits=[],
+    correction_input: CorrectionInput | None = None,
 ):
     qasm2_strings = _bound_param(qc, setting_num, parameter_binds)
     setting_num = len(qasm2_strings)
-    tasks = []
+
+    if correction_input is not None:
+        trivial_qasm2_strings = _bound_param(
+            correction_input.trivial_qc,
+            setting_num,
+            correction_input.trivial_parameter_binds,
+        )
+
+    tasks: list[asyncio.Task] = []
     for setting_idx in range(setting_num):
-        qasm2_string = qasm2_strings[setting_idx]
-        task = asyncio.create_task(
-            _run_quark_qc(
-                qasm2_string,
-                shot_num,
-                backend=backend,
-                name=f"{name}_U{setting_idx}",
-                target_qubits=target_qubits,
+        tasks.append(
+            asyncio.create_task(
+                _run_quark_qc(
+                    qasm2_strings[setting_idx],
+                    shot_num,
+                    token=token,
+                    backend=backend,
+                    name=f"{name}_U{setting_idx}",
+                    target_qubits=target_qubits,
+                )
             )
         )
-        tasks.append(task)
-    counts = await asyncio.gather(*tasks)
-    return counts
+        if correction_input is not None:
+            tasks.append(
+                asyncio.create_task(
+                    _run_quark_qc(
+                        trivial_qasm2_strings[setting_idx],
+                        correction_input.trivial_shot_num,
+                        token=token,
+                        backend=backend,
+                        name=f"{name}_calib_U{setting_idx}",
+                        target_qubits=target_qubits,
+                    )
+                )
+            )
+
+    results = await asyncio.gather(*tasks)
+
+    if correction_input is not None:
+        counts = results[0::2]
+        trivial_counts = results[1::2]
+        return counts, trivial_counts
+    else:
+        return results, None
 
 
 def run_aer_qc(
-    qc, parameter_binds, setting_num, shot_num, method="statevector", device="CPU", precision="single"
+    qc,
+    parameter_binds,
+    setting_num,
+    shot_num,
+    method="statevector",
+    device="CPU",
+    precision="single",
 ):
     sim = AerSimulator(
         method=method,
@@ -88,11 +126,11 @@ def _bound_param(qc, setting_num, parameter_binds):
 async def _run_quark_qc(
     qasm2_string,
     shot_num,
+    token=os.environ["QUARK_TOKEN"],
     backend="Baihua",  # an integer multiple of 1024
     name="my_job",
     target_qubits=[],
 ):
-    token = os.environ["QUARK_TOKEN"]
     tmgr = Task(token)
     task = {
         "chip": backend,  # the quantum computer choice,

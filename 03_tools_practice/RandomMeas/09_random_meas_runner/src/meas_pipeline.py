@@ -20,7 +20,9 @@ async def run_pipeline(
     _get_param_fun = _pick_param_fun(config.meas_mode)
     parameter_bind_groups = [
         _get_param_fun(
-            config.params, config.meas_indices, config.setting_pairs[setting_idx][0],
+            config.params,
+            config.meas_indices,
+            config.setting_pairs[setting_idx][0],
             ensemble=config.ensemble,
         )
         for setting_idx in range(len(config.setting_pairs))
@@ -48,7 +50,9 @@ async def run_pipeline(
             )
         trivial_parameter_bind_groups = [
             _get_param_fun(
-                config.params, config.meas_indices, config.setting_pairs[i][0],
+                config.params,
+                config.meas_indices,
+                config.setting_pairs[i][0],
                 ensemble=config.ensemble,
             )
             for i in range(len(config.setting_pairs))
@@ -149,18 +153,32 @@ def _build_result_dict(
     result["qc_num_qubits"] = config.qc.num_qubits
     result["qc_num_clbits"] = config.qc.num_clbits
     result["meas_indices"] = list(config.meas_indices)
-    result["parameter_bind_groups"] = [
-        {str(k): v for k, v in binds[0].items()} for binds in parameter_bind_groups
+    result["params"] = [
+        _binds_to_vec_dict(binds[0], config.params) for binds in parameter_bind_groups
     ]
     if trivial_count_groups:
-        result["trivial_parameter_bind_groups"] = [
-            {str(k): v for k, v in binds[0].items()}
+        result["trivial_params"] = [
+            _binds_to_vec_dict(binds[0], config.params)
             for binds in trivial_parameter_bind_groups
         ]
     # res
     result["count_group"] = count_groups
     if trivial_count_groups:
         result["trivial_count_group"] = trivial_count_groups
+    return result
+
+
+def _binds_to_vec_dict(binds: dict, params) -> dict[str, list]:
+    """Group parameter binds by ParameterVector into 2D lists.
+
+    Returns e.g. {"theta": [[...], ...], "lambda": [[...], ...]} where the
+    outer index is setting_idx and the inner list is the value per parameter
+    number.
+    """
+    result: dict[str, list] = {}
+    for pvec in params:
+        per_param = [list(binds[p]) for p in pvec]
+        result[pvec.name] = [list(col) for col in zip(*per_param)]
     return result
 
 

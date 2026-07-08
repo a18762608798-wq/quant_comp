@@ -18,7 +18,7 @@ from src import (
 )
 
 
-test_idx = 3
+test_idx = 1
 
 if __name__ == "__main__":
     HERE = Path(__file__).resolve().parent
@@ -82,8 +82,8 @@ if __name__ == "__main__":
             meas_mode="random",
             ensemble="pauli",
             runner_opts=QuarkOptions(
-                chip="Baihua",
-                target_qubits=[2, 3, 4, 5, 6, 7],
+                chip="Dongling",
+                target_qubits=[],
                 token=os.environ["QUARK_TOKEN"],
             ),
             output_dir=HERE / "./data",

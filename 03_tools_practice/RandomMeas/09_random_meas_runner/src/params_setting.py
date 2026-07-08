@@ -35,12 +35,12 @@ def get_random_params(params, meas_indices, setting_num, ensemble="haar"):
                 **{
                     theta[i]: vals
                     for i in range(meas_num)
-                    for vals in [theta_choice_groups[i]]
+                    for vals in [theta_choice_groups[i].tolist()]
                 },
                 **{
                     llambda[i]: vals
                     for i in range(meas_num)
-                    for vals in [llambda_choice_groups[i]]
+                    for vals in [llambda_choice_groups[i].tolist()]
                 },
             }
         ]
@@ -71,12 +71,12 @@ def get_random_params(params, meas_indices, setting_num, ensemble="haar"):
                 **{
                     theta[i]: vals
                     for i in range(meas_num)
-                    for vals in [theta_choice_groups[i]]
+                    for vals in [theta_choice_groups[i].tolist()]
                 },
                 **{
                     llambda[i]: vals
                     for i in range(meas_num)
-                    for vals in [llambda_choice_groups[i]]
+                    for vals in [llambda_choice_groups[i].tolist()]
                 },
             }
         ]
@@ -120,13 +120,13 @@ def get_condition_params(params, meas_indices, setting_num, ensemble="haar"):
                 **{
                     theta[k]: vals
                     for i in range(pair_num)
-                    for vals in [theta_choice_groups[i]]
+                    for vals in [theta_choice_groups[i].tolist()]
                     for k in (2 * i, 2 * i + 1)
                 },
                 **{
                     llambda[k]: vals
                     for i in range(pair_num)
-                    for vals in [llambda_choice_groups[i]]
+                    for vals in [llambda_choice_groups[i].tolist()]
                     for k in (2 * i, 2 * i + 1)
                 },
             }
@@ -155,13 +155,13 @@ def get_condition_params(params, meas_indices, setting_num, ensemble="haar"):
                 **{
                     theta[k]: vals
                     for i in range(pair_num)
-                    for vals in [theta_choice_groups[i]]
+                    for vals in [theta_choice_groups[i].tolist()]
                     for k in (2 * i, 2 * i + 1)
                 },
                 **{
                     llambda[k]: vals
                     for i in range(pair_num)
-                    for vals in [llambda_choice_groups[i]]
+                    for vals in [llambda_choice_groups[i].tolist()]
                     for k in (2 * i, 2 * i + 1)
                 },
             }

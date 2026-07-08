@@ -11,3 +11,4 @@ qiskit = ""
 
 [pip.deps]
 quarkstudio = ""
+quarkcircuit = ""

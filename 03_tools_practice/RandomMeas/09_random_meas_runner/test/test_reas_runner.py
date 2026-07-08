@@ -23,21 +23,23 @@ test_idx = 4
 
 if __name__ == "__main__":
     # add params meas
-    meas_indices = [0, 3, 1, 2]
+    meas_indices = [0, 5, 1, 4]
     meas_num = len(meas_indices)
     theta = ParameterVector("theta", meas_num)
     llambda = ParameterVector("lambda", meas_num)
     qc = QuantumCircuit(6, 4)
     qc.cx(0, 1)
     qc.cx(1, 2)
-    qc.cx(4, 5)
+    qc.cx(3, 4)
     qc = add_meas(qc, [theta, llambda], meas_indices)
     # give specific vals.
     setting_num = 2
     shot_num = 1024
 
     if test_idx == 1:
-        parameter_binds = get_random_params([theta, llambda], meas_indices, setting_num)
+        parameter_binds = get_random_params(
+            [theta, llambda], meas_indices, setting_num, ensemble="derandom"
+        )
         counts_ls = run_aer_qc(
             qc,
             parameter_binds,
@@ -51,7 +53,7 @@ if __name__ == "__main__":
 
     elif test_idx == 2:
         parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num
+            [theta, llambda], meas_indices, setting_num, ensemble="haar"
         )
         counts_ls = run_aer_qc(
             qc,
@@ -66,7 +68,7 @@ if __name__ == "__main__":
 
     elif test_idx == 3:
         parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num
+            [theta, llambda], meas_indices, setting_num, ensemble="pauli"
         )
         counts_ls, _ = asyncio.run(
             run_quark_qc(
@@ -89,10 +91,10 @@ if __name__ == "__main__":
 
         # parameter binds
         parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num
+            [theta, llambda], meas_indices, setting_num, ensemble="derandom"
         )
         trivial_parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num
+            [theta, llambda], meas_indices, setting_num, ensemble="pauli"
         )
 
         counts_ls, trivial_counts = asyncio.run(

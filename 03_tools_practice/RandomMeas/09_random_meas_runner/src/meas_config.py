@@ -42,6 +42,7 @@ class RandomMeasConfig:
 
     # ---- measurement strategy --------------------------------------
     meas_mode: str = "random"  # "random" | "condition"
+    ensemble: str = "haar"  # "haar" | "pauli" | "derandom"
 
     # ---- output ----------------------------------------------------
     output_dir: Path = "./data/"

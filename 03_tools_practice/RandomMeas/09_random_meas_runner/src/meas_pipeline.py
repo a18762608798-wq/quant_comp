@@ -20,7 +20,8 @@ async def run_pipeline(
     _get_param_fun = _pick_param_fun(config.meas_mode)
     parameter_bind_groups = [
         _get_param_fun(
-            config.params, config.meas_indices, config.setting_pairs[setting_idx][0]
+            config.params, config.meas_indices, config.setting_pairs[setting_idx][0],
+            ensemble=config.ensemble,
         )
         for setting_idx in range(len(config.setting_pairs))
     ]
@@ -47,7 +48,8 @@ async def run_pipeline(
             )
         trivial_parameter_bind_groups = [
             _get_param_fun(
-                config.params, config.meas_indices, config.setting_pairs[i][0]
+                config.params, config.meas_indices, config.setting_pairs[i][0],
+                ensemble=config.ensemble,
             )
             for i in range(len(config.setting_pairs))
         ]
@@ -142,6 +144,7 @@ def _build_result_dict(
         result["target_qubits"] = config.runner_opts.target_qubits
     # settings
     result["meas_mode"] = config.meas_mode
+    result["ensemble"] = config.ensemble
     result["setting_pairs"] = config.setting_pairs
     result["qc_num_qubits"] = config.qc.num_qubits
     result["qc_num_clbits"] = config.qc.num_clbits

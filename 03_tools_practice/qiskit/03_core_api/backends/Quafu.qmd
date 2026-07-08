@@ -19,16 +19,18 @@ tmgr = Task(token)
 print(tmgr.status()) # express the rows now.
 ```
 
+```{python}
+info = tmgr.backend('Baihua',show_couplers_fidelity=True,show_quibts_attributes='T1',save_svg_fname='test')
+```
+
 ## basics usage
 
 ```{python}
 # Create a measure circ
 from qiskit import QuantumCircuit
-from qiskit_aer import Aer
-from qiskit.visualization import plot_histogram
 circ = QuantumCircuit(2, 2)
-circ.x([0])
-circ.measure([0, 1], [0, 1]) 
+circ.cz([0], [1])
+circ.measure([0], [0]) 
 circ.draw()
 ```
 
@@ -41,14 +43,14 @@ qasm2_circ = qasm2.dumps(circ)
 ```{python}
 # submit the ranks to quatum computer
 task = {
-'chip': 'Dongling', # the quantum computer choice,  
+'chip': 'Baihua', # the quantum computer choice,  
 'name': 'my_job',  
 'circuit':qasm2_circ, 
 'shots': 1024, # an integer multiple of 1024
 'options':{
     'compiler': 'qiskit',
     'correct': False,
-    'target_qubits': [] # 具体bit而非范围, [] is automatic choice. 
+    'target_qubits': [71, 72] # 具体bit而非范围, [] is automatic choice. 
     }
 }
 tid = tmgr.run(task)

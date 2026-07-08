@@ -13,7 +13,9 @@ def add_meas(qc, params, meas_indices):
     llambda = params[1]
     for param_idx in range(len(meas_indices)):
         qubit_idx = meas_indices[param_idx]
-        qc.u(theta[param_idx], 0, llambda[param_idx], qubit_idx)
+        qc.u(
+            -theta[param_idx], -llambda[param_idx], 0, qubit_idx
+        )  # U^dag: U3(theta, 0, lambda)^† = U3(-theta, -lambda, 0)
     qc.measure(
         meas_indices, range(len(meas_indices))
     )  # Adjust the classical bits for fitting the addition mode.

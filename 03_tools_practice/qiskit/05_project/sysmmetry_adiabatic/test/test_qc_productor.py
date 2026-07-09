@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 from pathlib import Path
 
@@ -22,7 +23,7 @@ from qc_productor import (
 )
 
 
-test_idx = 3
+test_idx = 4
 HERE = Path(__file__).resolve().parent
 
 
@@ -61,4 +62,34 @@ if test_idx == 3:
             config=meas_config,
         )
     )
+    print(res)
+
+if test_idx == 4:
+    n, c, t_num, T = 8, 8, 5, 50
+    initial_state = get_initial_state(n, c)
+    t_ls = get_nonuniform_grid(T, t_num, steepness=3)
+    qc = get_evolutionary_qc(get_ssh_op, initial_state, t_ls, T, order=2, reps=1)
+    print(qc.draw())
+    # print(qc.decompose(reps=4).draw())
+    # quark-correction-condition, derandom
+    meas_indices = list(range(8))  # Arrange the swap bits together
+    setting_pairs = [(2, 512)]
+    meas_config = RandomMeasConfig(
+        qc=qc,
+        setting_pairs=setting_pairs,
+        meas_indices=meas_indices,
+        meas_mode="random",
+        ensemble="haar",
+        runner_opts=QuarkOptions(
+            chip="Dongling",
+            target_qubits=[],
+            token=os.environ["QUARK_TOKEN"],
+            correction_input=CorrectionInput(
+                trivial_shot_num=1024,
+            ),
+        ),
+        output_dir=HERE / "./data",
+        name="quark-correction-random",
+    )
+    res = asyncio.run(run_pipeline(config=meas_config))
     print(res)

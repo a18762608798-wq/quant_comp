@@ -1,15 +1,8 @@
 import os
-import sys
-from pathlib import Path
-
 
 from qiskit import QuantumCircuit
 
-
-# 将 09_reas_runner 目录加入搜索路径
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-import src
+from qmeas import random as src
 
 test_idx = 1
 

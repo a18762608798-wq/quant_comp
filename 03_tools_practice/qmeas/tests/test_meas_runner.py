@@ -1,16 +1,12 @@
 import asyncio
 import os
-import sys
-from pathlib import Path
 
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from src import (
+from qmeas.random import (
     CorrectionInput,
     get_random_params,
     get_condition_params,

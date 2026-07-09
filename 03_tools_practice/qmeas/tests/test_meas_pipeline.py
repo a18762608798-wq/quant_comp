@@ -15,7 +15,7 @@ from qmeas.random import (
 )
 
 
-test_idx = 1
+test_idx = 4
 
 if __name__ == "__main__":
     HERE = Path(__file__).resolve().parent

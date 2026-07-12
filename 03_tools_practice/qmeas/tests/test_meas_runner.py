@@ -15,7 +15,7 @@ from qmeas.random import (
     add_meas,
 )
 
-test_idx = 4
+test_idx = 3
 
 if __name__ == "__main__":
     # add params meas

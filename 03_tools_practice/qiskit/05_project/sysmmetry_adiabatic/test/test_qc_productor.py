@@ -11,6 +11,7 @@ from qmeas.random import (
     AerOptions,
     QuarkOptions,
     RandomMeasConfig,
+    SettingRun,
     run_pipeline,
 )
 
@@ -38,24 +39,27 @@ if test_idx == 2:
     print("ssh_op:", ssh_op)
 
 if test_idx == 3:
+    # evolution qc
     n, c, t_num, T = 8, 8, 4, 50
     initial_state = get_initial_state(n, c)
     t_ls = get_nonuniform_grid(T, t_num, steepness=3)
-    qc = get_evolutionary_qc(get_ssh_op, initial_state, t_ls, T, order=2, reps=1)
+    qc = get_evolutionary_qc(get_ssh_op, initial_state, t_ls, T, order=1, reps=1)
     print(qc.draw())
-    # print(qc.decompose(reps=4).draw())
-    # aer: random, derandom
-    meas_indices = list(range(8))  # Arrange the swap bits together
-    setting_pairs = [(2, 1024)]
+    # aer: independence, derandom
+    meas_indices = [2, 3, 4, 5]  # Arrange the swap bits together
+    setting_runs = [
+        SettingRun(setting_num=2, shot_num=1024),
+        SettingRun(setting_num=5, shot_num=1024),
+    ]
     meas_config = RandomMeasConfig(
         qc=qc,
-        setting_pairs=setting_pairs,
+        setting_runs=setting_runs,
         meas_indices=meas_indices,
-        meas_mode="random",
+        meas_mode="independence",
         ensemble="derandom",
         runner_opts=AerOptions(method="statevector", device="CPU", precision="single"),
         output_dir=HERE / "./data",
-        name="aer-random",
+        name="aer-independence",
     )
     res = asyncio.run(
         run_pipeline(
@@ -68,18 +72,21 @@ if test_idx == 4:
     n, c, t_num, T = 8, 8, 5, 50
     initial_state = get_initial_state(n, c)
     t_ls = get_nonuniform_grid(T, t_num, steepness=3)
-    qc = get_evolutionary_qc(get_ssh_op, initial_state, t_ls, T, order=2, reps=1)
+    qc = get_evolutionary_qc(get_ssh_op, initial_state, t_ls, T, order=1, reps=1)
     print(qc.draw())
-    # print(qc.decompose(reps=4).draw())
-    # quark-correction-condition, derandom
-    meas_indices = list(range(8))  # Arrange the swap bits together
-    setting_pairs = [(2, 512)]
+    # quark-correction-pair, derandom
+    meas_indices = [2, 5, 3, 4]
+    setting_runs = [
+        SettingRun(setting_num=2, shot_num=1024),
+        SettingRun(setting_num=5, shot_num=2048),
+    ]
+
     meas_config = RandomMeasConfig(
         qc=qc,
-        setting_pairs=setting_pairs,
+        setting_runs=setting_runs,
         meas_indices=meas_indices,
-        meas_mode="random",
-        ensemble="haar",
+        meas_mode="pair",
+        ensemble="derandom",
         runner_opts=QuarkOptions(
             chip="Dongling",
             target_qubits=[],
@@ -89,7 +96,7 @@ if test_idx == 4:
             ),
         ),
         output_dir=HERE / "./data",
-        name="quark-correction-random",
+        name="quark-correction-pair",
     )
     res = asyncio.run(run_pipeline(config=meas_config))
     print(res)

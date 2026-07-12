@@ -8,13 +8,15 @@
 
 ### Python venv
 
+revised the `python3` to the specific python path.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 ```bash
-python3 -m pip install --upgrade --force-reinstall --no-cache-dir "git+https://github.com/a18762608798-wq/quant_comp.git@main#subdirectory=03_tools_practice/qmeas"
+python3 -m pip install --upgrade --force-reinstall "git+https://github.com/a18762608798-wq/quant_comp.git@main#subdirectory=03_tools_practice/qmeas"
 ```
 
 本地克隆后可编辑安装：

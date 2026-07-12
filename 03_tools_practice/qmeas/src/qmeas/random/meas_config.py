@@ -1,13 +1,23 @@
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
 
-@dataclass
+MeasMode = Literal["independence", "pair"]
+Ensemble = Literal["haar", "pauli", "derandom"]
+
+
+@dataclass(frozen=True)  # Immutable
+class SettingRun:
+    setting_num: int
+    shot_num: int
+
+
+@dataclass(frozen=True)
 class AerOptions:
     method: str = "statevector"
     device: str = "CPU"
@@ -25,36 +35,40 @@ class CorrectionInput:
 class QuarkOptions:
     chip: str = "Baihua"
     target_qubits: list[int] = field(default_factory=list)
-    token: str = field(default_factory=lambda: os.environ.get("QUARK_TOKEN", ""))
+    token: str = field(default_factory=lambda: os.environ["QUARK_TOKEN"])
     correction_input: CorrectionInput | None = None
 
 
 @dataclass
 class RandomMeasConfig:
-    # ---- required --------------------------------------------------
     qc: QuantumCircuit
-    setting_pairs: list[tuple]
+    setting_runs: list[SettingRun]
     meas_indices: list[int]
-    params: list[ParameterVector] | None = None
 
-    # ---- runner selection ------------------------------------------
     runner_opts: AerOptions | QuarkOptions = field(default_factory=AerOptions)
 
-    # ---- measurement strategy --------------------------------------
-    meas_mode: str = "random"  # "random" | "condition"
-    ensemble: str = "haar"  # "haar" | "pauli" | "derandom"
+    meas_mode: MeasMode = "independence"
+    ensemble: Ensemble = "haar"
 
-    # ---- output ----------------------------------------------------
-    output_dir: Path = "./data/"
+    params: list[ParameterVector] | None = None
+
+    output_dir: Path = field(default_factory=lambda: Path("./data"))
     name: str = "experiment"
 
-    # ---- misc ------------------------------------------------------
     extra: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        self.output_dir = Path(self.output_dir)
+
         if self.params is None:
-            n = len(self.meas_indices)
+            meas_num = len(self.meas_indices)
             self.params = [
-                ParameterVector("theta", n),
-                ParameterVector("lambda", n),
+                ParameterVector("theta", meas_num),
+                ParameterVector("lambda", meas_num),
             ]
+
+        if not self.setting_runs:
+            raise ValueError("setting_runs cannot be empty")
+
+        if not self.meas_indices:
+            raise ValueError("meas_indices cannot be empty")

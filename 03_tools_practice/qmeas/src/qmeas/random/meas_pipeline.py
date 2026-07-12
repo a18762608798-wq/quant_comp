@@ -4,167 +4,220 @@ from typing import Any
 
 from qiskit import QuantumCircuit
 
-from .meas_config import AerOptions, CorrectionInput, RandomMeasConfig
-from . import params_setting
-from . import meas_runner
+from .meas_config import (
+    AerOptions,
+    CorrectionInput,
+    QuarkOptions,
+    RandomMeasConfig,
+)
+from .meas_runner import RunResult, add_meas, create_runner
+from .params_setting import create_parameter_generator
 
 
-async def run_pipeline(
-    config: RandomMeasConfig,
-):
+# 公共函数，兼容所有情况而不做if分支。
+async def run_pipeline(config: RandomMeasConfig) -> dict[str, Any]:
+    # 1. 构造参数生成器
+    param_generator = create_parameter_generator(
+        meas_mode=config.meas_mode,
+        ensemble=config.ensemble,
+    )
 
-    # Add measurements
-    qc_meas = meas_runner.add_meas(config.qc.copy(), config.params, config.meas_indices)
+    # 2. 构造 runner
+    runner = create_runner(config.runner_opts)
 
-    # Parameter generation
-    _get_param_fun = _pick_param_fun(config.meas_mode)
+    # 3. 构造带测量的电路
+    qc_meas = add_meas(
+        config.qc.copy(),
+        config.params,
+        config.meas_indices,
+    )
+
+    # 4. 为每一组 setting 生成参数
+    assert config.params is not None, (
+        "__post_init__(self)实际上已经避免None, 这里只是让pyright闭嘴。"
+    )
     parameter_bind_groups = [
-        _get_param_fun(
-            config.params,
-            config.meas_indices,
-            config.setting_pairs[setting_idx][0],
-            ensemble=config.ensemble,
+        param_generator.generate(
+            params=config.params,
+            meas_indices=config.meas_indices,
+            setting_num=setting_run.setting_num,
         )
-        for setting_idx in range(len(config.setting_pairs))
+        for setting_run in config.setting_runs
     ]
 
-    # Run
-    opts = config.runner_opts
-    is_aer = isinstance(opts, AerOptions)
-    count_groups: list[list[dict[str, int]]] = []
-    trivial_count_groups: list[list[dict[str, int]]] = []
+    # 5. 准备当前项目已有的 correction 输入
+    correction_base = _prepare_correction_base(config=config)
 
-    # ---- correction pre-build -------------------------------------
-    trivial_parameter_bind_groups = []
-    correction_input_base = opts.correction_input if not is_aer else None
-    if correction_input_base is not None:
-        if correction_input_base.trivial_qc is None:
-            trivial_qc = QuantumCircuit(config.qc.num_qubits, config.qc.num_clbits)
-            trivial_qc = meas_runner.add_meas(
-                trivial_qc, config.params, config.meas_indices
-            )
-            correction_input_base = CorrectionInput(
-                trivial_qc=trivial_qc,
-                trivial_parameter_binds=None,
-                trivial_shot_num=correction_input_base.trivial_shot_num,
-            )
-        trivial_parameter_bind_groups = [
-            _get_param_fun(
-                config.params,
-                config.meas_indices,
-                config.setting_pairs[i][0],
-                ensemble=config.ensemble,
-            )
-            for i in range(len(config.setting_pairs))
-        ]
-
-    for setting_idx in range(len(config.setting_pairs)):
-        setting_num = config.setting_pairs[setting_idx][0]
-        shot_num = config.setting_pairs[setting_idx][1]
-        parameter_binds = parameter_bind_groups[setting_idx]
-
-        if is_aer:
-            counts = meas_runner.run_aer_qc(
-                qc_meas,
-                parameter_binds,
-                setting_num,
-                shot_num,
-                method=opts.method,
-                device=opts.device,
-                precision=opts.precision,
-            )
-        else:
-            correction_input = None
-            if correction_input_base is not None:
-                correction_input = CorrectionInput(
-                    trivial_qc=correction_input_base.trivial_qc,
-                    trivial_parameter_binds=trivial_parameter_bind_groups[setting_idx],
-                    trivial_shot_num=correction_input_base.trivial_shot_num,
-                )
-
-            counts, trivial_counts = await meas_runner.run_quark_qc(
-                qc_meas,
-                parameter_binds,
-                setting_num,
-                shot_num,
-                token=opts.token,
-                backend=opts.chip,
-                name=f"{config.name}_setting{setting_idx}",
-                target_qubits=opts.target_qubits,
-                correction_input=correction_input,
-            )
-            if trivial_counts is not None:
-                trivial_count_groups.append(trivial_counts)
-        count_groups.append(counts)
-
-    # Record
-    res: dict[str, Any] = _build_result_dict(
-        config,
-        count_groups,
-        trivial_count_groups,
-        parameter_bind_groups,
-        trivial_parameter_bind_groups,
+    correction_bind_groups = _build_correction_bind_groups(
+        config=config,
+        param_generator=param_generator,
+        correction_base=correction_base,
     )
-    # Write to JSON
-    config.output_dir.mkdir(parents=True, exist_ok=True)
-    filename = f"{config.name}.json"
-    filepath = config.output_dir / filename
-    _write_json(filepath, res)
 
-    return res
+    # 6. 执行
+    run_results: list[RunResult] = []
 
-
-# ------------------------------------------------------------------
-# Helpers
-# ------------------------------------------------------------------
-
-
-def _pick_param_fun(meas_mode: str):
-    """Return the parameter-generation function for the given mode."""
-    mapping = {
-        "random": params_setting.get_random_params,
-        "condition": params_setting.get_condition_params,
-    }
-    if meas_mode not in mapping:
-        raise ValueError(
-            f"Unknown meas_mode={meas_mode!r}. Choose from {list(mapping.keys())}."
+    for run_idx, setting_run in enumerate(config.setting_runs):
+        correction_input = _make_run_correction_input(
+            correction_base=correction_base,
+            correction_binds=(
+                correction_bind_groups[run_idx] if correction_bind_groups else None
+            ),
         )
-    return mapping[meas_mode]
+
+        run_result = await runner.run(
+            qc=qc_meas,
+            parameter_binds=parameter_bind_groups[run_idx],
+            setting_num=setting_run.setting_num,
+            shot_num=setting_run.shot_num,
+            name=f"{config.name}_setting{run_idx}",
+            correction_input=correction_input,
+        )
+
+        run_results.append(run_result)
+
+    # 7. 构造最终结果
+    result = _build_result_dict(
+        config=config,
+        run_results=run_results,
+        parameter_bind_groups=parameter_bind_groups,
+        correction_bind_groups=correction_bind_groups,
+    )
+
+    # 8. 保存
+    _write_result(
+        output_dir=config.output_dir,
+        name=config.name,
+        result=result,
+    )
+
+    return result
+
+
+# ------------------------------------------------------------------
+# Correction helpers
+# ------------------------------------------------------------------
+
+
+# 若是 Quark 且需 correction，准备 trivial 电路（没给就自动建一个）；
+# 其它情况返回 `None`
+def _prepare_correction_base(
+    config: RandomMeasConfig,
+) -> CorrectionInput | None:
+    if not isinstance(config.runner_opts, QuarkOptions):
+        return None
+
+    correction_input = config.runner_opts.correction_input
+
+    if correction_input is None:
+        return None
+
+    if correction_input.trivial_qc is not None:
+        return correction_input
+
+    trivial_qc = QuantumCircuit(
+        config.qc.num_qubits,
+        config.qc.num_clbits,
+    )
+
+    trivial_qc = add_meas(
+        trivial_qc,
+        config.params,
+        config.meas_indices,
+    )
+
+    return CorrectionInput(
+        trivial_qc=trivial_qc,
+        trivial_parameter_binds=None,
+        trivial_shot_num=correction_input.trivial_shot_num,
+    )
+
+
+# 给每个 setting 生成 correction 参数；无 correction 则返回 `[]`。
+def _build_correction_bind_groups(
+    config,
+    param_generator,
+    correction_base,
+):
+    if correction_base is None:
+        return []
+
+    return [
+        param_generator.generate(
+            params=config.params,
+            meas_indices=config.meas_indices,
+            setting_num=setting_run.setting_num,
+        )
+        for setting_run in config.setting_runs
+    ]
+
+
+# 把 base + 当前 setting 的参数组合成单次 `CorrectionInput`。
+def _make_run_correction_input(
+    correction_base,
+    correction_binds,
+):
+    if correction_base is None:
+        return None
+
+    return CorrectionInput(
+        trivial_qc=correction_base.trivial_qc,
+        trivial_parameter_binds=correction_binds,
+        trivial_shot_num=correction_base.trivial_shot_num,
+    )
+
+
+# ------------------------------------------------------------------
+# Result helpers
+# ------------------------------------------------------------------
 
 
 def _build_result_dict(
     config: RandomMeasConfig,
-    count_groups: list[list[dict[str, int]]],
-    trivial_count_groups: list[list[dict[str, int]]],
+    run_results: list[RunResult],
     parameter_bind_groups,
-    trivial_parameter_bind_groups,
+    correction_bind_groups,
 ) -> dict[str, Any]:
-    """Construct the output dictionary with all metadata and counts."""
+    runner_opts = config.runner_opts
+
     result: dict[str, Any] = {}
-    # aer
-    result["runner"] = "aer" if isinstance(config.runner_opts, AerOptions) else "quark"
-    if not isinstance(config.runner_opts, AerOptions):
-        result["chip"] = config.runner_opts.chip
-        result["target_qubits"] = config.runner_opts.target_qubits
-    # settings
+    result["runner"] = "aer" if isinstance(runner_opts, AerOptions) else "quark"
+    if isinstance(runner_opts, QuarkOptions):
+        result["chip"] = runner_opts.chip
+        result["target_qubits"] = runner_opts.target_qubits
+
     result["meas_mode"] = config.meas_mode
     result["ensemble"] = config.ensemble
-    result["setting_pairs"] = config.setting_pairs
+    result["setting_runs"] = [
+        (setting_run.setting_num, setting_run.shot_num)
+        for setting_run in config.setting_runs
+    ]
     result["qc_num_qubits"] = config.qc.num_qubits
     result["qc_num_clbits"] = config.qc.num_clbits
     result["meas_indices"] = list(config.meas_indices)
     result["params"] = [
         _binds_to_vec_dict(binds[0], config.params) for binds in parameter_bind_groups
     ]
-    if trivial_count_groups:
+
+    has_trivial = any(
+        run_result.trivial_counts is not None for run_result in run_results
+    )
+
+    if has_trivial and correction_bind_groups:
         result["trivial_params"] = [
             _binds_to_vec_dict(binds[0], config.params)
-            for binds in trivial_parameter_bind_groups
+            for binds in correction_bind_groups
         ]
-    # res
-    result["count_group"] = count_groups
-    if trivial_count_groups:
-        result["trivial_count_group"] = trivial_count_groups
+
+    result["count_group"] = [run_result.counts for run_result in run_results]
+
+    if has_trivial:
+        result["trivial_count_group"] = [
+            run_result.trivial_counts
+            for run_result in run_results
+            if run_result.trivial_counts is not None
+        ]
+
     return result
 
 
@@ -182,6 +235,20 @@ def _binds_to_vec_dict(binds: dict, params) -> dict[str, list]:
     return result
 
 
-def _write_json(filepath: Path, data) -> None:
-    with open(filepath, "w", encoding="utf-8") as fh:
-        json.dump(data, fh, indent=2, ensure_ascii=False, default=str)
+def _write_result(
+    output_dir: Path,
+    name: str,
+    result: dict[str, Any],
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    filepath = output_dir / f"{name}.json"
+
+    with filepath.open("w", encoding="utf-8") as file:
+        json.dump(
+            result,
+            file,
+            indent=2,
+            ensure_ascii=False,
+            default=str,
+        )

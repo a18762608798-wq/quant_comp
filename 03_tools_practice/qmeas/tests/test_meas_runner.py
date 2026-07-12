@@ -8,11 +8,11 @@ from qiskit.circuit import ParameterVector
 
 from qmeas.random import (
     CorrectionInput,
-    get_random_params,
-    get_condition_params,
+    AerOptions,
+    QuarkOptions,
+    create_parameter_generator,
+    create_runner,
     add_meas,
-    run_quark_qc,
-    run_aer_qc,
 )
 
 test_idx = 4
@@ -33,52 +33,65 @@ if __name__ == "__main__":
     shot_num = 1024
 
     if test_idx == 1:
-        parameter_binds = get_random_params(
-            [theta, llambda], meas_indices, setting_num, ensemble="derandom"
+        generator = create_parameter_generator("independence", "derandom")
+        parameter_binds = generator.generate(
+            [theta, llambda], meas_indices, setting_num
         )
-        counts_ls = run_aer_qc(
-            qc,
-            parameter_binds,
-            setting_num,
-            shot_num,
-            method="statevector",
-            device="CPU",
-            precision="single",
+        runner = create_runner(
+            AerOptions(method="statevector", device="CPU", precision="single")
         )
-        print(counts_ls)
-
-    elif test_idx == 2:
-        parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num, ensemble="haar"
-        )
-        counts_ls = run_aer_qc(
-            qc,
-            parameter_binds,
-            setting_num,
-            shot_num,
-            method="statevector",
-            device="CPU",
-            precision="single",
-        )
-        print(counts_ls)
-
-    elif test_idx == 3:
-        parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num, ensemble="pauli"
-        )
-        counts_ls, _ = asyncio.run(
-            run_quark_qc(
+        result = asyncio.run(
+            runner.run(
                 qc,
                 parameter_binds,
                 setting_num,
                 shot_num,
-                token=os.environ["QUARK_TOKEN"],
-                backend="Dongling",
                 name="my_job",
-                target_qubits=[],
             )
         )
-        print(counts_ls)
+        print(result.counts)
+
+    elif test_idx == 2:
+        generator = create_parameter_generator("pair", "haar")
+        parameter_binds = generator.generate(
+            [theta, llambda], meas_indices, setting_num
+        )
+        runner = create_runner(
+            AerOptions(method="statevector", device="CPU", precision="single")
+        )
+        result = asyncio.run(
+            runner.run(
+                qc,
+                parameter_binds,
+                setting_num,
+                shot_num,
+                name="my_job",
+            )
+        )
+        print(result.counts)
+
+    elif test_idx == 3:
+        generator = create_parameter_generator("pair", "pauli")
+        parameter_binds = generator.generate(
+            [theta, llambda], meas_indices, setting_num
+        )
+        runner = create_runner(
+            QuarkOptions(
+                chip="Dongling",
+                target_qubits=[],
+                token=os.environ["QUARK_TOKEN"],
+            )
+        )
+        result = asyncio.run(
+            runner.run(
+                qc,
+                parameter_binds,
+                setting_num,
+                shot_num,
+                name="my_job",
+            )
+        )
+        print(result.counts)
 
     elif test_idx == 4:
         # trivial circuit
@@ -86,23 +99,29 @@ if __name__ == "__main__":
         trivial_qc = add_meas(trivial_qc, [theta, llambda], meas_indices)
 
         # parameter binds
-        parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num, ensemble="derandom"
+        generator = create_parameter_generator("pair", "derandom")
+        parameter_binds = generator.generate(
+            [theta, llambda], meas_indices, setting_num
         )
-        trivial_parameter_binds = get_condition_params(
-            [theta, llambda], meas_indices, setting_num, ensemble="pauli"
+        trivial_generator = create_parameter_generator("pair", "pauli")
+        trivial_parameter_binds = trivial_generator.generate(
+            [theta, llambda], meas_indices, setting_num
         )
 
-        counts_ls, trivial_counts = asyncio.run(
-            run_quark_qc(
+        runner = create_runner(
+            QuarkOptions(
+                chip="Dongling",
+                target_qubits=[],
+                token=os.environ["QUARK_TOKEN"],
+            )
+        )
+        result = asyncio.run(
+            runner.run(
                 qc,
                 parameter_binds,
                 setting_num,
                 shot_num,
-                token=os.environ["QUARK_TOKEN"],
-                backend="Dongling",
                 name="my_job",
-                target_qubits=[],
                 correction_input=CorrectionInput(
                     trivial_qc=trivial_qc,
                     trivial_parameter_binds=trivial_parameter_binds,
@@ -110,5 +129,5 @@ if __name__ == "__main__":
                 ),
             )
         )
-        print("counts:", counts_ls)
-        print("trivial_counts:", trivial_counts)
+        print("counts:", result.counts)
+        print("trivial_counts:", result.trivial_counts)

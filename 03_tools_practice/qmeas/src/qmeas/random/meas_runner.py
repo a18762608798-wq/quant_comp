@@ -1,13 +1,167 @@
-import os
 import asyncio
+from dataclasses import dataclass
 
+# `Protocol`（`typing`）用来定义**结构化类型 / 鸭子类型接口**：
+# 只要某个类“长得对”（有匹配的方法签名），就算符合这个接口，**不需要显式继承**。
+from typing import Protocol
 
+from qiskit import QuantumCircuit, qasm2, transpile
 from qiskit_aer import AerSimulator
-from qiskit import qasm2, transpile
-from .meas_config import CorrectionInput
 from quark import Task
 
+from .meas_config import AerOptions, CorrectionInput, QuarkOptions
 
+
+Counts = dict[str, int]
+
+
+# `RunResult` — 统一返回值：`counts`（+ 可选 `trivial_counts`）。
+@dataclass
+class RunResult:
+    counts: list[Counts]
+    trivial_counts: list[Counts] | None = None
+
+
+# `MeasurementRunner` — 接口声明，规定 runner 都要有 `run()`。
+class MeasurementRunner(Protocol):
+    async def run(
+        self,
+        qc: QuantumCircuit,
+        parameter_binds: list[dict],
+        setting_num: int,
+        shot_num: int,
+        *,
+        name: str,
+        correction_input: CorrectionInput | None = None,
+    ) -> RunResult: ...  # No return and no operation.
+
+
+# `AerRunner` — 本地模拟执行。
+class AerRunner:
+    def __init__(self, options: AerOptions) -> None:
+        self.options = options
+
+    async def run(
+        self,
+        qc,
+        parameter_binds,
+        setting_num,
+        shot_num,
+        *,
+        name,
+        correction_input=None,
+    ) -> RunResult:
+        if correction_input is not None:
+            raise ValueError("AerRunner does not accept correction_input")
+
+        simulator = AerSimulator(
+            method=self.options.method,
+            device=self.options.device,
+            precision=self.options.precision,
+        )
+
+        transpiled_qc = transpile(qc, simulator)
+
+        job = simulator.run(
+            transpiled_qc,
+            shots=shot_num,
+            parameter_binds=parameter_binds,
+        )
+
+        result = job.result()
+
+        counts = []
+        for setting_idx in range(setting_num):
+            raw_count = result.get_counts(setting_idx)
+            count = {bitstring[::-1]: value for bitstring, value in raw_count.items()}
+            counts.append(count)
+
+        return RunResult(counts=counts)
+
+
+# `QuarkRunner` — 远程云执行，支持 correction。
+class QuarkRunner:
+    def __init__(self, options: QuarkOptions) -> None:
+        self.options = options
+
+    async def run(
+        self,
+        qc,
+        parameter_binds,
+        setting_num,
+        shot_num,
+        *,
+        name,
+        correction_input=None,
+    ) -> RunResult:
+        qasm2_strings = _bind_to_qasm2(qc, setting_num, parameter_binds)
+
+        trivial_qasm2_strings = None
+
+        if correction_input is not None:
+            trivial_qasm2_strings = _bind_to_qasm2(
+                correction_input.trivial_qc,
+                setting_num,
+                correction_input.trivial_parameter_binds,
+            )
+
+        tasks = []
+
+        for setting_idx, qasm2_string in enumerate(qasm2_strings):
+            tasks.append(
+                _submit_quark_task(
+                    qasm2_string=qasm2_string,
+                    shot_num=shot_num,
+                    token=self.options.token,
+                    chip=self.options.chip,
+                    name=f"{name}_U{setting_idx}",
+                    target_qubits=self.options.target_qubits,
+                )
+            )
+
+            if trivial_qasm2_strings is not None:
+                tasks.append(
+                    _submit_quark_task(
+                        qasm2_string=trivial_qasm2_strings[setting_idx],
+                        shot_num=correction_input.trivial_shot_num,
+                        token=self.options.token,
+                        chip=self.options.chip,
+                        name=f"{name}_calib_U{setting_idx}",
+                        target_qubits=self.options.target_qubits,
+                    )
+                )
+
+        results = await asyncio.gather(*tasks)
+
+        if correction_input is None:
+            return RunResult(counts=results)
+
+        return RunResult(
+            counts=results[0::2],
+            trivial_counts=results[1::2],
+        )
+
+
+# 工厂函数：`create_runner()` — 按 options 类型返回对应 runner。
+def create_runner(
+    options: AerOptions | QuarkOptions,
+) -> MeasurementRunner:
+    runner_types = {
+        AerOptions: AerRunner,
+        QuarkOptions: QuarkRunner,
+    }
+
+    try:
+        runner_class = runner_types[type(options)]
+    except KeyError:
+        raise TypeError(
+            f"Unsupported runner options: {type(options).__name__}"
+        ) from None
+
+    return runner_class(options)
+
+
+# 给电路加测量门.
 def add_meas(qc, params, meas_indices):
     theta = params[0]
     llambda = params[1]
@@ -22,120 +176,38 @@ def add_meas(qc, params, meas_indices):
     return qc
 
 
-async def run_quark_qc(
-    qc,
-    parameter_binds,
-    setting_num,
-    shot_num,
-    token=os.environ["QUARK_TOKEN"],
-    backend="Baihua",
-    name="my_job",
-    target_qubits=[],
-    correction_input: CorrectionInput | None = None,
-):
-    qasm2_strings = _bound_param(qc, setting_num, parameter_binds)
-    setting_num = len(qasm2_strings)
-
-    if correction_input is not None:
-        trivial_qasm2_strings = _bound_param(
-            correction_input.trivial_qc,
-            setting_num,
-            correction_input.trivial_parameter_binds,
-        )
-
-    tasks: list[asyncio.Task] = []
-    for setting_idx in range(setting_num):
-        tasks.append(
-            asyncio.create_task(
-                _run_quark_qc(
-                    qasm2_strings[setting_idx],
-                    shot_num,
-                    token=token,
-                    backend=backend,
-                    name=f"{name}_U{setting_idx}",
-                    target_qubits=target_qubits,
-                )
-            )
-        )
-        if correction_input is not None:
-            tasks.append(
-                asyncio.create_task(
-                    _run_quark_qc(
-                        trivial_qasm2_strings[setting_idx],
-                        correction_input.trivial_shot_num,
-                        token=token,
-                        backend=backend,
-                        name=f"{name}_calib_U{setting_idx}",
-                        target_qubits=target_qubits,
-                    )
-                )
-            )
-
-    results = await asyncio.gather(*tasks)
-
-    if correction_input is not None:
-        counts = results[0::2]
-        trivial_counts = results[1::2]
-        return counts, trivial_counts
-    else:
-        return results, None
+# ------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------
 
 
-def run_aer_qc(
-    qc,
-    parameter_binds,
-    setting_num,
-    shot_num,
-    method="statevector",
-    device="CPU",
-    precision="single",
-):
-    sim = AerSimulator(
-        method=method,
-        device=device,
-        precision=precision,
-    )
-    tqc = transpile(qc, sim)
-    job = sim.run(
-        tqc,
-        shot_num=shot_num,
-        parameter_binds=parameter_binds,
-    )
-    result = job.result()
-    counts = []
-    for i in range(setting_num):
-        count = result.get_counts(i)
-        reversed_count = {bitstr[::-1]: count for bitstr, count in count.items()}
-        counts.append(reversed_count)
-    return counts
-
-
-# ---------------
-# Helper
-# -----------
-def _bound_param(qc, setting_num, parameter_binds):
+# 绑参数并转 QASM2
+def _bind_to_qasm2(qc, setting_num, parameter_binds) -> list[str]:
     binds = parameter_binds[0]
 
     bound_circuits = [
-        qc.assign_parameters({param: vals[s] for param, vals in binds.items()})
-        for s in range(setting_num)
+        qc.assign_parameters(
+            {parameter: values[setting_idx] for parameter, values in binds.items()}
+        )
+        for setting_idx in range(setting_num)
     ]
 
-    qasm2_strings = [qasm2.dumps(bound_qc) for bound_qc in bound_circuits]
-    return qasm2_strings
+    return [qasm2.dumps(bound_qc) for bound_qc in bound_circuits]
 
 
-async def _run_quark_qc(
+# 提交单个 Quark 任务并等结果
+async def _submit_quark_task(
     qasm2_string,
     shot_num,
-    token=os.environ["QUARK_TOKEN"],
-    backend="Baihua",  # an integer multiple of 1024
-    name="my_job",
-    target_qubits=[],
+    *,
+    token,
+    chip,
+    name,
+    target_qubits,
 ):
     tmgr = Task(token)
     task = {
-        "chip": backend,  # the quantum computer choice,
+        "chip": chip,  # the quantum computer choice,
         "name": name,
         "circuit": qasm2_string,
         "shots": shot_num,

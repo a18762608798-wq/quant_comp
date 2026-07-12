@@ -2,28 +2,34 @@ import os
 
 from qiskit import QuantumCircuit
 
-from qmeas import random as src
+from qmeas.random import (
+    AerOptions,
+    QuarkOptions,
+    RandomMeasConfig,
+    SettingRun,
+)
 
 test_idx = 1
 
 if __name__ == "__main__":
     qc = QuantumCircuit(6, 4)
     meas_indices = [1, 2]
-    setting_pairs = [(1, 2), (3, 4)]
-    a = src.RandomMeasConfig(
+    setting_runs = [
+        SettingRun(setting_num=1, shot_num=2),
+        SettingRun(setting_num=3, shot_num=4),
+    ]
+    a = RandomMeasConfig(
         qc=qc,
-        setting_pairs=setting_pairs,
+        setting_runs=setting_runs,
         meas_indices=meas_indices,
-        runner_opts=src.AerOptions(
-            method="statevector", device="CPU", precision="single"
-        ),
+        runner_opts=AerOptions(method="statevector", device="CPU", precision="single"),
     )
     print(a)
-    b = src.RandomMeasConfig(
+    b = RandomMeasConfig(
         qc=qc,
-        setting_pairs=setting_pairs,
+        setting_runs=setting_runs,
         meas_indices=meas_indices,
-        runner_opts=src.QuarkOptions(
+        runner_opts=QuarkOptions(
             chip="Baihua",
             target_qubits=[],
             token=os.environ["QUARK_TOKEN"],

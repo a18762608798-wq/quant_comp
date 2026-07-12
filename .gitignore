@@ -1,5 +1,6 @@
 .obsidian/
 .CondaPkg/
+.envrc
 *.tmp
 *.npz
 *.ipynb

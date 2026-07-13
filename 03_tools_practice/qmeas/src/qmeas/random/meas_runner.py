@@ -22,7 +22,7 @@ class RunResult:
     trivial_counts: list[Counts] | None = None
 
 
-# `MeasurementRunner` — 接口声明，规定 runner 都要有 `run()`。
+# `MeasurementRunner` — 接口声明，规定 runner 都要有 `run()`, 只是一个声明。
 class MeasurementRunner(Protocol):
     async def run(
         self,

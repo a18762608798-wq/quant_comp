@@ -57,6 +57,7 @@ class RandomMeasConfig:
 
     extra: dict[str, Any] = field(default_factory=dict)
 
+    # 检查可能的组合。
     def __post_init__(self) -> None:
         self.output_dir = Path(self.output_dir)
 
@@ -72,3 +73,10 @@ class RandomMeasConfig:
 
         if not self.meas_indices:
             raise ValueError("meas_indices cannot be empty")
+
+        if (
+            self.meas_mode == "pair"
+            and isinstance(self.runner_opts, QuarkOptions)
+            and self.runner_opts.correction_input is not None
+        ):
+            raise ValueError("pair mode does not support correction_input")

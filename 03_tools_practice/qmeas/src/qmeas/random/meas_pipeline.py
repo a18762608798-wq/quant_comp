@@ -22,17 +22,14 @@ async def run_pipeline(config: RandomMeasConfig) -> dict[str, Any]:
         ensemble=config.ensemble,
     )
 
-    # 2. 构造 runner
-    runner = create_runner(config.runner_opts)
-
-    # 3. 构造带测量的电路
+    # 2. 构造带测量的电路
     qc_meas = add_meas(
         config.qc.copy(),
         config.params,
         config.meas_indices,
     )
 
-    # 4. 为每一组 setting 生成参数
+    # 3. 为每一组 setting 生成参数
     assert config.params is not None, (
         "__post_init__(self)实际上已经避免None, 这里只是让pyright闭嘴。"
     )
@@ -45,7 +42,7 @@ async def run_pipeline(config: RandomMeasConfig) -> dict[str, Any]:
         for setting_run in config.setting_runs
     ]
 
-    # 5. 准备当前项目已有的 correction 输入
+    # 4. 准备当前项目已有的 correction 输入
     correction_base = _prepare_correction_base(config=config)
 
     correction_bind_groups = _build_correction_bind_groups(
@@ -53,6 +50,9 @@ async def run_pipeline(config: RandomMeasConfig) -> dict[str, Any]:
         param_generator=param_generator,
         correction_base=correction_base,
     )
+
+    # 5. 构造 runner
+    runner = create_runner(config.runner_opts)
 
     # 6. 执行
     run_results: list[RunResult] = []
@@ -195,15 +195,20 @@ def _build_result_dict(
     result["qc_num_qubits"] = config.qc.num_qubits
     result["qc_num_clbits"] = config.qc.num_clbits
     result["meas_indices"] = list(config.meas_indices)
-    result["params"] = [
-        _binds_to_vec_dict(binds[0], config.params) for binds in parameter_bind_groups
-    ]
+
+    store_params = config.meas_mode != "pair"
+
+    if store_params:
+        result["params"] = [
+            _binds_to_vec_dict(binds[0], config.params)
+            for binds in parameter_bind_groups
+        ]
 
     has_trivial = any(
         run_result.trivial_counts is not None for run_result in run_results
     )
 
-    if has_trivial and correction_bind_groups:
+    if store_params and has_trivial and correction_bind_groups:
         result["trivial_params"] = [
             _binds_to_vec_dict(binds[0], config.params)
             for binds in correction_bind_groups

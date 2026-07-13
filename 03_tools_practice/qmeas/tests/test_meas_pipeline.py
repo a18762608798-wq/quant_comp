@@ -28,15 +28,14 @@ if __name__ == "__main__":
             SettingRun(setting_num=2, shot_num=1024),
             SettingRun(setting_num=5, shot_num=1024),
         ]
+        aer_opts = AerOptions(method="statevector", device="CPU", precision="single")
         meas_config = RandomMeasConfig(
             qc=qc,
             setting_runs=setting_runs,
             meas_indices=meas_indices,
             meas_mode="independence",
             ensemble="derandom",
-            runner_opts=AerOptions(
-                method="statevector", device="CPU", precision="single"
-            ),
+            runner_opts=aer_opts,
             output_dir=HERE / "./data",
             name="aer-independence",
         )
@@ -54,15 +53,16 @@ if __name__ == "__main__":
             SettingRun(setting_num=2, shot_num=1024),
             SettingRun(setting_num=5, shot_num=1024),
         ]
+        aer_opts = AerOptions(
+            method="matrix_product_state", device="CPU", precision="single"
+        )
         meas_config = RandomMeasConfig(
             qc=qc,
             setting_runs=setting_runs,
             meas_indices=meas_indices,
             meas_mode="pair",
             ensemble="haar",
-            runner_opts=AerOptions(
-                method="statevector", device="CPU", precision="single"
-            ),
+            runner_opts=aer_opts,
             output_dir=HERE / "./data",
             name="aer-pair",
         )
@@ -82,17 +82,18 @@ if __name__ == "__main__":
             SettingRun(setting_num=5, shot_num=2048),
         ]
 
+        quark_opts = QuarkOptions(
+            chip="Dongling",
+            target_qubits=[],
+            token=os.environ["QUARK_TOKEN"],
+        )
         meas_config = RandomMeasConfig(
             qc=qc,
             setting_runs=setting_runs,
             meas_indices=meas_indices,
             meas_mode="independence",
             ensemble="pauli",
-            runner_opts=QuarkOptions(
-                chip="Dongling",
-                target_qubits=[],
-                token=os.environ["QUARK_TOKEN"],
-            ),
+            runner_opts=quark_opts,
             output_dir=HERE / "./data",
             name="quark-native-independence",
         )
@@ -108,20 +109,21 @@ if __name__ == "__main__":
             SettingRun(setting_num=5, shot_num=2048),
         ]
 
+        quark_opts = QuarkOptions(
+            chip="Dongling",
+            target_qubits=[],
+            token=os.environ["QUARK_TOKEN"],
+            correction_input=CorrectionInput(
+                trivial_shot_num=1024,
+            ),
+        )
         meas_config = RandomMeasConfig(
             qc=qc,
             setting_runs=setting_runs,
             meas_indices=meas_indices,
             meas_mode="pair",
             ensemble="derandom",
-            runner_opts=QuarkOptions(
-                chip="Dongling",
-                target_qubits=[],
-                token=os.environ["QUARK_TOKEN"],
-                correction_input=CorrectionInput(
-                    trivial_shot_num=1024,
-                ),
-            ),
+            runner_opts=quark_opts,
             output_dir=HERE / "./data",
             name="quark-correction-pair",
         )

@@ -15,7 +15,7 @@ from qmeas.random import (
     add_meas,
 )
 
-test_idx = 3
+test_idx = 4
 
 if __name__ == "__main__":
     # add params meas
@@ -37,9 +37,8 @@ if __name__ == "__main__":
         parameter_binds = generator.generate(
             [theta, llambda], meas_indices, setting_num
         )
-        runner = create_runner(
-            AerOptions(method="statevector", device="CPU", precision="single")
-        )
+        aer_opts = AerOptions(method="density_matrix", device="CPU", precision="single")
+        runner = create_runner(aer_opts)
         result = asyncio.run(
             runner.run(
                 qc,
@@ -56,9 +55,8 @@ if __name__ == "__main__":
         parameter_binds = generator.generate(
             [theta, llambda], meas_indices, setting_num
         )
-        runner = create_runner(
-            AerOptions(method="statevector", device="CPU", precision="single")
-        )
+        aer_opts = AerOptions(method="statevector", device="CPU", precision="single")
+        runner = create_runner(aer_opts)
         result = asyncio.run(
             runner.run(
                 qc,
@@ -75,13 +73,12 @@ if __name__ == "__main__":
         parameter_binds = generator.generate(
             [theta, llambda], meas_indices, setting_num
         )
-        runner = create_runner(
-            QuarkOptions(
-                chip="Dongling",
-                target_qubits=[],
-                token=os.environ["QUARK_TOKEN"],
-            )
+        quark_opts = QuarkOptions(
+            chip="Dongling",
+            target_qubits=[],
+            token=os.environ["QUARK_TOKEN"],
         )
+        runner = create_runner(quark_opts)
         result = asyncio.run(
             runner.run(
                 qc,
@@ -108,13 +105,12 @@ if __name__ == "__main__":
             [theta, llambda], meas_indices, setting_num
         )
 
-        runner = create_runner(
-            QuarkOptions(
-                chip="Dongling",
-                target_qubits=[],
-                token=os.environ["QUARK_TOKEN"],
-            )
+        quark_opts = QuarkOptions(
+            chip="Dongling",
+            target_qubits=[],
+            token=os.environ["QUARK_TOKEN"],
         )
+        runner = create_runner(quark_opts)
         result = asyncio.run(
             runner.run(
                 qc,

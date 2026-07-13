@@ -113,15 +113,12 @@ def _sample_derandom(
         dtype=int,
     )
 
-    if setting_num == setting_upper:
-        selected = all_bases
-    else:
-        selected_indices = rng.choice(
-            setting_upper,
-            size=setting_num,
-            replace=False,
-        )
-        selected = all_bases[selected_indices]
+    selected_indices = rng.choice(
+        setting_upper,
+        size=setting_num,
+        replace=False,
+    )
+    selected = all_bases[selected_indices]
 
     # selected shape: (setting_num, group_num) -> (group_num, setting_num)
     selected = selected.T
@@ -238,5 +235,5 @@ def create_parameter_generator(
     return ParameterGenerator(
         group_builder=group_builder,
         angle_sampler=angle_sampler,
-        rng=np.random.default_rng(seed),
+        rng=np.random.default_rng(seed),  # 这里才传入完整的rng.
     )

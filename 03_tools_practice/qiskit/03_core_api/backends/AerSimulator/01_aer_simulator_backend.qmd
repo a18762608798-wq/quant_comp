@@ -29,9 +29,13 @@ circ.draw()
 # transpiled the circ.
 from qiskit_aer import AerSimulator
 from qiskit import transpile
-sim = AerSimulator()
-#tqc = transpile(circ, sim) 
-tqc = transpile(circ, basis_gates=['u', 'cx']) # choose the basic gates to transpile
+sim = AerSimulator(
+    method="matrix_product_state",
+    device="CPU",      # 有 GPU 版 Aer 时可以改成 "GPU"
+    precision="single",
+)
+tqc = transpile(circ, sim) 
+#tqc = transpile(circ, basis_gates=['u', 'cx']) # choose the basic gates to transpile
 print("the depth of the transpiled circuit is:", tqc.depth())
 tqc.draw()
 ```
@@ -72,12 +76,14 @@ from qiskit.circuit import ParameterVector
 from qiskit_aer import AerSimulator
 import numpy as np
 
-theta = ParameterVector("theta", 3)
+theta = ParameterVector("theta", 1)
+llambda = ParameterVector("lambda", 2)
+parameters = [*theta, *llambda]
 
 qc = QuantumCircuit(3)
 qc.rx(theta[0], 0)
-qc.ry(theta[1], 1)
-qc.rz(theta[2], 2)
+qc.ry(llambda[0], 1)
+qc.rz(llambda[1], 2)
 qc.cx(0, 1)
 qc.cx(1, 2)
 qc.measure_all()
@@ -88,7 +94,13 @@ param_sets = np.column_stack([
     np.linspace(0, np.pi, N),
     np.linspace(0, np.pi / 2, N),
     np.linspace(0, 2 * np.pi, N),
+    np.linspace(0, np.pi / 2, N),
+    np.linspace(0, 2 * np.pi, N),
 ])
+
+parameter_binds = [
+    dict(zip(parameters, param_sets.T))
+]
 
 sim = AerSimulator(
     method="statevector",
@@ -101,11 +113,7 @@ tqc = transpile(qc, sim)
 job = sim.run(
     tqc,
     shots=1024,
-    parameter_binds=[{
-        theta[0]: param_sets[:, 0],
-        theta[1]: param_sets[:, 1],
-        theta[2]: param_sets[:, 2],
-    }] # Just a dic for a kind of params circuits
+    parameter_binds=parameter_binds
 )
 
 result = job.result()

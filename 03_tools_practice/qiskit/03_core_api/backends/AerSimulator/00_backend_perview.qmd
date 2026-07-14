@@ -1,14 +1,15 @@
----
-format: html
-engine: julia
-execute:
-  daemon: false
-julia:
-  exeflags: ["--project=@."]
----
-
-
 # Perview 
+
+```{text}
+method
+  决定内部如何模拟和存储状态
+
+save_*
+  决定从内部状态导出哪种快照，前提是该 method 支持
+
+measure + get_counts()
+  决定是否返回测量采样统计
+```
 
 ```{python}
 from qiskit_aer import AerSimulator
@@ -30,3 +31,4 @@ Where
 * `method="superop"`
 * `method="tensor_network"`
 
+这里你选择什么方式去运行电路都随便，但是最后输出的save决定返回类型, 当然有的组合是没有的。

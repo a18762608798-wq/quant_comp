@@ -1,0 +1,116 @@
+# aer_simulartor_statevector
+
+## statevector
+
+兼容选项如下：
+
+````{text}
+save_statevector:
+    automatic
+    statevector
+    matrix_product_state
+    extended_stabilizer
+````
+
+````{python}
+from qiskit import QuantumCircuit, transpile
+import numpy as np
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_bloch_multivector, plot_state_qsphere
+
+# save statevector
+qc = QuantumCircuit(2, 2)
+qc.ry(np.pi/4, 0)
+qc.save_statevector() 
+
+# get_statevector
+# use backend to calcualte and statistics 
+sim = AerSimulator(
+    method="statevector",
+    device="CPU",      # 有 GPU 版 Aer 时可以改成 "GPU"
+    precision="single",
+)
+tqc = transpile(qc, sim)
+job = sim.run(
+    tqc,
+)
+vec_result = job.result()
+psi = vec_result.get_statevector()  # get the statevector in matrix form 
+print(psi)
+plot_bloch_multivector(psi).show() # plot vector and qsphere.
+plot_state_qsphere(psi).show()
+````
+
+## uniary 
+
+兼容选项如下：
+
+````{text}
+save_unitary:
+    automatic
+    unitary
+````
+
+```{python}
+from qiskit import QuantumCircuit, transpile
+import numpy as np
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_bloch_multivector, plot_state_qsphere
+# save_unitary
+qc = QuantumCircuit(2, 2)
+qc.ry(np.pi/4, 0)
+qc.save_unitary() 
+
+# get_unitary
+sim = AerSimulator(
+    method="unitary",
+    device="CPU",      # 有 GPU 版 Aer 时可以改成 "GPU"
+    precision="single",
+)
+tqc = transpile(qc, sim)
+job = sim.run(
+    tqc,
+)
+matrix_result = job.result()
+matrix = matrix_result.get_unitary()  # get the statevector in matrix form 
+print(matrix)
+```
+
+## others
+
+支持直接get的就那么多：
+
+````{python}
+[m for m in dir(vec_result) if m.startswith("get_")]
+````
+
+其他的只能保存为label提取:
+
+````{python}
+from qiskit import QuantumCircuit, transpile
+import numpy as np
+from qiskit_aer import AerSimulator
+
+# save
+qc = QuantumCircuit(2, 2)
+qc.ry(np.pi/4, 0)
+qc.save_statevector() 
+qc.save_density_matrix(label="rho")
+qc.save_probabilities(label="probs")
+qc.save_matrix_product_state(label="prod_psi")
+# qc.save_expectation_value(op, qubits=[0, 1], label="expval")
+
+# get
+sim = AerSimulator(
+    method="matrix_product_state",
+    device="CPU",      # 有 GPU 版 Aer 时可以改成 "GPU"
+    precision="single",
+)
+tqc = transpile(qc, sim)
+result = sim.run(tqc).result()
+data = result.data(0)
+rho = data["rho"]
+probs = data["probs"]
+prod_psi = data["prod_psi"]
+#expval = data["expval"]
+````

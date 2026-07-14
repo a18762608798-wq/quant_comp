@@ -1,0 +1,34 @@
+# Preview
+
+```{python}
+from qiskit import QuantumCircuit
+from qiskit_aer.primitives import SamplerV2
+
+# 创建电路
+qc = QuantumCircuit(2)
+
+qc.h(0)
+qc.cx(0, 1)
+qc.measure_all()
+
+# 直接创建 Aer SamplerV2
+sampler = SamplerV2(
+    default_shots=1024,
+    seed=1234,
+)
+
+# 运行
+result = sampler.run(
+    [qc],
+    shots=1024,
+).result()
+
+# measure_all() 创建的经典寄存器名为 meas, 其他的是c
+samples = result[0].data.meas
+
+counts = samples.get_counts()
+memory = samples.get_bitstrings()
+
+print(counts)
+print(memory[:10])
+```

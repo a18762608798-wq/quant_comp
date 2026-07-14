@@ -1,0 +1,227 @@
+---
+format: html
+engine: julia
+execute:
+  daemon: false
+julia:
+  exeflags: ["--project=@."]
+---
+
+# sampler_v2
+
+## Basic usage
+
+### Create circuit
+
+```{python}
+from qiskit import QuantumCircuit
+from qiskit.visualization import plot_histogram
+
+circ = QuantumCircuit(2, 2)
+
+circ.x(0)
+circ.h(1)
+circ.swap(0, 1)
+circ.measure([0, 1], [0, 1])
+
+circ.draw()
+```
+
+### Create SamplerV2
+
+```{python}
+from qiskit_aer.primitives import SamplerV2
+
+sampler = SamplerV2(
+    default_shots=1024,
+    seed=1234,
+    options={
+        "backend_options": {
+            "method": "matrix_product_state",
+            "device": "CPU",
+            "precision": "single",
+        }
+    },
+)
+```
+
+### Get results
+
+因为 `circ = QuantumCircuit(2, 2)` 创建的经典寄存器名是 `c`，所以结果从
+`data.c` 读取。
+
+NOTE: 这个原语强制 `memory=true` 这不一定合适. 所以我们需要慎重考虑是否需要SamplerV2.
+
+```{python}
+result = sampler.run(
+    [circ],
+    shots=1024,
+).result()
+
+samples = result[0].data.c
+
+# 二进制字符串作为 key
+counts = samples.get_counts()
+
+# 整数作为 key
+counts_int = samples.get_int_counts()
+
+# 测量频率
+probs = {
+    key: value / samples.num_shots
+    for key, value in counts.items()
+}
+
+# 保留 shot 顺序的测量结果
+memory = samples.get_bitstrings()
+
+print("counts:")
+print(counts)
+
+print("integer counts:")
+print(counts_int)
+
+print("probabilities:")
+print(probs)
+
+print("first 10 shots:")
+print(memory[:10])
+
+fig = plot_histogram(counts)
+fig.show()
+```
+
+## Parallel circuits
+
+SamplerV2 可以一次提交多个电路。
+
+```{python}
+circs = [circ, circ]
+
+result = sampler.run(
+    circs,
+    shots=1024,
+).result()
+
+# 第一个电路的结果
+counts_0 = result[0].data.c.get_counts()
+
+# 第二个电路的结果
+counts_1 = result[1].data.c.get_counts()
+
+print(counts_0)
+print(counts_1)
+```
+
+## Large parameterized circuits
+
+```{python}
+import numpy as np
+
+from qiskit import QuantumCircuit
+from qiskit.circuit import ParameterVector
+from qiskit_aer.primitives import SamplerV2
+
+theta = ParameterVector("theta", 3)
+
+qc = QuantumCircuit(3)
+
+qc.rx(theta[0], 0)
+qc.ry(theta[1], 1)
+qc.rz(theta[2], 2)
+
+qc.cx(0, 1)
+qc.cx(1, 2)
+
+# 创建名为 meas 的经典寄存器
+qc.measure_all()
+```
+
+生成 `N` 组参数，每组包含三个参数：
+
+```{python}
+N = 100
+
+param_sets = np.column_stack([
+    np.linspace(0, np.pi, N),
+    np.linspace(0, np.pi / 2, N),
+    np.linspace(0, 2 * np.pi, N),
+])
+
+print(param_sets.shape)
+```
+
+结果：
+
+```text
+(100, 3)
+```
+
+最后一个维度对应：
+
+```text
+theta[0]
+theta[1]
+theta[2]
+```
+
+创建 SamplerV2：
+
+```{python}
+sampler = SamplerV2(
+    default_shots=1024,
+    seed=1234,
+    options={
+        "backend_options": {
+            "method": "statevector",
+            "device": "CPU",
+            "precision": "single",
+        }
+    },
+)
+```
+
+提交一个参数化 PUB：
+
+```{python}
+pub = (
+    qc,
+    param_sets,
+    1024,
+)
+
+result = sampler.run([pub]).result()
+```
+
+因为这里使用 `measure_all()`，经典寄存器名是 `meas`：
+
+```{python}
+samples = result[0].data.meas
+
+print("parameter shape:")
+print(samples.shape)
+
+print("shots per parameter set:")
+print(samples.num_shots)
+```
+
+分别取得每组参数的 counts：
+
+```{python}
+counts_list = [
+    samples.get_counts(i)
+    for i in range(N)
+]
+
+print(counts_list[0])
+print(counts_list[-1])
+```
+
+取得某一组参数对应的逐 shot 结果：
+
+```{python}
+memory_0 = samples.get_bitstrings(0)
+
+print(memory_0[:10])
+```
+

@@ -10,6 +10,8 @@ Wait for learning.
 
 #### Bell base
 
+We could explan the circuits via the transform of $\{ZI, IZ\}$ to $\{XX, ZZ\}$
+
 Known bell base
 
 $$

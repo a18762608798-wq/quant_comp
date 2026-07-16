@@ -1,6 +1,7 @@
 # Clifford
 
 其定义是对于 pauli operator 幺正变换后依然是 pauli operators。即：
+
 $$
 C \in \mathrm{Cl}(n) \iff \forall P \in \mathcal{P}_n,\; C^\dagger P C \in \mathcal{P}_n.
 $$
@@ -16,6 +17,7 @@ H = \frac{1}{\sqrt{2}}\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}
 $$
 
 对 Pauli 的作用：
+
 $$
 H^\dagger X H = Z,\quad H^\dagger Y H = -Y,\quad H^\dagger Z H = X.
 $$
@@ -33,6 +35,8 @@ $$
 
 $S^2 = Z \in \mathcal{P}_1$，$S^4 = I$。
 
+**对于单比特，本质上 $S^\dagger H$ 对XYZ右手轮换, $HS$ 反之.**
+
 ### 3. CNOT (CX)
 
 $$
@@ -45,6 +49,7 @@ $$
 $$
 
 对双 qubit Pauli 的作用（control=q1, target=q2）：
+
 $$
 \begin{aligned}
 \mathrm{CNOT}^\dagger (I \otimes X) \mathrm{CNOT} &= I \otimes X, &

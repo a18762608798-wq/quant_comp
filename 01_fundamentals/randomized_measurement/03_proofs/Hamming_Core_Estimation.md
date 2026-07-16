@@ -82,7 +82,7 @@ therefore
 
 $$
 \begin{aligned}
-&E_{U}[\sum_{s, s'} \prod\limits_{i = 1}^N (-2)^{-D[s_n, s'_n]}\Pi^\dagger[\bigotimes\limits_{n=1}^N P_n(s_n)\otimes P_n(s'_n) ]\Pi^\big ] \\
+&E_{U}[\sum_{s, s'} \prod\limits_{n = 1}^N (-2)^{-D[s_n, s'_n]}\Pi^\dagger[\bigotimes\limits_{n=1}^N P_n(s_n)\otimes P_n(s'_n) ]\Pi\big ] \\
 &= \Pi^\dagger\ \big[\bigotimes\limits_{n=1}^N \mathbb E_{U_n}[\sum_{s_n,s'_n}(-2)^{-D[s_n, s'_n]}P_n(s_n)\otimes P_n(s'_n) ] \big]\Pi,
 \end{aligned}
 $$
@@ -233,4 +233,5 @@ $$
 where pairing  is a set of allocations for the positions in q. Each group consists of two elements, and the groups are identical to each other. For instance, if $k = 2$, the allocations are
 
 <span style="color:green">In the conclution, the local operator could be estimated by constructing the Hamming core, which can only have components on $\Phi_q$ </span>, and the the difficulty of hitting targeted operator will keep increasing as the size of the subspace increases.
+
 

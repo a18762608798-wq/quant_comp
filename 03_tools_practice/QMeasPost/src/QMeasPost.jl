@@ -1,21 +1,10 @@
 module QMeasPost
+    # Load External Dependencies.
+    include("imports.jl")
 
-using JSON
-using LinearAlgebra
-using Statistics
+    # RandomMeas
+    include("RandomMeas.jl")
 
-export RandomMeasResult,
-       load_randmeas_result,
-       count_to_prob,
-       hist_of_bits,
-       u3_state,
-       single_qubit_shadow,
-       expect_shadow,
-       shadow_state,
-       classical_shadow_channel_inverse
-
-include("utils.jl")
-include("random.jl")
-
+    # Export Public API.
+    include("exports.jl")
 end
-

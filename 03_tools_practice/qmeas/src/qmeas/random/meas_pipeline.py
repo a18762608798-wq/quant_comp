@@ -18,7 +18,6 @@ from .params_setting import create_parameter_generator
 async def run_pipeline(config: RandomMeasConfig) -> dict[str, Any]:
     # 1. 构造参数生成器
     param_generator = create_parameter_generator(
-        meas_mode=config.meas_mode,
         ensemble=config.ensemble,
     )
 
@@ -36,7 +35,6 @@ async def run_pipeline(config: RandomMeasConfig) -> dict[str, Any]:
     parameter_bind_groups = [
         param_generator.generate(
             params=config.params,
-            meas_indices=config.meas_indices,
             setting_num=setting_run.setting_num,
         )
         for setting_run in config.setting_runs
@@ -145,7 +143,6 @@ def _build_correction_bind_groups(
     return [
         param_generator.generate(
             params=config.params,
-            meas_indices=config.meas_indices,
             setting_num=setting_run.setting_num,
         )
         for setting_run in config.setting_runs
@@ -186,7 +183,6 @@ def _build_result_dict(
         result["chip"] = runner_opts.chip
         result["target_qubits"] = runner_opts.target_qubits
 
-    result["meas_mode"] = config.meas_mode
     result["ensemble"] = config.ensemble
     result["setting_runs"] = [
         (setting_run.setting_num, setting_run.shot_num)
@@ -194,21 +190,18 @@ def _build_result_dict(
     ]
     result["qc_num_qubits"] = config.qc.num_qubits
     result["qc_num_clbits"] = config.qc.num_clbits
-    result["meas_indices"] = list(config.meas_indices)
+    result["meas_indices"] = config.meas_indices
 
-    store_params = config.meas_mode != "pair"
-
-    if store_params:
-        result["params"] = [
-            _binds_to_vec_dict(binds[0], config.params)
-            for binds in parameter_bind_groups
-        ]
+    result["params"] = [
+        _binds_to_vec_dict(binds[0], config.params)
+        for binds in parameter_bind_groups
+    ]
 
     has_trivial = any(
         run_result.trivial_counts is not None for run_result in run_results
     )
 
-    if store_params and has_trivial and correction_bind_groups:
+    if has_trivial and correction_bind_groups:
         result["trivial_params"] = [
             _binds_to_vec_dict(binds[0], config.params)
             for binds in correction_bind_groups

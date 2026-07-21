@@ -165,14 +165,12 @@ def create_runner(
 def add_meas(qc, params, meas_indices):
     theta = params[0]
     llambda = params[1]
-    for param_idx in range(len(meas_indices)):
-        qubit_idx = meas_indices[param_idx]
-        qc.u(
-            -theta[param_idx], -llambda[param_idx], 0, qubit_idx
-        )  # U^dag: U3(theta, 0, lambda)^† = U3(-theta, -lambda, 0)
-    qc.measure(
-        meas_indices, range(len(meas_indices))
-    )  # Adjust the classical bits for fitting the addition mode.
+    flat_indices: list[int] = []
+    for group_idx, group in enumerate(meas_indices):
+        for qubit_idx in group:
+            qc.u(-theta[group_idx], -llambda[group_idx], 0, qubit_idx)
+        flat_indices.extend(group)
+    qc.measure(flat_indices, range(len(flat_indices)))
     return qc
 
 

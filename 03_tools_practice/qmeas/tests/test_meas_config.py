@@ -13,7 +13,7 @@ test_idx = 2
 
 if __name__ == "__main__":
     qc = QuantumCircuit(6, 4)
-    meas_indices = [1, 2]
+    meas_indices = [(1,), (2,)]
     setting_runs = [
         SettingRun(setting_num=1, shot_num=2),
         SettingRun(setting_num=3, shot_num=4),

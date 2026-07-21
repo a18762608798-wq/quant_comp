@@ -5,8 +5,5 @@ export RandomMeasResult,
        count_to_prob,
        hist_of_bits,
        u3_state,
-       single_qubit_shadow,
-       expect_shadow,
-       shadow_state,
-       classical_shadow_channel_inverse
+       single_qubit_shadow
 

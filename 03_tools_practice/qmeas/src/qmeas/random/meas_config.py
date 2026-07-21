@@ -7,7 +7,6 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
 
-MeasMode = Literal["independence", "pair"]
 Ensemble = Literal["haar", "pauli", "derandom"]
 
 
@@ -43,11 +42,10 @@ class QuarkOptions:
 class RandomMeasConfig:
     qc: QuantumCircuit
     setting_runs: list[SettingRun]
-    meas_indices: list[int]
+    meas_indices: list[tuple[int, ...]]
 
     runner_opts: AerOptions | QuarkOptions = field(default_factory=AerOptions)
 
-    meas_mode: MeasMode = "independence"
     ensemble: Ensemble = "haar"
 
     params: list[ParameterVector] | None = None
@@ -57,15 +55,14 @@ class RandomMeasConfig:
 
     extra: dict[str, Any] = field(default_factory=dict)
 
-    # 检查可能的组合。
     def __post_init__(self) -> None:
         self.output_dir = Path(self.output_dir)
 
         if self.params is None:
-            meas_num = len(self.meas_indices)
+            group_num = len(self.meas_indices)
             self.params = [
-                ParameterVector("theta", meas_num),
-                ParameterVector("lambda", meas_num),
+                ParameterVector("theta", group_num),
+                ParameterVector("lambda", group_num),
             ]
 
         if not self.setting_runs:
@@ -74,9 +71,5 @@ class RandomMeasConfig:
         if not self.meas_indices:
             raise ValueError("meas_indices cannot be empty")
 
-        if (
-            self.meas_mode == "pair"
-            and isinstance(self.runner_opts, QuarkOptions)
-            and self.runner_opts.correction_input is not None
-        ):
-            raise ValueError("pair mode does not support correction_input")
+        if any(len(group) == 0 for group in self.meas_indices):
+            raise ValueError("meas_indices groups cannot be empty")

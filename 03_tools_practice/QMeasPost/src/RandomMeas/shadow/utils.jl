@@ -16,20 +16,20 @@ function hist_of_bits(
     count_to_prob(accum)
 end
 
-function u3_state(theta::Real, lambda::Real, bit::Int)::Vector{ComplexF32}
+function u3_state(theta::Real, phi::Real, bit::Int)::Vector{ComplexF32}
     T32 = Float32(theta)
-    L32 = Float32(lambda)
+    P32 = Float32(phi)
     ct = cos(T32 / 2)
     st = sin(T32 / 2)
     if bit == 0
-        return ComplexF32[ct, -exp(-im * L32) * st]
+        return ComplexF32[ct, st]
     else
-        return ComplexF32[st, exp(-im * L32) * ct]
+        return ComplexF32[-exp(im * P32) * st, exp(im * P32) * ct]
     end
 end
 
-function single_qubit_shadow(theta::Real, lambda::Real, bit::Int)::Matrix{ComplexF32}
-    psi = u3_state(theta, lambda, bit)
+function single_qubit_shadow(theta::Real, phi::Real, bit::Int)::Matrix{ComplexF32}
+    psi = u3_state(theta, phi, bit)
     Π = psi * psi'
     return 3 * Π - I
 end

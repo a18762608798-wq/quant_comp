@@ -31,8 +31,8 @@ end
 
 function _parse_param_block(p::AbstractDict)::Dict{String,Matrix{Float32}}
     Dict(
-        "theta" => Float32.(hcat(p["theta"]...)' ),
-        "lambda" => Float32.(hcat(p["lambda"]...)' ),
+        "theta" => Float32.(hcat(p["theta"]...)'),
+        "phi" => Float32.(hcat(p["phi"]...)'),
     )
 end
 
@@ -57,13 +57,13 @@ struct RandomGroup{N}
     M::Int
     K::Int
     meas_indices::Vector{Vector{Int}}
-    params::Union{Nothing, Dict{String, Matrix{Float32}}}
-    count_group::Vector{Array{Int, N}}
-    trivial_params::Union{Nothing, Dict{String, Matrix{Float32}}}
-    trivial_count_group::Union{Nothing, Vector{Array{Int, N}}}
+    params::Union{Nothing,Dict{String,Matrix{Float32}}}
+    count_group::Vector{Array{Int,N}}
+    trivial_params::Union{Nothing,Dict{String,Matrix{Float32}}}
+    trivial_count_group::Union{Nothing,Vector{Array{Int,N}}}
 end
 
-function _counts_to_tensor(counts::Dict{String, Int})::Array{Int}
+function _counts_to_tensor(counts::Dict{String,Int})::Array{Int}
     N = length(first(keys(counts)))
     tensor = zeros(Int, ntuple(_ -> 2, N))
     for (bits, c) in counts
@@ -85,7 +85,34 @@ function split_groups(result::RandomMeasResult)
         [_counts_to_tensor(d) for d in result.count_group[i]],
         isnothing(result.trivial_params) ? nothing : result.trivial_params[i],
         isnothing(result.trivial_count_group) ? nothing :
-            [_counts_to_tensor(d) for d in result.trivial_count_group[i]],
+        [_counts_to_tensor(d) for d in result.trivial_count_group[i]],
     ) for i in 1:n_runs]
 end
+
+# RandomData — single setting slice of RandomGroup
+
+struct RandomData{N}
+    ensemble::String
+    K::Int
+    meas_indices::Vector{Vector{Int}}
+    params::Union{Nothing,Dict{String,Matrix{Float32}}}
+    counts::Array{Int,N}
+    trivial_params::Union{Nothing,Dict{String,Matrix{Float32}}}
+    trivial_counts::Union{Nothing,Array{Int,N}}
+end
+
+function unroll_data(group::RandomGroup{N}) where N
+    [RandomData{N}(
+        group.ensemble,
+        group.K,
+        group.meas_indices,
+        group.params,
+        counts,
+        group.trivial_params,
+        isnothing(group.trivial_count_group) ? nothing :
+        group.trivial_count_group[s],
+    ) for (s, counts) in enumerate(group.count_group)]
+end
+
+
 

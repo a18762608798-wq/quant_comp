@@ -10,7 +10,7 @@ using LinearAlgebra
         @test psi1 ≈ ComplexF32[0, 1]
 
         psi_pi = u3_state(Float32(π), 0.0f0, 0)
-        @test psi_pi ≈ ComplexF32[0, -1]  atol=1e-7
+        @test psi_pi ≈ ComplexF32[0, 1]  atol=1e-7
     end
 
     @testset "single_qubit_shadow" begin

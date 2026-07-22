@@ -1,4 +1,6 @@
 [deps]
+CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
 ITensors = "9136182c-28ba-11e9-034c-db9fb085ebd5"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 QMeasPost = "0eb3f2fb-1a00-44d2-b32f-d01c869429f6"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

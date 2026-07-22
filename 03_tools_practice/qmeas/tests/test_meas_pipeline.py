@@ -22,28 +22,28 @@ if __name__ == "__main__":
     HERE = Path(__file__).resolve().parent
     if test_idx == 1:
         # aer: independence, derandom
-        qc = QuantumCircuit(6, 4)
-        meas_indices = [(2,), (3,), (4,), (5,)]  # Arrange the swap bits together
+        qc = QuantumCircuit(4, 4)
+        meas_indices = [(0,), (1,), (2,), (3,)]  # Arrange the swap bits together
         setting_runs = [
-            SettingRun(setting_num=2, shot_num=1024),
-            SettingRun(setting_num=5, shot_num=1024),
+            SettingRun(setting_num=3**3, shot_num=1024),
+            SettingRun(setting_num=3**4, shot_num=1024),
         ]
         aer_opts = AerOptions(method="statevector", device="CPU", precision="single")
         meas_config = RandomMeasConfig(
             qc=qc,
             setting_runs=setting_runs,
             meas_indices=meas_indices,
-            ensemble="derandom",
+            ensemble="pauli",
             runner_opts=aer_opts,
             output_dir=HERE / "data",
-            name="aer-independence",
+            name="aer-independence_pauli",
         )
         res = asyncio.run(
             run_pipeline(
                 config=meas_config,
             )
         )
-        print(res)
+
     elif test_idx == 2:
         # aer: pair, haar
         qc = QuantumCircuit(6, 4)

@@ -62,7 +62,7 @@ class RandomMeasConfig:
             group_num = len(self.meas_indices)
             self.params = [
                 ParameterVector("theta", group_num),
-                ParameterVector("lambda", group_num),
+                ParameterVector("phi", group_num),
             ]
 
         if not self.setting_runs:

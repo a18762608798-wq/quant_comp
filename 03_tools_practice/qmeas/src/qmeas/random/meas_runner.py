@@ -164,11 +164,11 @@ def create_runner(
 # 给电路加测量门.
 def add_meas(qc, params, meas_indices):
     theta = params[0]
-    llambda = params[1]
+    phi = params[1]
     flat_indices: list[int] = []
     for group_idx, group in enumerate(meas_indices):
         for qubit_idx in group:
-            qc.u(-theta[group_idx], -llambda[group_idx], 0, qubit_idx)
+            qc.u(-theta[group_idx], 0, -phi[group_idx], qubit_idx)
         flat_indices.extend(group)
     qc.measure(flat_indices, range(len(flat_indices)))
     return qc

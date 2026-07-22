@@ -25,16 +25,16 @@ if __name__ == "__main__":
         meas_indices = [(0,), (5,), (1,), (4,)]
         group_num = len(meas_indices)
         theta = ParameterVector("theta", group_num)
-        llambda = ParameterVector("lambda", group_num)
+        phi = ParameterVector("phi", group_num)
         qc = QuantumCircuit(6, 4)
         qc.cx(0, 1)
         qc.cx(1, 2)
         qc.cx(3, 4)
-        qc = add_meas(qc, [theta, llambda], meas_indices)
+        qc = add_meas(qc, [theta, phi], meas_indices)
 
         generator = create_parameter_generator("derandom")
         parameter_binds = generator.generate(
-            [theta, llambda], setting_num
+            [theta, phi], setting_num
         )
         aer_opts = AerOptions(method="density_matrix", device="CPU", precision="single")
         runner = create_runner(aer_opts)
@@ -53,16 +53,16 @@ if __name__ == "__main__":
         meas_indices = [(0, 5), (1, 4)]
         group_num = len(meas_indices)
         theta = ParameterVector("theta", group_num)
-        llambda = ParameterVector("lambda", group_num)
+        phi = ParameterVector("phi", group_num)
         qc = QuantumCircuit(6, 4)
         qc.cx(0, 1)
         qc.cx(1, 2)
         qc.cx(3, 4)
-        qc = add_meas(qc, [theta, llambda], meas_indices)
+        qc = add_meas(qc, [theta, phi], meas_indices)
 
         generator = create_parameter_generator("haar")
         parameter_binds = generator.generate(
-            [theta, llambda], setting_num
+            [theta, phi], setting_num
         )
         aer_opts = AerOptions(method="statevector", device="CPU", precision="single")
         runner = create_runner(aer_opts)
@@ -81,16 +81,16 @@ if __name__ == "__main__":
         meas_indices = [(0, 5), (1, 4)]
         group_num = len(meas_indices)
         theta = ParameterVector("theta", group_num)
-        llambda = ParameterVector("lambda", group_num)
+        phi = ParameterVector("phi", group_num)
         qc = QuantumCircuit(6, 4)
         qc.cx(0, 1)
         qc.cx(1, 2)
         qc.cx(3, 4)
-        qc = add_meas(qc, [theta, llambda], meas_indices)
+        qc = add_meas(qc, [theta, phi], meas_indices)
 
         generator = create_parameter_generator("pauli")
         parameter_binds = generator.generate(
-            [theta, llambda], setting_num
+            [theta, phi], setting_num
         )
         quark_opts = QuarkOptions(
             chip="Dongling",
@@ -113,23 +113,23 @@ if __name__ == "__main__":
         meas_indices = [(0, 5), (1, 4)]
         group_num = len(meas_indices)
         theta = ParameterVector("theta", group_num)
-        llambda = ParameterVector("lambda", group_num)
+        phi = ParameterVector("phi", group_num)
         qc = QuantumCircuit(6, 4)
         qc.cx(0, 1)
         qc.cx(1, 2)
         qc.cx(3, 4)
-        qc = add_meas(qc, [theta, llambda], meas_indices)
+        qc = add_meas(qc, [theta, phi], meas_indices)
 
         trivial_qc = QuantumCircuit(6, 4)
-        trivial_qc = add_meas(trivial_qc, [theta, llambda], meas_indices)
+        trivial_qc = add_meas(trivial_qc, [theta, phi], meas_indices)
 
         generator = create_parameter_generator("derandom")
         parameter_binds = generator.generate(
-            [theta, llambda], setting_num
+            [theta, phi], setting_num
         )
         trivial_generator = create_parameter_generator("pauli")
         trivial_parameter_binds = trivial_generator.generate(
-            [theta, llambda], setting_num
+            [theta, phi], setting_num
         )
 
         quark_opts = QuarkOptions(

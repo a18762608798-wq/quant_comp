@@ -45,13 +45,13 @@ def _sample_haar(
         )
     )
 
-    llambda = rng.uniform(
+    phi = rng.uniform(
         0.0,
         2.0 * np.pi,
         size=(group_num, setting_num),
     )
 
-    return theta, llambda
+    return theta, phi
 
 
 def _sample_pauli(
@@ -66,9 +66,9 @@ def _sample_pauli(
     )
 
     theta = PAULI_ROTATIONS[indices, 0]
-    llambda = PAULI_ROTATIONS[indices, 1]
+    phi = PAULI_ROTATIONS[indices, 1]
 
-    return theta, llambda
+    return theta, phi
 
 
 def _sample_derandom(
@@ -96,9 +96,9 @@ def _sample_derandom(
     selected = selected.T
 
     theta = PAULI_ROTATIONS[selected, 0]
-    llambda = PAULI_ROTATIONS[selected, 1]
+    phi = PAULI_ROTATIONS[selected, 1]
 
-    return theta, llambda
+    return theta, phi
 
 
 ANGLE_SAMPLERS: dict[str, AngleSampler] = {
@@ -125,7 +125,7 @@ class ParameterGenerator:
     ) -> ParameterBinds:
         group_num = len(params[0])
 
-        group_theta, group_lambda = self.angle_sampler(
+        group_theta, group_phi = self.angle_sampler(
             group_num,
             setting_num,
             self.rng,
@@ -134,21 +134,21 @@ class ParameterGenerator:
         return _to_parameter_binds(
             params=params,
             theta_values=group_theta,
-            lambda_values=group_lambda,
+            phi_values=group_phi,
         )
 
 
 def _to_parameter_binds(
     params: list[ParameterVector],
     theta_values: np.ndarray,
-    lambda_values: np.ndarray,
+    phi_values: np.ndarray,
 ) -> ParameterBinds:
-    theta, llambda = params
+    theta, phi = params
     group_num = len(theta)
 
     binds = {theta[i]: theta_values[i].tolist() for i in range(group_num)}
 
-    binds.update({llambda[i]: lambda_values[i].tolist() for i in range(group_num)})
+    binds.update({phi[i]: phi_values[i].tolist() for i in range(group_num)})
 
     return [binds]
 
@@ -169,3 +169,4 @@ def create_parameter_generator(
         angle_sampler=angle_sampler,
         rng=np.random.default_rng(seed),
     )
+

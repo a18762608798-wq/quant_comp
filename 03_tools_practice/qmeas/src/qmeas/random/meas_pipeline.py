@@ -193,8 +193,7 @@ def _build_result_dict(
     result["meas_indices"] = config.meas_indices
 
     result["params"] = [
-        _binds_to_vec_dict(binds[0], config.params)
-        for binds in parameter_bind_groups
+        _binds_to_vec_dict(binds[0], config.params) for binds in parameter_bind_groups
     ]
 
     has_trivial = any(
@@ -222,7 +221,7 @@ def _build_result_dict(
 def _binds_to_vec_dict(binds: dict, params) -> dict[str, list]:
     """Group parameter binds by ParameterVector into 2D lists.
 
-    Returns e.g. {"theta": [[...], ...], "lambda": [[...], ...]} where the
+    Returns e.g. {"theta": [[...], ...], "phi": [[...], ...]} where the
     outer index is setting_idx and the inner list is the value per parameter
     number.
     """

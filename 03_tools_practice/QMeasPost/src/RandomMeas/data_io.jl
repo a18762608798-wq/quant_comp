@@ -25,7 +25,7 @@ function load_randmeas_result(filepath::AbstractString)::RandomMeasResult
         _opt_parse_params(raw, "params"),
         raw["count_group"],
         _opt_parse_params(raw, "trivial_params"),
-        _opt_parse_counts(raw, "trivial_count_group"),
+        _opt_parse_hist(raw, "trivial_count_group"),
     )
 end
 
@@ -43,7 +43,7 @@ function _opt_parse_params(raw, key)
     return nothing
 end
 
-function _opt_parse_counts(raw, key)
+function _opt_parse_hist(raw, key)
     if haskey(raw, key) && !isnothing(raw[key])
         return raw[key]
     end
@@ -63,10 +63,10 @@ struct RandomGroup{N}
     trivial_count_group::Union{Nothing,Vector{Array{Int,N}}}
 end
 
-function _counts_to_tensor(counts::Dict{String,Int})::Array{Int}
-    N = length(first(keys(counts)))
+function _hist_to_tensor(hist::Dict{String,Int})::Array{Int}
+    N = length(first(keys(hist)))
     tensor = zeros(Int, ntuple(_ -> 2, N))
-    for (bits, c) in counts
+    for (bits, c) in hist
         idx = ntuple(i -> parse(Int, bits[i]) + 1, N)
         tensor[idx...] = c
     end
@@ -82,10 +82,10 @@ function split_groups(result::RandomMeasResult)
         result.setting_runs[i][2],
         result.meas_indices,
         isnothing(result.params) ? nothing : result.params[i],
-        [_counts_to_tensor(d) for d in result.count_group[i]],
+        [_hist_to_tensor(d) for d in result.count_group[i]],
         isnothing(result.trivial_params) ? nothing : result.trivial_params[i],
         isnothing(result.trivial_count_group) ? nothing :
-        [_counts_to_tensor(d) for d in result.trivial_count_group[i]],
+        [_hist_to_tensor(d) for d in result.trivial_count_group[i]],
     ) for i in 1:n_runs]
 end
 
@@ -96,9 +96,9 @@ struct RandomData{N}
     K::Int
     meas_indices::Vector{Vector{Int}}
     params::Union{Nothing,Dict{String,Matrix{Float32}}}
-    counts::Array{Int,N}
+    hist::Array{Int,N}
     trivial_params::Union{Nothing,Dict{String,Matrix{Float32}}}
-    trivial_counts::Union{Nothing,Array{Int,N}}
+    trivial_hist::Union{Nothing,Array{Int,N}}
 end
 
 function unroll_data(group::RandomGroup{N}) where N
@@ -107,12 +107,35 @@ function unroll_data(group::RandomGroup{N}) where N
         group.K,
         group.meas_indices,
         group.params,
-        counts,
+        hist,
         group.trivial_params,
         isnothing(group.trivial_count_group) ? nothing :
         group.trivial_count_group[s],
-    ) for (s, counts) in enumerate(group.count_group)]
+    ) for (s, hist) in enumerate(group.count_group)]
 end
 
+# resample
+function resample(hist::Array{Int,N}, K::Int) where N
+    @assert sum(hist) == K
+    prob = Float32.(hist) ./ sum(hist)
+    samples = sample(1:length(hist), Weights(vec(prob)), K; replace=true)
+    new_hist = reshape(counts(samples, 1:length(hist)), size(hist)) # counts: count the frequency of ench idx of prob.
+    return new_hist
+end
 
+function resample(group::RandomGroup{N}) where N
+    new_count_group = [
+        resample(group.count_group[idx], group.K) for idx = 1:group.M
+    ]
+    return RandomGroup{N}(
+        group.ensemble,
+        group.M,
+        group.K,
+        group.meas_indices,
+        group.params,
+        new_count_group,
+        group.trivial_params,
+        group.trivial_count_group,
+    )
+end
 

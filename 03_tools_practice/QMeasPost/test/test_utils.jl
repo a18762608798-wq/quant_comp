@@ -19,9 +19,9 @@ using LinearAlgebra
         @test σ ≈ 3.0f0 * ComplexF32[1 0; 0 0] - I
     end
 
-    @testset "count_to_prob" begin
-        counts = Dict("00" => 500, "11" => 500)
-        probs = count_to_prob(counts)
+    @testset "hist_to_prob" begin
+        hist = Dict("00" => 500, "11" => 500)
+        probs = hist_to_prob(hist)
         @test probs["00"] ≈ 0.5
         @test probs["11"] ≈ 0.5
     end

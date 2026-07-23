@@ -23,7 +23,7 @@ QC.h(4)
 QC.cx(4, 5)
 MEAS_INDICES = [(1,), (2,), (3,), (4,)]
 SETTING_RUNS = [
-    SettingRun(setting_num=int(0.1 * k * 3**4), shot_num=2**15) for k in range(6, 11)
+    SettingRun(setting_num=int(0.01 * k * 3**4), shot_num=2**10) for k in range(90, 101)
 ]
 AER_OPTS = AerOptions(method="statevector", device="CPU", precision="single")
 

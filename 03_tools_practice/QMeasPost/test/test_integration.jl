@@ -10,9 +10,9 @@ using Test
         @test result.ensemble == ensemble
         @test length(result.meas_indices) == 4
         @test result.meas_indices == [[1], [2], [3], [4]]
-        @test length(result.setting_runs) == 5
-        @test length(result.params) == 5
-        @test length(result.count_group) == 5
+        @test length(result.setting_runs) == 4
+        @test length(result.params) == 4
+        @test length(result.count_group) == 4
         @test isnothing(result.trivial_params)
         @test isnothing(result.trivial_count_group)
     end

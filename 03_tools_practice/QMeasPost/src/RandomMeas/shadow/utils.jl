@@ -1,6 +1,6 @@
-function count_to_prob(counts::AbstractDict{String,Int})::Dict{String,Float32}
-    total = sum(values(counts))
-    Dict(bits => val / total for (bits, val) in counts)
+function hist_to_prob(hist::AbstractDict{String,Int})::Dict{String,Float32}
+    total = sum(values(hist))
+    Dict(bits => val / total for (bits, val) in hist)
 end
 
 function hist_of_bits(
@@ -13,7 +13,7 @@ function hist_of_bits(
             accum[bits] = get(accum, bits, 0) + c
         end
     end
-    count_to_prob(accum)
+    hist_to_prob(accum)
 end
 
 function u3_state(theta::Real, phi::Real, bit::Int)::Vector{ComplexF32}

@@ -6,7 +6,7 @@ function get_purity(
     n = length(groups)
     purity = Vector{Float32}(undef, n)
     sem = Vector{Union{Nothing,Float32}}(undef, n)
-    Threads.@threads for idx in eachindex(groups)
+    @threads for idx in eachindex(groups)
         purity[idx], sem[idx] = get_purity(groups[idx]; compute_sem=compute_sem)
     end
     return purity, sem
